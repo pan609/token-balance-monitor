@@ -119,6 +119,10 @@ VOLCENGINE_REGION=cn-beijing
 
 原生 iOS App 位于 [ios/TokenBalanceMonitor](ios/TokenBalanceMonitor)。它不会保存云厂商密钥，只读取服务端摘要接口。
 
+| 中号小组件 | 小号小组件 |
+| --- | --- |
+| <img src="docs/assets/ios-widget-gallery-medium.jpg" alt="iOS 中号小组件预览" width="220"> | <img src="docs/assets/ios-widget-gallery-small.jpg" alt="iOS 小号小组件预览" width="220"> |
+
 - App 前台打开时每 1 分钟自动刷新。
 - WidgetKit 小组件请求每 15 分钟刷新一次，但最终频率由 iOS 调度。
 - App 内手动刷新或切换重点关注后，会主动请求刷新小组件。
