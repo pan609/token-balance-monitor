@@ -1,8 +1,8 @@
 // Scriptable 小组件模板：复制到 iPhone 的 Scriptable App 中。
 // 先把 API_URL 改成你的服务器地址，并填入 .env 里的 MOBILE_API_TOKEN。
-// 示例：https://example.com/token-monitor/api/mobile/summary?token=你的token
+// 示例：https://balance.example.com/api/mobile/summary?token=你的token
 
-const API_URL = "https://example.com/token-monitor/api/mobile/summary?token=你的MOBILE_API_TOKEN";
+const API_URL = "https://balance.example.com/api/mobile/summary?token=你的MOBILE_API_TOKEN";
 
 const data = await loadSummary();
 const widget = new ListWidget();

@@ -74,6 +74,172 @@ VOLCENGINE_SECRET_ACCESS_KEY=
 VOLCENGINE_REGION=cn-beijing
 ```
 
+## 服务器部署
+
+如果你有自己的服务器，可以把余额查询服务部署到服务器上，再让 iPhone App / Widget 只访问服务器摘要接口。云厂商 AccessKey 仍然只放在服务器 `.env` 里，不会进入 iPhone 或浏览器前端。
+
+推荐形态：
+
+- 服务器运行 Node.js 服务，监听 `127.0.0.1:5173`。
+- Nginx/Caddy 对外提供 HTTPS。
+- `/api/mobile/summary` 用 `MOBILE_API_TOKEN` 保护，给 iPhone App、Widget 或 Scriptable 使用。
+- Web 看板如果暴露到公网，建议加 Basic Auth 或只允许自己的 IP；因为 `/api/balances` 会展示余额数据。
+
+### 1. 安装和配置
+
+服务器需要 Node.js 20+、Git 和 Nginx。以下以 Ubuntu 为例：
+
+```bash
+sudo apt update
+sudo apt install -y git nginx
+
+# 用你习惯的方式安装 Node.js 20+ 后继续
+node -v
+```
+
+拉取项目并安装依赖：
+
+```bash
+sudo mkdir -p /opt/token-balance-monitor
+sudo chown "$USER":"$USER" /opt/token-balance-monitor
+git clone https://github.com/pan609/token-balance-monitor.git /opt/token-balance-monitor
+cd /opt/token-balance-monitor
+
+cp .env.example .env
+nano .env
+
+npm ci
+npm run build
+```
+
+服务器 `.env` 至少建议设置：
+
+```bash
+NODE_ENV=production
+HOST=127.0.0.1
+PORT=5173
+MOBILE_API_TOKEN=replace-with-long-random-token
+MOBILE_ALERT_THRESHOLD_CNY=2
+PRIMARY_PROVIDER_ID=aliyun
+
+# 填入你要监控的平台 key
+ALIYUN_ACCESS_KEY_ID=
+ALIYUN_ACCESS_KEY_SECRET=
+DEEPSEEK_API_KEY=
+VOLCENGINE_ACCESS_KEY_ID=
+VOLCENGINE_SECRET_ACCESS_KEY=
+```
+
+可以用下面的命令生成 token：
+
+```bash
+openssl rand -hex 32
+```
+
+先手动启动确认服务正常：
+
+```bash
+NODE_ENV=production node server/index.mjs
+curl http://127.0.0.1:5173/api/health
+```
+
+### 2. systemd 常驻
+
+创建服务：
+
+```bash
+sudo tee /etc/systemd/system/token-balance-monitor.service >/dev/null <<'EOF'
+[Unit]
+Description=Token Balance Monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/token-balance-monitor
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=5173
+ExecStart=/usr/bin/node server/index.mjs
+Restart=always
+RestartSec=5
+User=YOUR_LINUX_USER
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+把 `YOUR_LINUX_USER` 替换成拥有 `/opt/token-balance-monitor` 目录权限的 Linux 用户。如果你的 `node` 不在 `/usr/bin/node`，也需要把 `ExecStart` 改成 `which node` 输出的路径。
+
+启动并查看日志：
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now token-balance-monitor
+sudo systemctl status token-balance-monitor
+journalctl -u token-balance-monitor -f
+```
+
+### 3. Nginx 反向代理
+
+建议用一个独立域名或子域名，例如 `balance.example.com`：
+
+```nginx
+server {
+    server_name balance.example.com;
+
+    location /api/mobile/ {
+        proxy_pass http://127.0.0.1:5173/api/mobile/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location / {
+        # 如果要公开 Web 看板，强烈建议在这里加 Basic Auth 或 IP 限制。
+        proxy_pass http://127.0.0.1:5173/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+启用 HTTPS 后，移动端摘要地址就是：
+
+```text
+https://balance.example.com/api/mobile/summary
+```
+
+请求时带 token：
+
+```bash
+curl -H "Authorization: Bearer 你的MOBILE_API_TOKEN" \
+  https://balance.example.com/api/mobile/summary
+```
+
+### 4. iPhone App / Widget 连接服务器
+
+在你本机 Mac 的 `.env` 里填入服务器地址和同一个 token，再运行 iOS 脚本：
+
+```bash
+MOBILE_API_URL=https://balance.example.com/api/mobile/summary
+MOBILE_API_TOKEN=和服务器一致的长随机字符串
+```
+
+然后重新安装 App：
+
+```bash
+./scripts/run-ios-device.sh
+```
+
+如果使用 Scriptable，把 `docs/ios-scriptable-widget.js` 里的 `API_URL` 改成：
+
+```text
+https://balance.example.com/api/mobile/summary?token=你的MOBILE_API_TOKEN
+```
+
 ## 权限
 
 - DeepSeek：开放平台 API Key，需要能调用 `/user/balance`。
@@ -179,7 +345,7 @@ iPhone App 在前台打开时会每 1 分钟自动刷新一次。主屏幕小组
 1. 云端接口已支持小组件访问，地址形如：
 
    ```text
-   https://example.com/token-monitor/api/mobile/summary?token=你的MOBILE_API_TOKEN
+   https://balance.example.com/api/mobile/summary?token=你的MOBILE_API_TOKEN
    ```
 
 2. 在 iPhone 安装 Scriptable，把 `docs/ios-scriptable-widget.js` 复制进去，并把 `API_URL` 里的 token 改成 `.env` 中的 `MOBILE_API_TOKEN`。
