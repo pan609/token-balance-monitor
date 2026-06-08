@@ -1,59 +1,78 @@
-# Token 余额监控
+<p align="center">
+  <img src="docs/assets/pet-widget.png" alt="Token 余额监控桌宠预览" width="180">
+</p>
 
-一个本地运行的 AI 模型账户余额监控工具，支持 Web 看板、macOS 状态栏桌宠、iPhone App 和 WidgetKit 小组件。
+<h1 align="center">Token 余额监控</h1>
 
-已支持：
+<p align="center">
+  一个轻量的 AI 模型账户余额监控工具，支持 Web 看板、macOS 状态栏桌宠、iPhone App 和 WidgetKit 小组件。
+</p>
 
-- 阿里云百炼 / 费用中心
-- DeepSeek
-- 火山引擎 / 豆包
-- Kimi / Moonshot
-- SiliconFlow / 硅基流动
-- OpenRouter credits
+<p align="center">
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/pan609/token-balance-monitor"></a>
+  <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white">
+  <img alt="Platforms" src="https://img.shields.io/badge/platform-Web%20%7C%20macOS%20%7C%20iOS-111827">
+  <img alt="Privacy" src="https://img.shields.io/badge/keys-server%20side-0f766e">
+</p>
 
-> `totalCny` 只汇总人民币余额。OpenRouter 这类 USD credits 会单独显示，不会混入人民币总额。
+## 为什么做这个
 
-## 启动
+很多模型平台的余额入口都藏在不同控制台里。这个项目把常用平台的余额统一拉到一个本地服务里，再根据使用场景显示在桌面、网页、手机和小组件上。
 
-### 桌宠模式
+- **看得快**：macOS 状态栏直接显示总额或重点关注平台余额。
+- **不裸奔**：云厂商 AccessKey 只在本机或自托管服务器 `.env` 中读取，不打包到浏览器前端或 iOS 客户端。
+- **够轻量**：Web、桌宠、iOS App 共用同一套后端 provider，新增平台只需要写一个 fetcher。
+- **适合自托管**：有服务器时可以部署一个只暴露摘要接口的移动端服务。
 
-双击 `pet.command`。它会打开一个小型置顶桌面挂件，直接读取 `.env` 并刷新余额，不需要先打开网页。
+## 数据流
 
-- 默认每 1 分钟自动刷新一次。
-- 自动刷新在后台主进程里执行；只要桌宠程序还在运行，窗口隐藏到状态栏后金额也会继续更新。
-- macOS 右上角状态栏会显示当前总余额，可打开菜单显示/隐藏桌宠、立即刷新、打开网页看板或退出；如果菜单栏太挤看不到入口，可以按 `⌘⇧B` 显示/隐藏。
-- 状态栏金额可以在菜单的“状态栏显示”中切换为总余额、重点关注或任意已返回的平台金额。
-- 桌宠窗口和状态栏菜单都可以切换“重点关注平台”；切换后状态栏会自动改为显示“重点关注”。
-- 桌宠右上角 `⌃` 是置顶开关，`−` 是收起，`×` 是隐藏到状态栏。
-- 重复双击 `pet.command` 不会开多个桌宠，会把已经运行的桌宠叫出来。
+```mermaid
+flowchart LR
+  keys[".env<br/>云厂商密钥"] --> server["Node.js 服务<br/>统一 provider"]
+  providers["阿里云 / DeepSeek / 豆包 / Kimi / SiliconFlow / OpenRouter"] --> server
+  server --> web["Web 看板"]
+  server --> pet["macOS 桌宠<br/>状态栏"]
+  server --> mobile["/api/mobile/summary<br/>token 保护"]
+  mobile --> ios["iPhone App"]
+  mobile --> widget["WidgetKit / Scriptable"]
+```
 
-桌面版和网页看板使用同一套 provider 适配器，支持阿里云、Kimi、DeepSeek、SiliconFlow / 硅基流动、火山引擎/豆包、OpenRouter。桌面版读取本机 `.env`，因此某个平台如果显示“待配置”，需要先在本机 `.env` 填入对应 key。
+## 预览
 
-### 网页看板
+| macOS 桌宠 | Web 看板 | iPhone App / Widget |
+| --- | --- | --- |
+| <img src="docs/assets/pet-widget-desktop-providers.png" alt="macOS 桌宠" width="260"> | <img src="docs/assets/dashboard-desktop.png" alt="Web 看板" width="320"> | <img src="docs/assets/ios-token-monitor-updated.png" alt="iPhone App" width="220"> |
 
-1. 复制配置文件：
+## 支持平台
 
-   ```bash
-   cp .env.example .env
-   ```
+| 平台 | 接入方式 | 汇总方式 |
+| --- | --- | --- |
+| 阿里云百炼 / 费用中心 | RAM AccessKey + 费用中心 API | CNY |
+| DeepSeek | API Key + `/user/balance` | 按返回币种显示 |
+| 火山引擎 / 豆包 | AccessKey + 费用中心 API | CNY |
+| Kimi / Moonshot | API Key + 余额 API | CNY |
+| SiliconFlow / 硅基流动 | API Key + 用户信息 API | CNY |
+| OpenRouter | Management key + credits API | USD 单独显示 |
 
-2. 在 `.env` 中填写各平台密钥。只想先看界面也可以留空，页面会显示“待配置”。
+`totalCny` 只汇总人民币余额。OpenRouter 这类 USD credits 会单独显示，不会混入人民币总额。
 
-3. 双击 `start.command`，或在终端运行：
+OpenAI / Anthropic / Gemini 更适合做“本月成本 / 用量报表”，不是简单余额接口。相关状态见 [provider matrix](docs/provider-matrix.md)。
 
-   ```bash
-   ./start.command
-   ```
+## 快速开始
 
-4. 终端会显示实际地址。如果 `5173` 已被别的项目占用，会自动换到后续空端口，例如：
+### 1. 安装依赖
 
-   ```text
-   http://127.0.0.1:5173
-   ```
+```bash
+git clone https://github.com/pan609/token-balance-monitor.git
+cd token-balance-monitor
 
-网页看板打开后会每 1 分钟静默刷新一次，刷新按钮仍可随时手动触发。
+cp .env.example .env
+./scripts/install-deps.sh
+```
 
-## 配置项
+### 2. 填写配置
+
+打开 `.env`，按需填写平台 key。只想先看界面也可以留空，页面会显示“待配置”。
 
 ```bash
 LOW_BALANCE_THRESHOLD_CNY=20
@@ -62,11 +81,12 @@ HOST=127.0.0.1
 MOBILE_API_TOKEN=
 MOBILE_API_URL=http://127.0.0.1:5173/api/mobile/summary
 MOBILE_ALERT_THRESHOLD_CNY=2
+
 DEEPSEEK_API_KEY=
 MOONSHOT_API_KEY=
 SILICONFLOW_API_KEY=
-SILICONFLOW_BASE_URL=https://api.siliconflow.com
 OPENROUTER_API_KEY=
+
 ALIYUN_ACCESS_KEY_ID=
 ALIYUN_ACCESS_KEY_SECRET=
 VOLCENGINE_ACCESS_KEY_ID=
@@ -74,42 +94,73 @@ VOLCENGINE_SECRET_ACCESS_KEY=
 VOLCENGINE_REGION=cn-beijing
 ```
 
-## 服务器部署
+### 3. 选择入口
 
-如果你有自己的服务器，可以把余额查询服务部署到服务器上，再让 iPhone App / Widget 只访问服务器摘要接口。云厂商 AccessKey 仍然只放在服务器 `.env` 里，不会进入 iPhone 或浏览器前端。
+| 场景 | 命令 |
+| --- | --- |
+| Web 看板 | `./start.command` |
+| macOS 桌宠 / 状态栏 | `./pet.command` |
+| iOS 模拟器 | `./scripts/run-ios-simulator.sh` |
+| iPhone 真机 | `./scripts/run-ios-device.sh` |
 
-推荐形态：
+没有全局 `npm` 也没关系，项目脚本会优先使用本地和 Codex bundled Node runtime。
 
-- 服务器运行 Node.js 服务，监听 `127.0.0.1:5173`。
-- Nginx/Caddy 对外提供 HTTPS。
-- `/api/mobile/summary` 用 `MOBILE_API_TOKEN` 保护，给 iPhone App、Widget 或 Scriptable 使用。
-- Web 看板如果暴露到公网，建议加 Basic Auth 或只允许自己的 IP；因为 `/api/balances` 会展示余额数据。
+## macOS 桌宠
 
-### 1. 安装和配置
+双击 `pet.command` 会打开一个置顶小窗，并在 macOS 状态栏显示余额。
 
-服务器需要 Node.js 20+、Git 和 Nginx。以下以 Ubuntu 为例：
+- 默认每 1 分钟自动刷新。
+- 状态栏可以显示总余额、重点关注平台或任意已返回平台。
+- 桌宠窗口和状态栏菜单都可以切换“重点关注平台”。
+- 右上角 `⌃` 是置顶开关，`−` 是收起，`×` 是隐藏到状态栏。
+- 如果菜单栏太挤看不到入口，可以按 `⌘⇧B` 显示或隐藏。
+
+## iPhone 和小组件
+
+原生 iOS App 位于 [ios/TokenBalanceMonitor](ios/TokenBalanceMonitor)。它不会保存云厂商密钥，只读取服务端摘要接口。
+
+- App 前台打开时每 1 分钟自动刷新。
+- WidgetKit 小组件请求每 15 分钟刷新一次，但最终频率由 iOS 调度。
+- App 内手动刷新或切换重点关注后，会主动请求刷新小组件。
+- 低于 `MOBILE_ALERT_THRESHOLD_CNY` 时，App 会发本地提醒。
+
+本地模拟器：
 
 ```bash
-sudo apt update
-sudo apt install -y git nginx
-
-# 用你习惯的方式安装 Node.js 20+ 后继续
-node -v
+./scripts/run-ios-simulator.sh
 ```
 
-拉取项目并安装依赖：
+真机：
 
 ```bash
-sudo mkdir -p /opt/token-balance-monitor
-sudo chown "$USER":"$USER" /opt/token-balance-monitor
+./scripts/run-ios-device.sh
+```
+
+更多操作和小组件选择方式见 [iOS README](ios/TokenBalanceMonitor/README.md)。
+
+### Scriptable 轻量小组件
+
+不想安装原生 App 时，可以在 iPhone 的 Scriptable 里使用 [docs/ios-scriptable-widget.js](docs/ios-scriptable-widget.js)。
+
+把脚本里的 `API_URL` 改成你的服务端摘要地址：
+
+```text
+https://balance.example.com/api/mobile/summary?token=你的MOBILE_API_TOKEN
+```
+
+## 服务器部署
+
+有服务器时，推荐把 Node 服务部署在服务器内网端口，再用 Nginx/Caddy 提供 HTTPS。iPhone App、Widget 或 Scriptable 只访问 `/api/mobile/summary`。
+
+最小部署路径：
+
+```bash
 git clone https://github.com/pan609/token-balance-monitor.git /opt/token-balance-monitor
 cd /opt/token-balance-monitor
-
 cp .env.example .env
-nano .env
-
 npm ci
 npm run build
+NODE_ENV=production node server/index.mjs
 ```
 
 服务器 `.env` 至少建议设置：
@@ -119,167 +170,14 @@ NODE_ENV=production
 HOST=127.0.0.1
 PORT=5173
 MOBILE_API_TOKEN=replace-with-long-random-token
-MOBILE_ALERT_THRESHOLD_CNY=2
 PRIMARY_PROVIDER_ID=aliyun
-
-# 填入你要监控的平台 key
-ALIYUN_ACCESS_KEY_ID=
-ALIYUN_ACCESS_KEY_SECRET=
-DEEPSEEK_API_KEY=
-VOLCENGINE_ACCESS_KEY_ID=
-VOLCENGINE_SECRET_ACCESS_KEY=
 ```
 
-可以用下面的命令生成 token：
+完整 systemd、Nginx、HTTPS 和 iPhone 连接示例见 [部署文档](docs/deployment.md)。
 
-```bash
-openssl rand -hex 32
-```
-
-先手动启动确认服务正常：
-
-```bash
-NODE_ENV=production node server/index.mjs
-curl http://127.0.0.1:5173/api/health
-```
-
-### 2. systemd 常驻
-
-创建服务：
-
-```bash
-sudo tee /etc/systemd/system/token-balance-monitor.service >/dev/null <<'EOF'
-[Unit]
-Description=Token Balance Monitor
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-WorkingDirectory=/opt/token-balance-monitor
-Environment=NODE_ENV=production
-Environment=HOST=127.0.0.1
-Environment=PORT=5173
-ExecStart=/usr/bin/node server/index.mjs
-Restart=always
-RestartSec=5
-User=YOUR_LINUX_USER
-
-[Install]
-WantedBy=multi-user.target
-EOF
-```
-
-把 `YOUR_LINUX_USER` 替换成拥有 `/opt/token-balance-monitor` 目录权限的 Linux 用户。如果你的 `node` 不在 `/usr/bin/node`，也需要把 `ExecStart` 改成 `which node` 输出的路径。
-
-启动并查看日志：
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now token-balance-monitor
-sudo systemctl status token-balance-monitor
-journalctl -u token-balance-monitor -f
-```
-
-### 3. Nginx 反向代理
-
-建议用一个独立域名或子域名，例如 `balance.example.com`：
-
-```nginx
-server {
-    server_name balance.example.com;
-
-    location /api/mobile/ {
-        proxy_pass http://127.0.0.1:5173/api/mobile/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-
-    location / {
-        # 如果要公开 Web 看板，强烈建议在这里加 Basic Auth 或 IP 限制。
-        proxy_pass http://127.0.0.1:5173/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-```
-
-启用 HTTPS 后，移动端摘要地址就是：
-
-```text
-https://balance.example.com/api/mobile/summary
-```
-
-请求时带 token：
-
-```bash
-curl -H "Authorization: Bearer 你的MOBILE_API_TOKEN" \
-  https://balance.example.com/api/mobile/summary
-```
-
-### 4. iPhone App / Widget 连接服务器
-
-在你本机 Mac 的 `.env` 里填入服务器地址和同一个 token，再运行 iOS 脚本：
-
-```bash
-MOBILE_API_URL=https://balance.example.com/api/mobile/summary
-MOBILE_API_TOKEN=和服务器一致的长随机字符串
-```
-
-然后重新安装 App：
-
-```bash
-./scripts/run-ios-device.sh
-```
-
-如果使用 Scriptable，把 `docs/ios-scriptable-widget.js` 里的 `API_URL` 改成：
-
-```text
-https://balance.example.com/api/mobile/summary?token=你的MOBILE_API_TOKEN
-```
-
-## 权限
-
-- DeepSeek：开放平台 API Key，需要能调用 `/user/balance`。
-- Kimi / Moonshot：开放平台 API Key，需要能调用 `/v1/users/me/balance`。
-- SiliconFlow / 硅基流动：API Key，需要能调用 `/v1/user/info`。如你的账号必须走旧中国大陆域名，可设置 `SILICONFLOW_BASE_URL=https://api.siliconflow.cn`。
-- OpenRouter：`/api/v1/credits` 需要 Management key，返回 USD credits。
-- 阿里云：RAM 用户需要费用中心 `bss:DescribeAcccount` 权限。
-- 火山引擎：AccessKey 需要能调用费用中心 `QueryBalanceAcct`。
-
-更多平台状态见 `docs/provider-matrix.md`。
-
-## 重点关注
+## 重点关注平台
 
 `PRIMARY_PROVIDER_ID` 控制统一的重点关注平台，默认是 `aliyun`。
-
-在 iPhone App 里，打开右上角齿轮，或使用首页的“重点关注平台”选择卡片即可切换。保存成功后：
-
-- iPhone App 顶部“重点关注”卡片会立即更新。
-- 小组件如果选择的是“重点关注”，会跟随更新。
-- 服务器 `.env` 会同步写入新的 `PRIMARY_PROVIDER_ID`。
-
-命令行备用切换方式：
-
-```bash
-./scripts/set-primary-provider.sh deepseek
-```
-
-它默认更新本机 Mac 配置。也可以用中文别名：
-
-```bash
-./scripts/set-primary-provider.sh 豆包
-```
-
-如果你自托管了给 iPhone App / Widget 使用的服务器，可以显式传入远程地址同时更新服务器配置：
-
-```bash
-TOKEN_MONITOR_REMOTE_HOST=user@example.com \
-TOKEN_MONITOR_REMOTE_DIR=/home/user/token-monitor \
-./scripts/set-primary-provider.sh deepseek --both
-```
 
 可选值：
 
@@ -292,84 +190,98 @@ volcengine
 openrouter
 ```
 
+命令行切换本机重点关注：
+
+```bash
+./scripts/set-primary-provider.sh deepseek
+```
+
+中文别名也可以：
+
+```bash
+./scripts/set-primary-provider.sh 豆包
+```
+
+如果已经自托管服务器，可以显式传入远程地址同时更新服务器配置：
+
+```bash
+TOKEN_MONITOR_REMOTE_HOST=user@example.com \
+TOKEN_MONITOR_REMOTE_DIR=/home/user/token-monitor \
+./scripts/set-primary-provider.sh deepseek --both
+```
+
 这个值会影响：
 
 - iPhone App 顶部“重点关注”卡片。
 - Widget 选择“重点关注”时显示的平台。
-- macOS 状态栏菜单里“重点关注”的金额。
+- macOS 状态栏菜单里的“重点关注”金额。
 
-Widget 也可以手动固定为某个平台：长按小组件，选择“编辑小组件”，把“显示”从“重点关注”改成阿里云、DeepSeek、Kimi 等固定项。
+Widget 也可以固定显示某个平台：长按小组件，选择“编辑小组件”，把“显示”从“重点关注”改成阿里云、DeepSeek、Kimi 等固定项。
 
-## 添加其他平台
+## 配置项
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `LOW_BALANCE_THRESHOLD_CNY` | `20` | Web 和桌宠低余额阈值 |
+| `PRIMARY_PROVIDER_ID` | `aliyun` | 重点关注平台 |
+| `HOST` | `127.0.0.1` | 服务监听地址，公网部署建议仍走反向代理 |
+| `PORT` | `5173` | 服务端口 |
+| `MOBILE_API_TOKEN` | 空 | 移动端摘要接口 token，公网部署必须设置 |
+| `MOBILE_API_URL` | 本机地址 | iOS App / Widget 请求的摘要接口 |
+| `MOBILE_ALERT_THRESHOLD_CNY` | `2` | iPhone 低余额提醒阈值 |
+| `DEEPSEEK_API_KEY` | 空 | DeepSeek API Key |
+| `MOONSHOT_API_KEY` | 空 | Kimi / Moonshot API Key |
+| `SILICONFLOW_API_KEY` | 空 | SiliconFlow API Key |
+| `SILICONFLOW_BASE_URL` | `https://api.siliconflow.com` | SiliconFlow API 地址 |
+| `OPENROUTER_API_KEY` | 空 | OpenRouter Management key |
+| `ALIYUN_ACCESS_KEY_ID` | 空 | 阿里云 RAM AccessKey ID |
+| `ALIYUN_ACCESS_KEY_SECRET` | 空 | 阿里云 RAM AccessKey Secret |
+| `VOLCENGINE_ACCESS_KEY_ID` | 空 | 火山引擎 AccessKey ID |
+| `VOLCENGINE_SECRET_ACCESS_KEY` | 空 | 火山引擎 Secret AccessKey |
+| `VOLCENGINE_REGION` | `cn-beijing` | 火山引擎地域 |
+
+## 安全模型
+
+- `.env` 已加入 `.gitignore`，不要提交真实 key。
+- AccessKey 和 API Key 只在 Express 服务端读取。
+- Web 前端只拿余额结果，不持有云厂商密钥。
+- iOS App 和 Widget 只读取 `/api/mobile/summary` 摘要接口。
+- 公网部署必须设置强随机 `MOBILE_API_TOKEN`，并优先使用 HTTPS。
+- 如果曾经把服务器密码或真实 key 贴到聊天、issue、日志里，建议立即轮换。
+
+更多安全建议见 [SECURITY.md](SECURITY.md)。
+
+## 新增平台
 
 如果平台有官方余额 API，新增成本很低：
 
 1. 新增 `server/providers/<name>.mjs`，读取 `.env` 中的 key，请求官方接口。
 2. fetcher 返回统一结构：`status`、`amount`、`currency`、`message`、`metrics`。
 3. 在 `server/providers/index.mjs` 注册平台信息和 fetcher。
-4. 在 `.env.example` 和 `docs/api-sources.md` 补配置与官方文档链接。
+4. 在 `.env.example` 和 [API sources](docs/api-sources.md) 补配置与官方文档链接。
 5. 如果要让 iPhone 小组件可选它，在 `BalanceWidgetConfigurationIntent.swift` 增加一个枚举值。
-
-ChatGPT 订阅不是 OpenAI API 余额，Claude 订阅也不是 Anthropic API 余额。OpenAI、Anthropic、Gemini 更适合做“本月成本/用量报表”，不是简单余额接口；不要用网页抓取作为默认开源方案。
-
-## 安全
-
-- `.env` 已加入 `.gitignore`。
-- AccessKey 和 API Key 只在本地 Express 服务端读取，不会打包进浏览器前端。
-- 前端只保存刷新历史中的余额数字，用于画本地趋势线。
-- iOS App 和 Widget 只读取 `/api/mobile/summary` 摘要接口，不保存云厂商密钥。
-- 如果曾经把服务器密码或真实 key 贴到聊天、issue、日志里，建议立即轮换。
-
-## iPhone 小组件
-
-现在有两条路线：
-
-### 原生 iOS App + WidgetKit
-
-已在 `ios/TokenBalanceMonitor` 里加入轻量原生工程。它不会把阿里云、火山或 DeepSeek 的密钥放进手机端，只读取你服务器上的移动端摘要接口。
-
-iPhone App 在前台打开时会每 1 分钟自动刷新一次。主屏幕小组件由 iOS WidgetKit 调度，当前请求每 15 分钟刷新一次，并在 App 内切换重点关注或手动刷新后主动请求刷新小组件；iOS 不保证小组件按分钟级后台刷新。
-
-从项目根目录运行：
-
-```bash
-./scripts/run-ios-simulator.sh
-```
-
-这个脚本会从 `.env` 生成本地 iOS 配置、生成 Xcode 工程、构建并启动模拟器。更多说明见 `ios/TokenBalanceMonitor/README.md`。
-
-### Scriptable 轻量小组件
-
-如果暂时不想装原生 App，也可以用 Scriptable 小组件。普通网页不能直接变成 iOS 原生桌面小组件，Apple 的系统小组件能力来自 WidgetKit App；Scriptable 可以用少量 JavaScript 在主屏幕显示数据。
-
-1. 云端接口已支持小组件访问，地址形如：
-
-   ```text
-   https://balance.example.com/api/mobile/summary?token=你的MOBILE_API_TOKEN
-   ```
-
-2. 在 iPhone 安装 Scriptable，把 `docs/ios-scriptable-widget.js` 复制进去，并把 `API_URL` 里的 token 改成 `.env` 中的 `MOBILE_API_TOKEN`。
-
-3. 在 iPhone 主屏幕添加 Scriptable 小组件，选择这个脚本。
-
-小组件适合随手查看；iOS 不保证小组件每分钟后台刷新。低于阈值的持续后台主动提醒，建议仍用 Bark/PushDeer/APNs 之类的推送。
-
-## 开源
-
-本项目使用 MIT License。开源前请确认：
-
-- `.env` 没有被提交。
-- `ios/TokenBalanceMonitor/Shared/TokenMonitorConfig.swift` 没有被提交。
-- 截图中没有真实 key、手机号、账单号或服务器密码。
-- 如果你要公开部署移动端接口，请设置强随机 `MOBILE_API_TOKEN`，并优先使用 HTTPS。
 
 ## 开发
 
-没有全局 `npm` 也没关系：
-
 ```bash
-./scripts/install-deps.sh
 ./scripts/build.sh
+PATH="/opt/homebrew/bin:$PATH" npm run check
 ```
 
-添加新供应商时，新增 `server/providers/<name>.mjs`，再在 `server/providers/index.mjs` 注册即可。
+改 iOS 后建议至少跑一次：
+
+```bash
+xcodebuild \
+  -project ios/TokenBalanceMonitor/TokenBalanceMonitor.xcodeproj \
+  -scheme TokenBalanceMonitor \
+  -destination 'generic/platform=iOS Simulator' \
+  -derivedDataPath ios/TokenBalanceMonitor/DerivedDataCheck \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+```
+
+贡献前请看 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [open source checklist](docs/open-source-checklist.md)。
+
+## License
+
+[MIT](LICENSE)
