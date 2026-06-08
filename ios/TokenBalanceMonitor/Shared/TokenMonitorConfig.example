@@ -1,0 +1,4 @@
+enum TokenMonitorConfig {
+    static let mobileSummaryURL = "http://127.0.0.1:5173/api/mobile/summary"
+    static let mobileToken = "paste-mobile-token-here"
+}

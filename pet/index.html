@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>余额监控桌宠</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="pet-shell" id="petShell">
+      <section class="pet-card">
+        <header class="pet-head drag-region">
+          <div class="pet-face" aria-hidden="true">
+            <span class="eye left-eye"></span>
+            <span class="eye right-eye"></span>
+            <span class="mouth"></span>
+          </div>
+          <div class="pet-title">
+            <strong>余额助手</strong>
+            <span id="moodText">正在同步</span>
+          </div>
+          <div class="window-actions no-drag">
+            <button id="pinButton" title="置顶/取消置顶" aria-label="置顶">⌃</button>
+            <button id="collapseButton" title="收起">−</button>
+            <button id="closeButton" title="隐藏到状态栏">×</button>
+          </div>
+        </header>
+
+        <section class="balance-hero">
+          <span>总可用余额</span>
+          <strong id="totalBalance">--</strong>
+          <small id="refreshTime">等待刷新</small>
+        </section>
+
+        <section class="focus-card no-drag" aria-label="重点关注平台">
+          <div>
+            <span>重点关注</span>
+            <strong id="focusName">等待同步</strong>
+            <small id="focusAmount">--</small>
+          </div>
+          <select id="focusSelect" aria-label="切换重点关注平台">
+            <option>同步中</option>
+          </select>
+        </section>
+
+        <section class="provider-list" id="providerList" aria-label="供应商余额"></section>
+
+        <footer class="pet-foot no-drag">
+          <button class="ghost-button" id="dashboardButton">打开看板</button>
+          <button class="refresh-button" id="refreshButton">刷新</button>
+        </footer>
+      </section>
+    </main>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

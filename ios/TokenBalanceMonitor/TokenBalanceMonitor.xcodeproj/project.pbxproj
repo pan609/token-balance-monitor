@@ -1,0 +1,478 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0EE4678F74C4C4644B577177 /* BalanceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6418C86586A86B72EA24B245 /* BalanceAPI.swift */; };
+		10AB69F5ECB77046C8970F9E /* TokenMonitorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */; };
+		1D63277739C8AB7079EE0F39 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BA0C76EC9AB2E86316AAC007 /* Assets.xcassets */; };
+		2ED48A80494D4B496FD43983 /* TokenBalanceWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E4426FC958D0AC9CDF24FEA7 /* TokenBalanceWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		400629AB22EAA689FC733689 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 809D239CF93BE261778E0F06 /* Assets.xcassets */; };
+		8556F3FDEA5D755A19EF026B /* BalanceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */; };
+		8697FFEE3447B9D2166648F7 /* BalanceWidgetConfigurationIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53870B07D601E12FFA543804 /* BalanceWidgetConfigurationIntent.swift */; };
+		8F72423147DAE28D7498176B /* TokenMonitorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */; };
+		AA93FCA9C92A2A16C9CC69EF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB5368CEFF4D02438526B9D /* ContentView.swift */; };
+		C2E0EDF7F4D5AA73470663D2 /* TokenBalanceMonitorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8247C03F050C9942DB583E6D /* TokenBalanceMonitorApp.swift */; };
+		C386F71EA9162F3FCCF8FBD3 /* BalanceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6418C86586A86B72EA24B245 /* BalanceAPI.swift */; };
+		CBEF25DE88C5F5807DE65463 /* BalanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39594AB06091D2FD9E1DA55A /* BalanceStore.swift */; };
+		D327DD4E0BCEB346CD040211 /* TokenBalanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B78A925B16E935BBAA0E3D /* TokenBalanceWidget.swift */; };
+		FE1C0C3348C35967CBA4A475 /* BalanceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C896356DEC4A71911474C9A2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 174DF655DA7BC733C199E96F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3C8495F1A8053AF37A3CD051;
+			remoteInfo = TokenBalanceWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EFC003D9310035C3BF636B4F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2ED48A80494D4B496FD43983 /* TokenBalanceWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenMonitorConfig.swift; sourceTree = "<group>"; };
+		1CB5368CEFF4D02438526B9D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1FB02122DCD4FF4AD3F2997D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		39594AB06091D2FD9E1DA55A /* BalanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceStore.swift; sourceTree = "<group>"; };
+		3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceModels.swift; sourceTree = "<group>"; };
+		53870B07D601E12FFA543804 /* BalanceWidgetConfigurationIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceWidgetConfigurationIntent.swift; sourceTree = "<group>"; };
+		6418C86586A86B72EA24B245 /* BalanceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceAPI.swift; sourceTree = "<group>"; };
+		65B78A925B16E935BBAA0E3D /* TokenBalanceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenBalanceWidget.swift; sourceTree = "<group>"; };
+		809D239CF93BE261778E0F06 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8247C03F050C9942DB583E6D /* TokenBalanceMonitorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenBalanceMonitorApp.swift; sourceTree = "<group>"; };
+		939EA578F9243F097315ED7A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		BA0C76EC9AB2E86316AAC007 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E4426FC958D0AC9CDF24FEA7 /* TokenBalanceWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TokenBalanceWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8D8E3D41BA950E3D14DFA84 /* TokenBalanceMonitor.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TokenBalanceMonitor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		525E28DAD97C3DAB9B690417 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				6418C86586A86B72EA24B245 /* BalanceAPI.swift */,
+				3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */,
+				0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		57F694CF41B5F3F77FF8639A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E8D8E3D41BA950E3D14DFA84 /* TokenBalanceMonitor.app */,
+				E4426FC958D0AC9CDF24FEA7 /* TokenBalanceWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9D6D2D7088A1D7732D27AE9E /* TokenBalanceWidget */ = {
+			isa = PBXGroup;
+			children = (
+				809D239CF93BE261778E0F06 /* Assets.xcassets */,
+				53870B07D601E12FFA543804 /* BalanceWidgetConfigurationIntent.swift */,
+				939EA578F9243F097315ED7A /* Info.plist */,
+				65B78A925B16E935BBAA0E3D /* TokenBalanceWidget.swift */,
+			);
+			path = TokenBalanceWidget;
+			sourceTree = "<group>";
+		};
+		C8AF4A0DDA8E5139D1FE8B5F /* TokenBalanceMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				BA0C76EC9AB2E86316AAC007 /* Assets.xcassets */,
+				39594AB06091D2FD9E1DA55A /* BalanceStore.swift */,
+				1CB5368CEFF4D02438526B9D /* ContentView.swift */,
+				1FB02122DCD4FF4AD3F2997D /* Info.plist */,
+				8247C03F050C9942DB583E6D /* TokenBalanceMonitorApp.swift */,
+			);
+			path = TokenBalanceMonitor;
+			sourceTree = "<group>";
+		};
+		DBFB05B3341506D888B7D103 = {
+			isa = PBXGroup;
+			children = (
+				525E28DAD97C3DAB9B690417 /* Shared */,
+				C8AF4A0DDA8E5139D1FE8B5F /* TokenBalanceMonitor */,
+				9D6D2D7088A1D7732D27AE9E /* TokenBalanceWidget */,
+				57F694CF41B5F3F77FF8639A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3C8495F1A8053AF37A3CD051 /* TokenBalanceWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BF7BFE1ECAA5BEA0326C5A7F /* Build configuration list for PBXNativeTarget "TokenBalanceWidgetExtension" */;
+			buildPhases = (
+				DD395C4068565C9488258A73 /* Sources */,
+				125D8494A5A295AA1C884FA3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TokenBalanceWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = TokenBalanceWidgetExtension;
+			productReference = E4426FC958D0AC9CDF24FEA7 /* TokenBalanceWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		AC73E874F860490E4FAEBFFA /* TokenBalanceMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E5D8E2DC28F8736C3C80489B /* Build configuration list for PBXNativeTarget "TokenBalanceMonitor" */;
+			buildPhases = (
+				8FC50EB56D8AC42907F2DAC5 /* Sources */,
+				721013FEF27CA87D473098BE /* Resources */,
+				EFC003D9310035C3BF636B4F /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				852F65C6DCEAB462F720C1DB /* PBXTargetDependency */,
+			);
+			name = TokenBalanceMonitor;
+			packageProductDependencies = (
+			);
+			productName = TokenBalanceMonitor;
+			productReference = E8D8E3D41BA950E3D14DFA84 /* TokenBalanceMonitor.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		174DF655DA7BC733C199E96F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 789B90E26F243703C9BC243E /* Build configuration list for PBXProject "TokenBalanceMonitor" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = DBFB05B3341506D888B7D103;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 54;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AC73E874F860490E4FAEBFFA /* TokenBalanceMonitor */,
+				3C8495F1A8053AF37A3CD051 /* TokenBalanceWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		125D8494A5A295AA1C884FA3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				400629AB22EAA689FC733689 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		721013FEF27CA87D473098BE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D63277739C8AB7079EE0F39 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8FC50EB56D8AC42907F2DAC5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C386F71EA9162F3FCCF8FBD3 /* BalanceAPI.swift in Sources */,
+				8556F3FDEA5D755A19EF026B /* BalanceModels.swift in Sources */,
+				CBEF25DE88C5F5807DE65463 /* BalanceStore.swift in Sources */,
+				AA93FCA9C92A2A16C9CC69EF /* ContentView.swift in Sources */,
+				C2E0EDF7F4D5AA73470663D2 /* TokenBalanceMonitorApp.swift in Sources */,
+				8F72423147DAE28D7498176B /* TokenMonitorConfig.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DD395C4068565C9488258A73 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0EE4678F74C4C4644B577177 /* BalanceAPI.swift in Sources */,
+				FE1C0C3348C35967CBA4A475 /* BalanceModels.swift in Sources */,
+				8697FFEE3447B9D2166648F7 /* BalanceWidgetConfigurationIntent.swift in Sources */,
+				D327DD4E0BCEB346CD040211 /* TokenBalanceWidget.swift in Sources */,
+				10AB69F5ECB77046C8970F9E /* TokenMonitorConfig.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		852F65C6DCEAB462F720C1DB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3C8495F1A8053AF37A3CD051 /* TokenBalanceWidgetExtension */;
+			targetProxy = C896356DEC4A71911474C9A2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		14CD931DF29008C5D8CBFF38 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = TokenBalanceMonitor/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyue.TokenBalanceMonitor;
+				PRODUCT_NAME = TokenBalanceMonitor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		436E74C18E7F43DF729D9C86 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		9AFA0F2C7D91985F97001260 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				INFOPLIST_FILE = TokenBalanceWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyue.TokenBalanceMonitor.widget;
+				PRODUCT_NAME = TokenBalanceWidgetExtension;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A993BE4204EA9D0A331C6138 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				INFOPLIST_FILE = TokenBalanceWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyue.TokenBalanceMonitor.widget;
+				PRODUCT_NAME = TokenBalanceWidgetExtension;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E3BB6F4DA0CA7C670257AD35 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = TokenBalanceMonitor/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyue.TokenBalanceMonitor;
+				PRODUCT_NAME = TokenBalanceMonitor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F9B3F9AD26046D5ECD601071 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		789B90E26F243703C9BC243E /* Build configuration list for PBXProject "TokenBalanceMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				436E74C18E7F43DF729D9C86 /* Debug */,
+				F9B3F9AD26046D5ECD601071 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BF7BFE1ECAA5BEA0326C5A7F /* Build configuration list for PBXNativeTarget "TokenBalanceWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AFA0F2C7D91985F97001260 /* Debug */,
+				A993BE4204EA9D0A331C6138 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E5D8E2DC28F8736C3C80489B /* Build configuration list for PBXNativeTarget "TokenBalanceMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E3BB6F4DA0CA7C670257AD35 /* Debug */,
+				14CD931DF29008C5D8CBFF38 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 174DF655DA7BC733C199E96F /* Project object */;
+}

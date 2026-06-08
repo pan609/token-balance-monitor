@@ -1,0 +1,30 @@
+node_modules/
+dist/
+coverage/
+.tools/
+
+# Local secrets and runtime state
+.env
+.env.*
+!.env.example
+.pet-settings.json
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# macOS / editor noise
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# iOS local configuration and build output
+ios/TokenBalanceMonitor/Shared/TokenMonitorConfig.swift
+ios/TokenBalanceMonitor/build/
+ios/TokenBalanceMonitor/DerivedData*/
+ios/TokenBalanceMonitor/*.xcresult
+ios/TokenBalanceMonitor/**/*.xcuserstate
+ios/TokenBalanceMonitor/**/*.xcuserdata/
