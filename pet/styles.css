@@ -224,10 +224,59 @@ button {
   font-size: 12px;
 }
 
+.usage-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 10px 14px 0;
+}
+
+.usage-card > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.usage-card > div:hover,
+.usage-card > div:focus-visible {
+  border-color: rgba(37, 99, 235, 0.38);
+  background: rgba(255, 255, 255, 0.9);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.usage-card span,
+.usage-card small {
+  display: block;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usage-card strong {
+  display: block;
+  overflow: hidden;
+  margin: 5px 0 4px;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .provider-list {
   display: grid;
   gap: 8px;
-  max-height: 294px;
+  max-height: 278px;
   overflow: auto;
   padding: 12px 14px 0;
 }
@@ -400,6 +449,7 @@ button {
 
 .pet-shell.is-collapsed .balance-hero,
 .pet-shell.is-collapsed .focus-card,
+.pet-shell.is-collapsed .usage-card,
 .pet-shell.is-collapsed .provider-list,
 .pet-shell.is-collapsed .pet-foot {
   display: none;

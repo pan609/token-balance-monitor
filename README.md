@@ -1,66 +1,60 @@
 <p align="center">
-  <img src="docs/assets/pet-widget.png" alt="Token 余额监控桌宠预览" width="180">
+  <img src="docs/assets/pet-widget.png" alt="Token Balance Monitor" width="160">
 </p>
 
 <h1 align="center">Token 余额监控</h1>
 
 <p align="center">
-  一个轻量的 AI 模型账户余额监控工具，支持 Web 看板、macOS 状态栏桌宠、iPhone App 和 WidgetKit 小组件。
+  把阿里云百炼、DeepSeek、豆包、Kimi、硅基流动、OpenRouter 的余额放到一个地方看。
+  支持 Web 看板、Agent Skill、macOS 状态栏桌宠、iPhone App 和小组件。
 </p>
 
 <p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/pan609/token-balance-monitor"></a>
   <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white">
-  <img alt="Platforms" src="https://img.shields.io/badge/platform-Web%20%7C%20macOS%20%7C%20iOS-111827">
+  <img alt="Platforms" src="https://img.shields.io/badge/Web%20%7C%20Skill%20%7C%20macOS%20%7C%20iOS-111827">
   <img alt="Privacy" src="https://img.shields.io/badge/keys-server%20side-0f766e">
 </p>
 
-## 适用场景
+## Overview
 
-如果你同时使用多个模型平台，可以用它把余额放到一个地方查看，减少反复打开控制台的次数。
+模型平台用多了以后，余额会散在不同控制台里：阿里云百炼一处、DeepSeek 一处、豆包/Kimi/OpenRouter 又是另一处。Token 余额监控把这些账户余额收在一个自托管服务里，并提供几个不同入口：
 
-- **日常查看**：在 macOS 状态栏显示总额或重点关注平台余额。
-- **低额提醒**：iPhone 侧可以设置更低的提醒阈值，例如低于 2 元时提醒充值。
-- **本地优先**：云厂商 AccessKey 只在本机或自托管服务器 `.env` 中读取，不打包到浏览器前端或 iOS 客户端。
-- **方便扩展**：Web、桌宠、iOS App 共用同一套 provider，新增平台只需要补一个 fetcher。
+- **统一看余额**：阿里云、DeepSeek、豆包、Kimi、硅基流动、OpenRouter 放到同一个看板。
+- **随手看状态**：macOS 状态栏、桌宠、iPhone App、小组件都可以显示重点关注平台。
+- **追踪请求级 token**：业务项目可以上报每次模型调用的 token，用 Web 看板看到是谁、哪个功能、哪个资源在消耗。
 
-## 数据流
+云厂商 AccessKey 只保存在你自己的服务端 `.env`，不会打包进浏览器、macOS 客户端或 iPhone App。
 
-```mermaid
-flowchart LR
-  keys[".env<br/>云厂商密钥"] --> server["Node.js 服务<br/>统一 provider"]
-  providers["阿里云 / DeepSeek / 豆包 / Kimi / SiliconFlow / OpenRouter"] --> server
-  server --> web["Web 看板"]
-  server --> pet["macOS 桌宠<br/>状态栏"]
-  server --> mobile["/api/mobile/summary<br/>token 保护"]
-  mobile --> ios["iPhone App"]
-  mobile --> widget["WidgetKit / Scriptable"]
-```
+## 选你需要的形态
+
+每个入口都是独立的，按需要选一个用就行。
+
+| 形态 | 用途 | 入口 |
+| --- | --- | --- |
+| **Web 看板** | 查看余额、近 24h 消耗、请求级 token 明细 | `./start.command` |
+| **Agent Skill** | 让 Codex/Agent 查询余额、上报 usage | [skills/token-balance-monitor](skills/token-balance-monitor) |
+| **macOS 状态栏 / 桌宠** | 在电脑右上角随手看余额 | `./pet.command` |
+| **iPhone App / Widget** | 在手机和小组件里看余额，低于阈值提醒 | [ios/TokenBalanceMonitor](ios/TokenBalanceMonitor) |
+| **Scriptable 小组件** | 不装原生 App，只要一个轻量 iPhone 小组件 | [docs/ios-scriptable-widget.js](docs/ios-scriptable-widget.js) |
 
 ## 预览
 
-| macOS 桌宠 | Web 看板 | iPhone App / Widget |
-| --- | --- | --- |
-| <img src="docs/assets/pet-widget-desktop-providers.png" alt="macOS 桌宠" width="260"> | <img src="docs/assets/dashboard-desktop.png" alt="Web 看板" width="320"> | <img src="docs/assets/ios-token-monitor-updated.png" alt="iPhone App" width="220"> |
+<p align="center">
+  <img src="docs/assets/readme/web-overview.jpg" alt="Web 余额总览" width="860">
+</p>
 
-## 支持平台
+| 请求级 Token 看板 | 请求详情 |
+| --- | --- |
+| <img src="docs/assets/readme/web-usage-dashboard.jpg" alt="请求级 Token 看板" width="420"> | <img src="docs/assets/readme/web-request-detail.jpg" alt="请求详情" width="420"> |
 
-| 平台 | 接入方式 | 汇总方式 |
-| --- | --- | --- |
-| 阿里云百炼 / 费用中心 | RAM AccessKey + 费用中心 API | CNY |
-| DeepSeek | API Key + `/user/balance` | 按返回币种显示 |
-| 火山引擎 / 豆包 | AccessKey + 费用中心 API | CNY |
-| Kimi / Moonshot | API Key + 余额 API | CNY |
-| SiliconFlow / 硅基流动 | API Key + 用户信息 API | CNY |
-| OpenRouter | Management key + credits API | USD 单独显示 |
+| macOS 桌宠 | iPhone App / Widget |
+| --- | --- |
+| <img src="docs/assets/pet-widget-desktop-providers.png" alt="macOS 桌宠" width="300"> | <img src="docs/assets/ios-token-monitor-updated.png" alt="iPhone App" width="240"> |
 
-`totalCny` 只汇总人民币余额。OpenRouter 这类 USD credits 会单独显示，不会混入人民币总额。
+## 5 分钟跑起来
 
-OpenAI / Anthropic / Gemini 更适合做“本月成本 / 用量报表”，不是简单余额接口。相关状态见 [provider matrix](docs/provider-matrix.md)。
-
-## 快速开始
-
-### 1. 安装依赖
+### 1. 安装
 
 ```bash
 git clone https://github.com/pan609/token-balance-monitor.git
@@ -70,93 +64,145 @@ cp .env.example .env
 ./scripts/install-deps.sh
 ```
 
-### 2. 填写配置
+没有全局 `npm` 也没关系，项目脚本会优先使用本地和 Codex bundled Node runtime。
 
-打开 `.env`，按需填写平台 key。只想先看界面也可以留空，页面会显示“待配置”。
+### 2. 填 key
+
+打开 `.env`，按需填写你使用的平台。只想先看界面也可以留空，页面会显示“待配置”。
 
 ```bash
-LOW_BALANCE_THRESHOLD_CNY=20
 PRIMARY_PROVIDER_ID=aliyun
-HOST=127.0.0.1
-MOBILE_API_TOKEN=
-MOBILE_API_URL=http://127.0.0.1:5173/api/mobile/summary
-MOBILE_ALERT_THRESHOLD_CNY=2
-
-DEEPSEEK_API_KEY=
-MOONSHOT_API_KEY=
-SILICONFLOW_API_KEY=
-OPENROUTER_API_KEY=
+LOW_BALANCE_THRESHOLD_CNY=20
 
 ALIYUN_ACCESS_KEY_ID=
 ALIYUN_ACCESS_KEY_SECRET=
+
+DEEPSEEK_API_KEY=
 VOLCENGINE_ACCESS_KEY_ID=
 VOLCENGINE_SECRET_ACCESS_KEY=
-VOLCENGINE_REGION=cn-beijing
+MOONSHOT_API_KEY=
+SILICONFLOW_API_KEY=
+OPENROUTER_API_KEY=
 ```
 
-### 3. 选择入口
+完整配置见 [.env.example](.env.example)。
 
-| 场景 | 命令 |
-| --- | --- |
-| Web 看板 | `./start.command` |
-| macOS 桌宠 / 状态栏 | `./pet.command` |
-| iOS 模拟器 | `./scripts/run-ios-simulator.sh` |
-| iPhone 真机 | `./scripts/run-ios-device.sh` |
-
-没有全局 `npm` 也没关系，项目脚本会优先使用本地和 Codex bundled Node runtime。
-
-## macOS 桌宠
-
-双击 `pet.command` 会打开一个置顶小窗，并在 macOS 状态栏显示余额。
-
-- 默认每 1 分钟自动刷新。
-- 状态栏可以显示总余额、重点关注平台或任意已返回平台。
-- 桌宠窗口和状态栏菜单都可以切换“重点关注平台”。
-- 右上角 `⌃` 是置顶开关，`−` 是收起，`×` 是隐藏到状态栏。
-- 如果菜单栏太挤看不到入口，可以按 `⌘⇧B` 显示或隐藏。
-
-## iPhone 和小组件
-
-原生 iOS App 位于 [ios/TokenBalanceMonitor](ios/TokenBalanceMonitor)。它不会保存云厂商密钥，只读取服务端摘要接口。
-
-| 中号小组件 | 小号小组件 |
-| --- | --- |
-| <img src="docs/assets/ios-widget-gallery-medium.jpg" alt="iOS 中号小组件预览" width="220"> | <img src="docs/assets/ios-widget-gallery-small.jpg" alt="iOS 小号小组件预览" width="220"> |
-
-- App 前台打开时每 1 分钟自动刷新。
-- WidgetKit 小组件请求每 15 分钟刷新一次，但最终频率由 iOS 调度。
-- App 内手动刷新或切换重点关注后，会主动请求刷新小组件。
-- 低于 `MOBILE_ALERT_THRESHOLD_CNY` 时，App 会发本地提醒。
-
-本地模拟器：
+### 3. 打开你要的入口
 
 ```bash
+# Web 看板
+./start.command
+
+# macOS 桌宠 / 状态栏
+./pet.command
+```
+
+iOS:
+
+```bash
+# 模拟器
 ./scripts/run-ios-simulator.sh
-```
 
-真机：
-
-```bash
+# 真机
 ./scripts/run-ios-device.sh
 ```
 
-更多操作和小组件选择方式见 [iOS README](ios/TokenBalanceMonitor/README.md)。
+## Agent Skill
 
-### Scriptable 轻量小组件
+Agent 场景只依赖自托管服务，不需要安装 macOS 或 iOS 客户端。
 
-不想安装原生 App 时，可以在 iPhone 的 Scriptable 里使用 [docs/ios-scriptable-widget.js](docs/ios-scriptable-widget.js)。
+安装 Skill：
 
-把脚本里的 `API_URL` 改成你的服务端摘要地址：
+```bash
+mkdir -p ~/.codex/skills
+cp -R skills/token-balance-monitor ~/.codex/skills/
+```
+
+给 Agent 配置：
+
+```bash
+TOKEN_MONITOR_BASE_URL=https://balance.example.com/token-monitor
+TOKEN_MONITOR_MOBILE_TOKEN=只读查询token
+TOKEN_MONITOR_INGEST_TOKEN=usage上报token
+```
+
+可用能力：
+
+```bash
+# 查询余额
+node ~/.codex/skills/token-balance-monitor/scripts/token-monitor.mjs balance
+
+# 输出请求明细看板地址
+node ~/.codex/skills/token-balance-monitor/scripts/token-monitor.mjs dashboard
+
+# 上报请求级 token
+node ~/.codex/skills/token-balance-monitor/scripts/token-monitor.mjs report ./usage-event.json
+```
+
+详细字段和行为建议见 [Agent 接入文档](docs/agent-integration.md)。
+
+## 请求级 Token 看板
+
+余额只能回答“还剩多少钱”。如果你想知道“哪次请求花了多少 token、来自哪个项目、哪个用户、哪个业务对象”，在业务项目里接入 usage 上报。
+
+推荐模式是 `report-only`：
 
 ```text
-https://balance.example.com/api/mobile/summary?token=你的MOBILE_API_TOKEN
+业务项目 -> 模型平台
+业务项目 -> Token Monitor /api/usage/events
 ```
+
+最小事件示例：
+
+```json
+{
+  "projectId": "my-product",
+  "environment": "production",
+  "provider": "aliyun",
+  "model": "qwen-plus",
+  "feature": "chat_completion",
+  "operationName": "智能问答",
+  "accountId": "workspace:1",
+  "actorId": "user:123",
+  "requestId": "req_abc",
+  "status": "success",
+  "promptTokens": 1200,
+  "completionTokens": 340,
+  "totalTokens": 1540
+}
+```
+
+内置 JS SDK 在 [sdk/javascript](sdk/javascript)。完整事件模型、旧字段兼容和接入示例见 [Agent 接入文档](docs/agent-integration.md)。
+
+## 支持平台
+
+| 平台 | 接入方式 | 余额汇总 |
+| --- | --- | --- |
+| 阿里云百炼 / 费用中心 | RAM AccessKey + 费用中心 API | CNY |
+| DeepSeek | API Key + `/user/balance` | 按返回币种显示 |
+| 火山引擎 / 豆包 | AccessKey + 费用中心 API | CNY |
+| Kimi / Moonshot | API Key + 余额 API | CNY |
+| SiliconFlow / 硅基流动 | API Key + 用户信息 API | CNY |
+| OpenRouter | Management key + credits API | USD 单独显示 |
+
+`totalCny` 只汇总人民币余额。OpenRouter 这类 USD credits 会单独显示，不混入人民币总额。
+
+OpenAI / Anthropic / Gemini 更适合做“本月成本 / 用量报表”，不是简单余额接口。当前适配状态见 [provider matrix](docs/provider-matrix.md)。
+
+## 刷新和提醒
+
+- 服务端默认每 1 分钟刷新余额并记录历史快照。
+- Web 看板根据余额快照估算近 24h 消耗。
+- macOS 状态栏默认每 1 分钟刷新。
+- iPhone App 前台打开时每 1 分钟刷新。
+- WidgetKit 小组件通常不会严格每分钟刷新，最终频率由 iOS 调度。
+- iPhone 低余额提醒阈值由 `MOBILE_ALERT_THRESHOLD_CNY` 控制，默认 2 元。
 
 ## 服务器部署
 
-有服务器时，推荐把 Node 服务部署在服务器内网端口，再用 Nginx/Caddy 提供 HTTPS。iPhone App、Widget 或 Scriptable 只访问 `/api/mobile/summary`。
+有服务器时，推荐把 Node 服务部署在服务器内网端口，再用 Nginx/Caddy 提供 HTTPS。iPhone App、Widget、Agent Skill 都访问你的自托管服务。
 
-最小部署路径：
+最小启动：
 
 ```bash
 git clone https://github.com/pan609/token-balance-monitor.git /opt/token-balance-monitor
@@ -167,21 +213,22 @@ npm run build
 NODE_ENV=production node server/index.mjs
 ```
 
-服务器 `.env` 至少建议设置：
+生产环境至少设置：
 
 ```bash
 NODE_ENV=production
 HOST=127.0.0.1
 PORT=5173
 MOBILE_API_TOKEN=replace-with-long-random-token
+USAGE_INGEST_TOKEN=replace-with-another-long-random-token
 PRIMARY_PROVIDER_ID=aliyun
 ```
 
-完整 systemd、Nginx、HTTPS 和 iPhone 连接示例见 [部署文档](docs/deployment.md)。
+完整 systemd、Nginx、HTTPS、iPhone 连接示例见 [部署文档](docs/deployment.md)。
 
 ## 重点关注平台
 
-`PRIMARY_PROVIDER_ID` 控制统一的重点关注平台，默认是 `aliyun`。
+`PRIMARY_PROVIDER_ID` 控制 Web、macOS、iOS、小组件默认显示的重点平台。
 
 可选值：
 
@@ -194,19 +241,14 @@ volcengine
 openrouter
 ```
 
-命令行切换本机重点关注：
+命令行切换：
 
 ```bash
 ./scripts/set-primary-provider.sh deepseek
-```
-
-中文别名也可以：
-
-```bash
 ./scripts/set-primary-provider.sh 豆包
 ```
 
-如果已经自托管服务器，可以显式传入远程地址同时更新服务器配置：
+如果是自托管服务器，可以用脚本同步更新远端配置：
 
 ```bash
 TOKEN_MONITOR_REMOTE_HOST=user@example.com \
@@ -214,46 +256,29 @@ TOKEN_MONITOR_REMOTE_DIR=/home/user/token-monitor \
 ./scripts/set-primary-provider.sh deepseek --both
 ```
 
-这个值会影响：
-
-- iPhone App 顶部“重点关注”卡片。
-- Widget 选择“重点关注”时显示的平台。
-- macOS 状态栏菜单里的“重点关注”金额。
-
-Widget 也可以固定显示某个平台：长按小组件，选择“编辑小组件”，把“显示”从“重点关注”改成阿里云、DeepSeek、Kimi 等固定项。
-
-## 配置项
-
-| 变量 | 默认值 | 说明 |
-| --- | --- | --- |
-| `LOW_BALANCE_THRESHOLD_CNY` | `20` | Web 和桌宠低余额阈值 |
-| `PRIMARY_PROVIDER_ID` | `aliyun` | 重点关注平台 |
-| `HOST` | `127.0.0.1` | 服务监听地址，公网部署建议仍走反向代理 |
-| `PORT` | `5173` | 服务端口 |
-| `MOBILE_API_TOKEN` | 空 | 移动端摘要接口 token，公网部署必须设置 |
-| `MOBILE_API_URL` | 本机地址 | iOS App / Widget 请求的摘要接口 |
-| `MOBILE_ALERT_THRESHOLD_CNY` | `2` | iPhone 低余额提醒阈值 |
-| `DEEPSEEK_API_KEY` | 空 | DeepSeek API Key |
-| `MOONSHOT_API_KEY` | 空 | Kimi / Moonshot API Key |
-| `SILICONFLOW_API_KEY` | 空 | SiliconFlow API Key |
-| `SILICONFLOW_BASE_URL` | `https://api.siliconflow.com` | SiliconFlow API 地址 |
-| `OPENROUTER_API_KEY` | 空 | OpenRouter Management key |
-| `ALIYUN_ACCESS_KEY_ID` | 空 | 阿里云 RAM AccessKey ID |
-| `ALIYUN_ACCESS_KEY_SECRET` | 空 | 阿里云 RAM AccessKey Secret |
-| `VOLCENGINE_ACCESS_KEY_ID` | 空 | 火山引擎 AccessKey ID |
-| `VOLCENGINE_SECRET_ACCESS_KEY` | 空 | 火山引擎 Secret AccessKey |
-| `VOLCENGINE_REGION` | `cn-beijing` | 火山引擎地域 |
-
 ## 安全模型
 
 - `.env` 已加入 `.gitignore`，不要提交真实 key。
 - AccessKey 和 API Key 只在 Express 服务端读取。
-- Web 前端只拿余额结果，不持有云厂商密钥。
-- iOS App 和 Widget 只读取 `/api/mobile/summary` 摘要接口。
-- 公网部署必须设置强随机 `MOBILE_API_TOKEN`，并优先使用 HTTPS。
+- Web 前端、macOS 桌宠、iOS App、小组件都不持有云厂商密钥。
+- 公网部署必须设置强随机 `MOBILE_API_TOKEN` 和 `USAGE_INGEST_TOKEN`。
 - 如果曾经把服务器密码或真实 key 贴到聊天、issue、日志里，建议立即轮换。
 
 更多安全建议见 [SECURITY.md](SECURITY.md)。
+
+## 项目结构
+
+```text
+server/                  余额 provider、历史快照、usage events API
+src/                     Web 看板
+pet/                     macOS 桌宠 UI
+electron/                macOS 状态栏和桌宠外壳
+ios/TokenBalanceMonitor  iPhone App 和 WidgetKit
+skills/token-balance-monitor
+                         给 Agent / Codex 使用的 Skill
+sdk/javascript           请求级 token 上报 SDK
+docs/                    部署、接入、平台说明
+```
 
 ## 新增平台
 
@@ -269,7 +294,7 @@ Widget 也可以固定显示某个平台：长按小组件，选择“编辑小�
 
 ```bash
 ./scripts/build.sh
-PATH="/opt/homebrew/bin:$PATH" npm run check
+npm run check
 ```
 
 改 iOS 后建议至少跑一次：

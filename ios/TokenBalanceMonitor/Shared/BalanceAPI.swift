@@ -1,6 +1,17 @@
 import Foundation
 
 enum TokenMonitorAPI {
+    static var dashboardURL: URL? {
+        let summaryPath = "/api/mobile/summary"
+        let base: String
+        if TokenMonitorConfig.mobileSummaryURL.hasSuffix(summaryPath) {
+            base = String(TokenMonitorConfig.mobileSummaryURL.dropLast(summaryPath.count))
+        } else {
+            base = TokenMonitorConfig.mobileSummaryURL
+        }
+        return URL(string: base + "#usage-dashboard")
+    }
+
     static func fetchSummary() async throws -> MobileSummary {
         guard let url = URL(string: TokenMonitorConfig.mobileSummaryURL) else {
             throw TokenMonitorError.invalidURL

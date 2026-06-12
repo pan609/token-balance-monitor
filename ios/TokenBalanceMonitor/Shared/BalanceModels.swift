@@ -9,6 +9,9 @@ struct MobileSummary: Decodable, Equatable, Sendable {
     let primaryAmount: Double?
     let primaryCurrency: String
     let primaryIsBelowAlert: Bool
+    let usage24hCny: Double?
+    let usageSnapshotCount: Int?
+    let usageCoverageMinutes: Int?
     let providers: [String: ProviderSummary]
 
     var orderedProviders: [ProviderSummary] {
@@ -54,6 +57,9 @@ extension MobileSummary {
         primaryAmount: 6.47,
         primaryCurrency: "CNY",
         primaryIsBelowAlert: false,
+        usage24hCny: 1.28,
+        usageSnapshotCount: 24,
+        usageCoverageMinutes: 360,
         providers: [
             "aliyun": ProviderSummary(
                 id: "aliyun",
@@ -139,6 +145,9 @@ extension MobileSummary {
         primaryAmount: 1.42,
         primaryCurrency: "CNY",
         primaryIsBelowAlert: true,
+        usage24hCny: 3.12,
+        usageSnapshotCount: 24,
+        usageCoverageMinutes: 360,
         providers: [
             "aliyun": ProviderSummary(
                 id: "aliyun",

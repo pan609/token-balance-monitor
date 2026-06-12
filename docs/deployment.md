@@ -50,6 +50,11 @@ PORT=5173
 MOBILE_API_TOKEN=replace-with-long-random-token
 MOBILE_ALERT_THRESHOLD_CNY=2
 PRIMARY_PROVIDER_ID=aliyun
+BALANCE_POLL_ENABLED=true
+BALANCE_POLL_INTERVAL_MS=60000
+BALANCE_HISTORY_RETENTION_DAYS=30
+USAGE_INGEST_TOKEN=replace-with-another-long-random-token
+USAGE_USER_HASH_SALT=replace-with-stable-random-salt
 
 # 按需填入平台 key
 ALIYUN_ACCESS_KEY_ID=
@@ -79,6 +84,40 @@ curl http://127.0.0.1:5173/api/health
 curl -H "Authorization: Bearer 你的MOBILE_API_TOKEN" \
   http://127.0.0.1:5173/api/mobile/summary
 ```
+
+余额历史默认写入 `/opt/token-balance-monitor/data/balance-snapshots.jsonl`，用于 Web 看板的小时消耗估算。这个目录不要提交到仓库；如需备份，只备份数据文件即可。
+
+请求级 token 用量默认写入 `/opt/token-balance-monitor/data/usage-events.jsonl`。业务项目上报到 `/api/usage/events` 时需要带：
+
+```bash
+curl -X POST https://balance.example.com/api/usage/events \
+  -H "Authorization: Bearer 你的USAGE_INGEST_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "aliyun",
+    "model": "qwen-plus",
+    "projectId": "my-app",
+    "environment": "production",
+    "accountId": "workspace-a",
+    "accountName": "默认工作区",
+    "actorId": "user_123",
+    "actorName": "张三",
+    "feature": "chat_completion",
+    "operationName": "智能问答",
+    "resourceType": "conversation",
+    "resourceId": "conv_abc",
+    "requestId": "req_abc",
+    "promptTokens": 1200,
+    "completionTokens": 340,
+    "totalTokens": 1540,
+    "durationMs": 1800,
+    "attributes": {
+      "source": "chat_box"
+    }
+  }'
+```
+
+默认不记录 prompt 和 response。`feature`、`accountId`、`actorId`、`resourceType` 这类 ID 字段用于聚合，`operationName`、`accountName`、`actorName`、`resourceName` 只用于展示。旧字段仍然兼容：`userId` 会映射到 `actorId` 并生成匿名哈希，`metadata.usage_context` 会映射到 `attributes`。
 
 ## 3. systemd 常驻
 

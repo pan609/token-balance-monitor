@@ -18,7 +18,7 @@
   "scripts": {
     "dev": "node server/index.mjs",
     "build": "vite build",
-    "check": "node --check server/index.mjs && node --check server/providers/index.mjs && node --check electron/main.cjs && node --check electron/preload.cjs",
+    "check": "node --check server/index.mjs && node --check server/history.mjs && node --check server/usage-events.mjs && node --check server/providers/index.mjs && node --check sdk/javascript/index.js && node --check electron/main.cjs && node --check electron/preload.cjs",
     "pet": "electron electron/main.cjs",
     "preview": "NODE_ENV=production node server/index.mjs"
   },

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Token Balance Monitor"
+  short_description: "Query AI model balances and report token usage events."
+  default_prompt: "Use this skill to check model platform balances, evaluate low-balance risk, and report request-level token usage events to a Token Balance Monitor service."

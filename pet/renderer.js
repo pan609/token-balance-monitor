@@ -20,6 +20,10 @@ const elements = {
   focusName: document.getElementById("focusName"),
   focusAmount: document.getElementById("focusAmount"),
   focusSelect: document.getElementById("focusSelect"),
+  usageAmount: document.getElementById("usageAmount"),
+  usageMeta: document.getElementById("usageMeta"),
+  usageTokens: document.getElementById("usageTokens"),
+  usageRecent: document.getElementById("usageRecent"),
   providerList: document.getElementById("providerList"),
   refreshButton: document.getElementById("refreshButton"),
   collapseButton: document.getElementById("collapseButton"),
@@ -33,6 +37,14 @@ elements.collapseButton.addEventListener("click", toggleCollapse);
 elements.pinButton.addEventListener("click", togglePin);
 elements.closeButton.addEventListener("click", () => window.balancePet.hide());
 elements.dashboardButton.addEventListener("click", () => window.balancePet.openDashboard());
+for (const trigger of document.querySelectorAll("[data-dashboard-link]")) {
+  trigger.addEventListener("click", () => window.balancePet.openDashboard());
+  trigger.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    window.balancePet.openDashboard();
+  });
+}
 elements.focusSelect.addEventListener("change", () => {
   setPrimaryProvider(elements.focusSelect.value);
 });
@@ -94,6 +106,10 @@ function renderBalances(data) {
   );
   const okCount = providers.filter((provider) => provider.status === "ok").length;
   const primary = providers.find((provider) => provider.id === data.primaryProvider) || providers[0];
+  const usageTotal = sumHourlyUsage(data.usage);
+  const usageCoverage = data.usage?.coverageMinutes || 0;
+  const tokenTotal = sumUsageTokens(data.usageStats);
+  const recentCount = data.recentUsage?.events?.length || 0;
 
   elements.totalBalance.textContent = formatCurrency(data.totalCny || 0, "CNY");
   elements.refreshTime.textContent = formatDateTime(data.refreshedAt);
@@ -103,6 +119,12 @@ function renderBalances(data) {
       ? formatCurrency(primary.amount, primary.currency)
       : primary.statusLabel
     : "--";
+  elements.usageAmount.textContent =
+    usageTotal > 0 || usageCoverage >= 60 ? formatCurrency(usageTotal, "CNY") : "采样中";
+  elements.usageMeta.textContent =
+    usageCoverage > 0 ? `已采样 ${usageCoverage} 分钟` : "余额下降后显示金额";
+  elements.usageTokens.textContent = tokenTotal ? formatInteger(tokenTotal) : "--";
+  elements.usageRecent.textContent = recentCount ? `最近 ${recentCount} 条请求` : "等待上报";
   renderFocusOptions(providers, data.primaryProvider);
   elements.moodText.textContent = warnings.length
     ? `${warnings.length} 项偏低`
@@ -172,6 +194,8 @@ function buildTrayTitles(data, providers) {
       Number.isFinite(primary.amount) ? formatCurrency(primary.amount, primary.currency) : "--"
     }`;
   }
+  const usageTotal = sumHourlyUsage(data.usage);
+  titles.usage24h = usageTotal > 0 ? `消耗 ${formatCurrency(usageTotal, "CNY")}` : "消耗 采样中";
 
   for (const provider of providers) {
     const amount = Number.isFinite(provider.amount)
@@ -181,6 +205,14 @@ function buildTrayTitles(data, providers) {
   }
 
   return titles;
+}
+
+function sumHourlyUsage(usage) {
+  return (usage?.buckets || []).reduce((sum, bucket) => sum + (bucket.amountCny || 0), 0);
+}
+
+function sumUsageTokens(stats) {
+  return (stats?.groups || []).reduce((sum, group) => sum + (group.totalTokens || 0), 0);
 }
 
 function renderError(error) {
@@ -238,6 +270,10 @@ function formatCurrency(value, currency = "CNY") {
   } catch {
     return `${compactFormatter.format(value)} ${normalized}`.trim();
   }
+}
+
+function formatInteger(value) {
+  return new Intl.NumberFormat("zh-CN").format(Number(value) || 0);
 }
 
 function escapeHtml(value) {

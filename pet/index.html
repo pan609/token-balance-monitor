@@ -43,6 +43,19 @@
           </select>
         </section>
 
+        <section class="usage-card no-drag" aria-label="近 24 小时消耗">
+          <div data-dashboard-link role="button" tabindex="0" aria-label="查看近 24 小时消耗明细">
+            <span>近 24h 消耗</span>
+            <strong id="usageAmount">采样中</strong>
+            <small id="usageMeta">等待 usage 上报</small>
+          </div>
+          <div data-dashboard-link role="button" tabindex="0" aria-label="查看请求级 Token 明细">
+            <span>请求级 Token</span>
+            <strong id="usageTokens">--</strong>
+            <small id="usageRecent">最近请求</small>
+          </div>
+        </section>
+
         <section class="provider-list" id="providerList" aria-label="供应商余额"></section>
 
         <footer class="pet-foot no-drag">

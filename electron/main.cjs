@@ -32,6 +32,7 @@ let lastTraySummary = {
   providerLabels: {}
 };
 const expandedSize = { width: 380, height: 574 };
+const expandedUsageSize = { width: 380, height: 642 };
 const collapsedSize = { width: 260, height: 104 };
 
 app.setName("余额监控桌宠");
@@ -77,7 +78,7 @@ ipcMain.handle("balances:set-primary-provider", async (_event, providerId) => {
 
 ipcMain.handle("window:collapse", (_event, collapsed) => {
   if (!mainWindow) return;
-  const target = collapsed ? collapsedSize : expandedSize;
+  const target = collapsed ? collapsedSize : expandedUsageSize;
   mainWindow.setSize(target.width, target.height, true);
 });
 
@@ -89,7 +90,7 @@ ipcMain.handle("window:pin", (_event, pinned) => {
 });
 
 ipcMain.handle("window:open-dashboard", async () => {
-  await shell.openExternal("http://127.0.0.1:5174/");
+  await shell.openExternal(getDashboardUrl({ usage: true }));
 });
 
 ipcMain.handle("window:hide", () => {
@@ -119,9 +120,9 @@ function createWindow() {
   const { workArea } = screen.getPrimaryDisplay();
   mainWindow = new BrowserWindow({
     width: expandedSize.width,
-    height: expandedSize.height,
+    height: expandedUsageSize.height,
     x: Math.max(workArea.x + workArea.width - expandedSize.width - 28, workArea.x),
-    y: Math.max(workArea.y + workArea.height - expandedSize.height - 42, workArea.y),
+    y: Math.max(workArea.y + workArea.height - expandedUsageSize.height - 42, workArea.y),
     frame: false,
     transparent: true,
     resizable: false,
@@ -196,6 +197,7 @@ function updateTrayMenu() {
         submenu: [
           createDisplayModeItem("total", "总余额"),
           createDisplayModeItem("primary", "重点关注"),
+          createDisplayModeItem("usage24h", "近24h消耗"),
           ...getTrayProviderItems()
         ]
       },
@@ -217,7 +219,7 @@ function updateTrayMenu() {
       },
       {
         label: "打开网页看板",
-        click: () => shell.openExternal("http://127.0.0.1:5174/")
+        click: () => shell.openExternal(getDashboardUrl({ usage: true }))
       },
       { type: "separator" },
       {
@@ -295,10 +297,123 @@ async function fetchBalancesAndUpdateTray({ notifyRenderer = false } = {}) {
 
 async function fetchBalances() {
   loadEnv();
-  const providerModule = await import(
-    pathToFileURL(path.join(root, "server/providers/index.mjs")).href
+  const [providerModule, historyModule, usageEventModule] = await Promise.all([
+    import(pathToFileURL(path.join(root, "server/providers/index.mjs")).href),
+    import(pathToFileURL(path.join(root, "server/history.mjs")).href),
+    import(pathToFileURL(path.join(root, "server/usage-events.mjs")).href)
+  ]);
+  historyModule.initHistoryStore(root);
+  usageEventModule.initUsageEventStore(root);
+
+  const balances = await providerModule.fetchAllBalances();
+  historyModule.recordBalanceSnapshot(balances, { source: "pet" });
+  const localUsageData = {
+    usage: historyModule.buildHourlyUsage({ hours: 24 }),
+    usageStats: usageEventModule.buildUsageStats({ hours: 24, groupBy: "projectId" }),
+    recentUsage: usageEventModule.listRecentUsageEvents({ limit: 8 }),
+    usageSource: "local"
+  };
+  const remoteUsageData = await fetchRemoteUsageData();
+
+  return {
+    ...balances,
+    ...(remoteUsageData || localUsageData)
+  };
+}
+
+async function fetchRemoteUsageData() {
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl || typeof fetch !== "function") return null;
+
+  try {
+    const [usage, usageStats, recentUsage] = await Promise.all([
+      fetchJson(`${apiBaseUrl}/api/usage/hourly?hours=24`),
+      fetchJson(`${apiBaseUrl}/api/usage/stats?hours=24&groupBy=projectId`),
+      fetchJson(`${apiBaseUrl}/api/usage/recent?limit=8`)
+    ]);
+
+    return {
+      usage,
+      usageStats,
+      recentUsage,
+      usageSource: "remote"
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchJson(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: buildRemoteApiHeaders()
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function buildRemoteApiHeaders() {
+  const headers = {};
+  if (process.env.MOBILE_API_TOKEN) {
+    headers["x-mobile-token"] = process.env.MOBILE_API_TOKEN;
+  }
+  return headers;
+}
+
+function getDashboardUrl({ usage = false } = {}) {
+  const baseUrl = getApiBaseUrl() || "http://127.0.0.1:5174/";
+  return usage ? `${baseUrl.replace(/#.*$/, "")}#usage-dashboard` : baseUrl;
+}
+
+function getApiBaseUrl() {
+  const candidates = [
+    process.env.TOKEN_MONITOR_API_BASE_URL,
+    process.env.PUBLIC_API_BASE_URL,
+    process.env.MOBILE_API_BASE_URL,
+    process.env.API_BASE_URL,
+    process.env.MOBILE_API_URL,
+    readIosMobileSummaryUrl()
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = normalizeApiBaseUrl(candidate);
+    if (normalized) return normalized;
+  }
+
+  return "";
+}
+
+function normalizeApiBaseUrl(value) {
+  if (!value) return "";
+  let normalized = String(value).trim().replace(/\/+$/, "");
+  if (!/^https?:\/\//i.test(normalized)) return "";
+
+  normalized = normalized
+    .replace(/\/api\/mobile\/summary$/i, "")
+    .replace(/\/api\/balances$/i, "")
+    .replace(/\/api\/usage\/(?:hourly|stats|recent|events)$/i, "");
+
+  return normalized.replace(/\/+$/, "");
+}
+
+function readIosMobileSummaryUrl() {
+  const configPath = path.join(
+    root,
+    "ios/TokenBalanceMonitor/Shared/TokenMonitorConfig.swift"
   );
-  return providerModule.fetchAllBalances();
+  if (!fs.existsSync(configPath)) return "";
+
+  const match = fs
+    .readFileSync(configPath, "utf8")
+    .match(/mobileSummaryURL\s*=\s*"([^"]+)"/);
+  return match?.[1] || "";
 }
 
 async function setPrimaryProvider(providerId) {
@@ -333,6 +448,8 @@ function buildTraySummary(data) {
       Number.isFinite(primary.amount) ? formatCurrency(primary.amount, primary.currency) : "--"
     }`;
   }
+  const usageTotal = sumHourlyUsage(data.usage);
+  titles.usage24h = usageTotal > 0 ? `消耗 ${formatCurrency(usageTotal, "CNY")}` : "消耗 采样中";
 
   for (const provider of providers) {
     providerLabels[provider.id] = provider.shortName;
@@ -348,6 +465,10 @@ function buildTraySummary(data) {
     titles,
     providerLabels
   };
+}
+
+function sumHourlyUsage(usage) {
+  return (usage?.buckets || []).reduce((sum, bucket) => sum + (bucket.amountCny || 0), 0);
 }
 
 function getTrayProviderItems() {

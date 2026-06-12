@@ -3,13 +3,30 @@ import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  buildHourlyUsage,
+  initHistoryStore,
+  recordBalanceSnapshot
+} from "./history.mjs";
 import { fetchAllBalances, isKnownProviderId } from "./providers/index.mjs";
+import {
+  buildUsageBreakdown,
+  buildUsageOverview,
+  buildUsageStats,
+  buildUsageTimeline,
+  initUsageEventStore,
+  listUsageEvents,
+  listRecentUsageEvents,
+  recordUsageEvents
+} from "./usage-events.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, "..");
 const envPath = path.join(root, ".env");
 loadEnv(envPath);
+initHistoryStore(root);
+initUsageEventStore(root);
 
 const requestedPort = Number(process.env.PORT || 5173);
 const host = process.env.HOST || "127.0.0.1";
@@ -17,7 +34,8 @@ const port = await findAvailablePort(requestedPort);
 const hmrPort = await findAvailablePort(Number(process.env.HMR_PORT || port + 10000));
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
+app.use(applyUsageCors);
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -28,11 +46,74 @@ app.get("/api/health", (_req, res) => {
 
 app.get("/api/balances", async (_req, res) => {
   const startedAt = Date.now();
-  const result = await fetchAllBalances();
+  const result = await fetchAndRecordBalances("web");
   res.json({
     ...result,
     durationMs: Date.now() - startedAt
   });
+});
+
+app.get("/api/usage/hourly", (req, res) => {
+  res.json(
+    buildHourlyUsage({
+      hours: req.query.hours
+    })
+  );
+});
+
+app.post("/api/usage/events", (req, res) => {
+  if (!isUsageIngestAuthorized(req)) {
+    res.status(401).json({
+      ok: false,
+      message: "Missing or invalid usage ingest token"
+    });
+    return;
+  }
+
+  const result = recordUsageEvents(req.body, {
+    ingestTokenId: getUsageIngestTokenId(req)
+  });
+  res.status(result.accepted ? 202 : 400).json({
+    ok: result.accepted > 0,
+    ...result
+  });
+});
+
+app.options("/api/usage/events", (_req, res) => {
+  res.status(204).end();
+});
+
+app.get("/api/usage/recent", (req, res) => {
+  res.json(
+    listRecentUsageEvents({
+      limit: req.query.limit
+    })
+  );
+});
+
+app.get("/api/usage/events", (req, res) => {
+  res.json(listUsageEvents(req.query));
+});
+
+app.get("/api/usage/overview", (req, res) => {
+  res.json(buildUsageOverview(req.query));
+});
+
+app.get("/api/usage/timeline", (req, res) => {
+  res.json(buildUsageTimeline(req.query));
+});
+
+app.get("/api/usage/stats", (req, res) => {
+  res.json(
+    buildUsageStats({
+      hours: req.query.hours,
+      groupBy: req.query.groupBy
+    })
+  );
+});
+
+app.get("/api/usage/breakdown", (req, res) => {
+  res.json(buildUsageBreakdown(req.query));
 });
 
 app.get("/api/mobile/summary", async (req, res) => {
@@ -44,7 +125,7 @@ app.get("/api/mobile/summary", async (req, res) => {
     return;
   }
 
-  const result = await fetchAllBalances();
+  const result = await fetchAndRecordBalances("mobile");
   res.json(buildMobileSummary(result));
 });
 
@@ -69,7 +150,7 @@ app.put("/api/mobile/primary-provider", async (req, res) => {
   try {
     setEnvValue(envPath, "PRIMARY_PROVIDER_ID", providerId);
     process.env.PRIMARY_PROVIDER_ID = providerId;
-    const result = await fetchAllBalances();
+    const result = await fetchAndRecordBalances("mobile-settings");
     res.json(buildMobileSummary(result));
   } catch (error) {
     res.status(500).json({
@@ -82,6 +163,11 @@ app.put("/api/mobile/primary-provider", async (req, res) => {
 function buildMobileSummary(result) {
   const alertThresholdCny = Number(process.env.MOBILE_ALERT_THRESHOLD_CNY || 2);
   const primaryProviderId = result.primaryProvider || "aliyun";
+  const usage24h = buildHourlyUsage({ hours: 24 });
+  const usage24hCny = usage24h.buckets.reduce(
+    (sum, bucket) => sum + (bucket.amountCny || 0),
+    0
+  );
   const providers = Object.fromEntries(
     result.providers.map((provider) => [
       provider.id,
@@ -114,6 +200,12 @@ function buildMobileSummary(result) {
     primaryAmount: roundMoney(primary?.amount),
     primaryCurrency: primary?.currency || "CNY",
     primaryIsBelowAlert: Boolean(primary?.isBelowMobileAlert),
+    usage24hCny:
+      usage24h.snapshotCount >= 2 && (usage24h.coverageMinutes >= 60 || usage24hCny > 0)
+        ? roundMoney(usage24hCny)
+        : null,
+    usageSnapshotCount: usage24h.snapshotCount,
+    usageCoverageMinutes: usage24h.coverageMinutes,
     providers
   };
 }
@@ -153,7 +245,41 @@ app.listen(port, host, () => {
     console.log(`端口 ${requestedPort} 已占用，已切换到 ${port}`);
   }
   console.log(`Token 余额监控已启动: http://${host}:${port}`);
+  startBackgroundBalanceRecorder();
 });
+
+async function fetchAndRecordBalances(source) {
+  const result = await fetchAllBalances();
+  recordBalanceSnapshot(result, { source });
+  return result;
+}
+
+function startBackgroundBalanceRecorder() {
+  if (String(process.env.BALANCE_POLL_ENABLED || "true").toLowerCase() === "false") {
+    return;
+  }
+
+  const intervalMs = Math.max(
+    60 * 1000,
+    Number(process.env.BALANCE_POLL_INTERVAL_MS || 60 * 1000)
+  );
+  let isPolling = false;
+
+  const poll = async () => {
+    if (isPolling) return;
+    isPolling = true;
+    try {
+      await fetchAndRecordBalances("poll");
+    } catch (error) {
+      console.warn(`余额历史轮询失败: ${error.message || error}`);
+    } finally {
+      isPolling = false;
+    }
+  };
+
+  setTimeout(poll, 5 * 1000);
+  setInterval(poll, intervalMs);
+}
 
 async function findAvailablePort(startPort) {
   for (let candidate = startPort; candidate < startPort + 50; candidate += 1) {
@@ -184,6 +310,37 @@ function isMobileRequestAuthorized(req) {
     req.query.token ||
     req.get("authorization")?.replace(/^Bearer\s+/i, "");
   return requestToken === configuredToken;
+}
+
+function isUsageIngestAuthorized(req) {
+  const configuredToken = process.env.USAGE_INGEST_TOKEN || process.env.TBM_INGEST_TOKEN;
+  if (!configuredToken) {
+    return process.env.NODE_ENV !== "production" && host === "127.0.0.1";
+  }
+
+  const requestToken =
+    req.get("x-usage-token") ||
+    req.get("x-ingest-token") ||
+    req.get("authorization")?.replace(/^Bearer\s+/i, "");
+  return requestToken === configuredToken;
+}
+
+function getUsageIngestTokenId(req) {
+  return req.get("x-token-id") || req.get("x-project-id") || null;
+}
+
+function applyUsageCors(req, res, next) {
+  const configuredOrigin = process.env.USAGE_INGEST_CORS_ORIGIN;
+  if (configuredOrigin && req.path === "/api/usage/events") {
+    res.setHeader("Access-Control-Allow-Origin", configuredOrigin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "content-type, authorization, x-usage-token, x-ingest-token, x-token-id, x-project-id"
+    );
+  }
+  next();
 }
 
 function roundMoney(value) {

@@ -90,6 +90,8 @@ struct ContentView: View {
 }
 
 private struct SummaryView: View {
+    @Environment(\.openURL) private var openURL
+
     let summary: MobileSummary
     let isUpdatingPrimaryProvider: Bool
     let refresh: () -> Void
@@ -105,6 +107,12 @@ private struct SummaryView: View {
                     setPrimaryProvider: setPrimaryProvider
                 )
                 TotalStrip(summary: summary)
+                HourlyUsageStrip(summary: summary)
+                DashboardLinkCard {
+                    if let url = TokenMonitorAPI.dashboardURL {
+                        openURL(url)
+                    }
+                }
                 ProviderSection(
                     summary: summary,
                     isUpdatingPrimaryProvider: isUpdatingPrimaryProvider,
@@ -125,6 +133,37 @@ private struct SummaryView: View {
             .padding(.vertical, 12)
             .background(.regularMaterial)
         }
+    }
+}
+
+private struct DashboardLinkCard: View {
+    let openDashboard: () -> Void
+
+    var body: some View {
+        Button(action: openDashboard) {
+            HStack(spacing: 14) {
+                Image(systemName: "chart.xyaxis.line")
+                    .font(.headline)
+                    .frame(width: 34, height: 34)
+                    .background(Color.indigo.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .foregroundStyle(.indigo)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("查看请求明细")
+                        .font(.subheadline.weight(.semibold))
+                    Text("项目、模型、功能和单次请求 token")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 12)
+                Image(systemName: "arrow.up.right")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(16)
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("打开请求明细看板")
     }
 }
 
@@ -284,6 +323,53 @@ private struct TotalStrip: View {
         }
         .padding(16)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+private struct HourlyUsageStrip: View {
+    let summary: MobileSummary
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "chart.bar.xaxis")
+                .font(.headline)
+                .frame(width: 34, height: 34)
+                .background(Color.blue.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .foregroundStyle(.blue)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("近 24h 消耗")
+                    .font(.subheadline.weight(.semibold))
+                Text(usageSubtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 12)
+            Text(usageValue)
+                .font(.title2.weight(.bold))
+                .monospacedDigit()
+                .minimumScaleFactor(0.78)
+        }
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private var usageSubtitle: String {
+        let snapshotCount = summary.usageSnapshotCount ?? 0
+        let coverage = summary.usageCoverageMinutes ?? 0
+        if snapshotCount < 2 {
+            return "等待第二次快照"
+        }
+        if coverage < 60 {
+            return "已采样 \(max(1, coverage)) 分钟"
+        }
+        return "按余额快照估算"
+    }
+
+    private var usageValue: String {
+        guard (summary.usageSnapshotCount ?? 0) >= 2 else {
+            return "采样中"
+        }
+        return summary.usage24hCny?.yuanText ?? "采样中"
     }
 }
 
