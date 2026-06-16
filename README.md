@@ -10,10 +10,23 @@
 </p>
 
 <p align="center">
+  <strong>Token Balance Monitor</strong> is a self-hosted open-source monitor for AI provider balances
+  and request-level token usage across Web, macOS, iPhone widgets, and agent workflows.
+</p>
+
+<p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/pan609/token-balance-monitor"></a>
   <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white">
   <img alt="Platforms" src="https://img.shields.io/badge/Web%20%7C%20Skill%20%7C%20macOS%20%7C%20iOS-111827">
   <img alt="Privacy" src="https://img.shields.io/badge/keys-server%20side-0f766e">
+</p>
+
+<p align="center">
+  <a href="#5-分钟跑起来">Quick Start</a> ·
+  <a href="#agent-skill">Agent Skill</a> ·
+  <a href="docs/api-reference.md">API Reference</a> ·
+  <a href="#支持平台">Providers</a> ·
+  <a href="#安全模型">Privacy & Security</a>
 </p>
 
 ## Overview
@@ -25,6 +38,14 @@
 - **追踪请求级 token**：业务项目可以上报每次模型调用的 token，用 Web 看板看到是谁、哪个功能、哪个资源在消耗。
 
 云厂商 AccessKey 只保存在你自己的服务端 `.env`，不会打包进浏览器、macOS 客户端或 iPhone App。
+
+## 适合谁 / Who it is for
+
+- **多平台 AI 开发者**：同时使用阿里云百炼、DeepSeek、豆包、Kimi、硅基流动、OpenRouter，希望不用每天打开多个控制台查余额。
+- **Agent / 后端项目维护者**：想知道每次模型调用来自哪个项目、功能、账号或业务对象，而不把 prompt 和 response 存进看板。
+- **自托管优先的团队**：希望云厂商密钥留在自己的服务端，只把只读 token 或上报 token 发给客户端、Widget 或业务系统。
+
+For English readers: this project is a local-first, self-hosted balance and token-usage monitor for teams that call multiple LLM providers and want operational visibility without sending provider keys or prompt content to a third-party dashboard.
 
 ## 选你需要的形态
 
@@ -139,7 +160,7 @@ node ~/.codex/skills/token-balance-monitor/scripts/token-monitor.mjs dashboard
 node ~/.codex/skills/token-balance-monitor/scripts/token-monitor.mjs report ./usage-event.json
 ```
 
-详细字段和行为建议见 [Agent 接入文档](docs/agent-integration.md)。
+详细字段和行为建议见 [Agent 接入文档](docs/agent-integration.md)；稳定接口契约见 [API Reference](docs/api-reference.md)。
 
 ## 请求级 Token 看板
 
@@ -172,7 +193,7 @@ node ~/.codex/skills/token-balance-monitor/scripts/token-monitor.mjs report ./us
 }
 ```
 
-内置 JS SDK 在 [sdk/javascript](sdk/javascript)。完整事件模型、旧字段兼容和接入示例见 [Agent 接入文档](docs/agent-integration.md)。
+内置 JS SDK 在 [sdk/javascript](sdk/javascript)。完整事件模型、旧字段兼容和接入示例见 [Agent 接入文档](docs/agent-integration.md)，接口鉴权、请求体和响应格式见 [API Reference](docs/api-reference.md)。
 
 ## 支持平台
 
@@ -279,6 +300,8 @@ skills/token-balance-monitor
 sdk/javascript           请求级 token 上报 SDK
 docs/                    部署、接入、平台说明
 ```
+
+接口文档见 [API Reference](docs/api-reference.md)。它只把 `GET /api/mobile/summary`、`POST /api/usage/events` 等稳定集成面作为主要入口；Web Dashboard 内部读取接口单独标注。
 
 ## 新增平台
 
