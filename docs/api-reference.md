@@ -29,6 +29,8 @@ Token Balance Monitor 把读取和写入分成两个 token。
 | --- | --- | --- | --- |
 | 只读查询余额摘要 | `MOBILE_API_TOKEN` | `Authorization: Bearer <token>` | 给 Agent、iPhone、Widget、macOS 客户端使用 |
 | 写入 usage 事件 | `USAGE_INGEST_TOKEN` | `Authorization: Bearer <token>` | 给业务服务或 Agent 在模型请求结束后上报 |
+| 只读查询订阅额度摘要 | `QUOTA_READ_TOKEN` | `Authorization: Bearer <token>` | 给 Apple Watch、iPhone 或 Web 读取 Codex / Claude 额度窗口 |
+| 写入订阅额度快照 | `QUOTA_INGEST_TOKEN` | `Authorization: Bearer <token>` | 给本机 Codex / Claude Code bridge 上报额度窗口 |
 
 只读查询也支持：
 
@@ -43,6 +45,13 @@ x-usage-token: <USAGE_INGEST_TOKEN>
 x-ingest-token: <USAGE_INGEST_TOKEN>
 ```
 
+订阅额度读取和写入也支持：
+
+```http
+x-quota-token: <QUOTA_READ_TOKEN>
+x-quota-ingest-token: <QUOTA_INGEST_TOKEN>
+```
+
 如果要标记写入 token 的来源，可以额外传：
 
 ```http
@@ -50,7 +59,7 @@ x-token-id: class-teacher-prod
 x-project-id: class-teacher
 ```
 
-生产环境必须设置强随机 `MOBILE_API_TOKEN` 和 `USAGE_INGEST_TOKEN`。本地开发未设置 token 时，服务只在 `127.0.0.1` 下放宽鉴权，方便先看界面和调试。
+生产环境必须设置强随机 `MOBILE_API_TOKEN`、`USAGE_INGEST_TOKEN`、`QUOTA_READ_TOKEN` 和 `QUOTA_INGEST_TOKEN`。本地开发未设置 token 时，服务只在 `127.0.0.1` 下放宽部分鉴权，方便先看界面和调试。
 
 ## 公开集成接口
 
@@ -264,6 +273,140 @@ curl -X POST "$TOKEN_MONITOR_BASE_URL/api/usage/events" \
 }
 ```
 
+### GET /api/quota/summary
+
+读取 Codex / Claude Code 这类订阅额度窗口的最新快照。这个接口和模型平台余额不是同一类数据：它回答的是 5 小时、每周等订阅周期里还剩多少可用空间。
+
+```bash
+curl "$TOKEN_MONITOR_BASE_URL/api/quota/summary" \
+  -H "Authorization: Bearer $QUOTA_READ_TOKEN" \
+  -H "Accept: application/json"
+```
+
+返回示例：
+
+```json
+{
+  "ok": true,
+  "refreshedAt": "2026-06-17T02:30:00.000Z",
+  "staleSeconds": 120,
+  "warningRemainingPercent": 20,
+  "criticalRemainingPercent": 8,
+  "primaryServiceId": "codex",
+  "primaryService": {
+    "serviceId": "codex",
+    "serviceName": "Codex",
+    "planLabel": "Codex",
+    "source": "codex-app-server",
+    "fetchedAt": "2026-06-17T02:29:30.000Z",
+    "isStale": false,
+    "status": "ok",
+    "statusLabel": "充足",
+    "windows": [
+      {
+        "id": "5h",
+        "label": "5 小时",
+        "usedPercent": 42,
+        "remainingPercent": 58,
+        "resetsAt": "2026-06-17T05:00:00.000Z",
+        "status": "ok",
+        "statusLabel": "充足"
+      }
+    ]
+  },
+  "services": []
+}
+```
+
+建议外部客户端只依赖这些字段：
+
+| 字段 | 说明 |
+| --- | --- |
+| `primaryServiceId` | 当前重点关注服务，例如 `codex` 或 `claude` |
+| `services` | 所有服务的最新额度快照 |
+| `windows[].remainingPercent` | 当前窗口剩余百分比 |
+| `windows[].resetsAt` | 窗口重置时间，可能为 `null` |
+| `isStale` | 数据是否超过 `QUOTA_STALE_SECONDS` |
+| `status` / `statusLabel` | `ok`、`warning`、`critical`、`stale` 等状态 |
+
+### POST /api/quota/refresh
+
+请求服务端尽量刷新一次订阅额度，然后返回与 `GET /api/quota/summary` 相同的摘要结构。这个接口适合 Apple Watch App 前台打开或用户手动刷新时调用。
+
+```bash
+curl -X POST "$TOKEN_MONITOR_BASE_URL/api/quota/refresh" \
+  -H "Authorization: Bearer $QUOTA_READ_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"force":true,"serviceId":"codex"}'
+```
+
+注意：
+
+- Codex 只有在服务端运行环境能访问本机 Codex app-server 时，才可能实时刷新。
+- Claude Code 推荐通过 status line bridge 上报，云端 `refresh` 通常只能返回最近快照。
+- 上一次刷新距离太近时，服务端可能返回 `liveRefresh.skipped = true`，用来保护本机读取频率。
+
+### POST /api/quota/snapshots
+
+写入订阅额度窗口快照。这个接口给本机 bridge 使用，例如 `scripts/codex-quota-bridge.mjs` 或 `scripts/quota-statusline-bridge.mjs`。
+
+```bash
+curl -X POST "$TOKEN_MONITOR_BASE_URL/api/quota/snapshots" \
+  -H "Authorization: Bearer $QUOTA_INGEST_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "serviceId": "claude",
+    "serviceName": "Claude",
+    "planLabel": "Claude Code",
+    "source": "claude-statusline",
+    "fetchedAt": "2026-06-17T02:30:00.000Z",
+    "windows": [
+      {
+        "id": "5h",
+        "label": "5 小时",
+        "usedPercent": 37,
+        "remainingPercent": 63,
+        "resetsAt": "2026-06-17T05:00:00.000Z"
+      },
+      {
+        "id": "weekly",
+        "label": "每周",
+        "usedPercent": 52,
+        "remainingPercent": 48
+      }
+    ]
+  }'
+```
+
+响应示例：
+
+```json
+{
+  "ok": true,
+  "accepted": 1,
+  "rejected": 0,
+  "errors": []
+}
+```
+
+字段说明：
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| `serviceId` | 是 | 稳定服务 ID，例如 `codex`、`claude` |
+| `serviceName` | 建议 | 展示名 |
+| `accountLabel` | 可选 | 账号或订阅标签 |
+| `planLabel` | 可选 | 套餐或来源标签 |
+| `source` | 建议 | `codex-app-server`、`claude-statusline`、`manual` 等 |
+| `fetchedAt` | 建议 | 快照实际读取时间 |
+| `windows` | 是 | 一个或多个额度窗口 |
+| `windows[].id` | 是 | `5h`、`weekly` 等窗口 ID |
+| `windows[].usedPercent` | 建议 | 已用百分比 |
+| `windows[].remainingPercent` | 建议 | 剩余百分比；不传时会尝试由 `usedPercent` 计算 |
+| `windows[].resetsAt` | 可选 | 窗口重置时间 |
+
+订阅额度接口不接收 prompt、response、Claude 登录态、OpenAI 登录态或浏览器 cookie。
+
 ## Dashboard 读取接口
 
 下面这些接口主要给 Web Dashboard 使用。外部系统可以读取，但不要把它们当成最小接入依赖。
@@ -316,7 +459,7 @@ resourceType
 
 ## CORS
 
-`POST /api/usage/events` 支持按环境变量配置跨域：
+`POST /api/usage/events`、`POST /api/quota/snapshots` 和 `POST /api/quota/refresh` 支持按环境变量配置跨域：
 
 ```bash
 USAGE_INGEST_CORS_ORIGIN=https://your-app.example.com
@@ -326,7 +469,7 @@ USAGE_INGEST_CORS_ORIGIN=https://your-app.example.com
 
 ```text
 POST, OPTIONS
-content-type, authorization, x-usage-token, x-ingest-token, x-token-id, x-project-id
+content-type, authorization, x-usage-token, x-ingest-token, x-quota-token, x-quota-ingest-token, x-token-id, x-project-id, x-service-id
 ```
 
 如果业务服务和 Token Balance Monitor 都在服务端，优先使用服务端到服务端调用，不需要浏览器跨域。
@@ -338,9 +481,13 @@ content-type, authorization, x-usage-token, x-ingest-token, x-token-id, x-projec
 | 状态码 | 示例 message | 说明 |
 | --- | --- | --- |
 | `400` | `provider is required` | usage 事件字段不完整或格式错误 |
+| `400` | `serviceId is required` | quota 快照缺少服务 ID |
+| `400` | `codex: windows is required` | quota 快照缺少额度窗口 |
 | `400` | `Unknown provider id` | 切换重点平台时传入了未知 provider |
 | `401` | `Missing or invalid mobile token` | 只读查询 token 缺失或错误 |
 | `401` | `Missing or invalid usage ingest token` | usage 写入 token 缺失或错误 |
+| `401` | `Missing or invalid quota read token` | quota 只读 token 缺失或错误 |
+| `401` | `Missing or invalid quota ingest token` | quota 写入 token 缺失或错误 |
 | `500` | `Failed to update primary provider` | 服务端写入配置失败 |
 
 usage 上报建议做 best-effort：上报失败不应该影响原本的模型请求结果。
