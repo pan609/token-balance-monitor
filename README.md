@@ -58,6 +58,8 @@ For English readers: this project is a local-first, self-hosted balance and toke
 | **Agent Skill** | 让 Codex/Agent 查询余额、上报 usage | [skills/token-balance-monitor](skills/token-balance-monitor) |
 | **macOS 状态栏 / 桌宠** | 在电脑右上角随手看余额 | `./pet.command` |
 | **iPhone App / Widget** | 在手机和小组件里看余额，低于阈值提醒 | [ios/TokenBalanceMonitor](ios/TokenBalanceMonitor) |
+| **Apple Watch 订阅额度** | 看 Codex / Claude 的 5 小时、每周剩余额度窗口 | [docs/subscription-quota-watch.md](docs/subscription-quota-watch.md) |
+| **Claude Code 额度桥接** | 用 Claude Code status line 上报 Pro / Max 订阅额度 | [docs/claude-code-quota.md](docs/claude-code-quota.md) |
 | **Scriptable 小组件** | 不装原生 App，只要一个轻量 iPhone 小组件 | [docs/ios-scriptable-widget.js](docs/ios-scriptable-widget.js) |
 
 ## 预览
@@ -219,6 +221,7 @@ OpenAI / Anthropic / Gemini 更适合做“本月成本 / 用量报表”，不�
 - iPhone App 前台打开时每 1 分钟刷新。
 - WidgetKit 小组件通常不会严格每分钟刷新，最终频率由 iOS 调度。
 - iPhone 低余额提醒阈值由 `MOBILE_ALERT_THRESHOLD_CNY` 控制，默认 2 元。
+- Codex / Claude 这类订阅额度窗口走独立 quota 通道。Codex 可由本机服务实时读取；Claude Code 推荐通过 status line 上报，详见 [Claude Code 额度接入](docs/claude-code-quota.md)。
 
 ## 服务器部署
 

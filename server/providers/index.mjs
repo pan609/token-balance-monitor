@@ -4,6 +4,7 @@ import { fetchMoonshotBalance } from "./moonshot.mjs";
 import { fetchOpenRouterCredits } from "./openrouter.mjs";
 import { fetchSiliconFlowBalance } from "./siliconflow.mjs";
 import { fetchVolcengineBalance } from "./volcengine.mjs";
+import { buildDemoBalances, isDemoMode } from "../demo-data.mjs";
 
 const providers = [
   {
@@ -64,6 +65,10 @@ const providers = [
 ];
 
 export async function fetchAllBalances() {
+  if (isDemoMode()) {
+    return buildDemoBalances();
+  }
+
   const threshold = Number(process.env.LOW_BALANCE_THRESHOLD_CNY || 20);
   const refreshedAt = new Date().toISOString();
 

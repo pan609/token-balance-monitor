@@ -3,10 +3,12 @@ options:
   bundleIdPrefix: com.panyue
   deploymentTarget:
     iOS: "17.0"
+    watchOS: "10.0"
 settings:
   base:
     SWIFT_VERSION: "6.0"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    WATCHOS_DEPLOYMENT_TARGET: "10.0"
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
 targets:
@@ -43,3 +45,16 @@ targets:
         SKIP_INSTALL: YES
         APPLICATION_EXTENSION_API_ONLY: YES
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  TokenBalanceWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: TokenBalanceWatch
+      - path: Shared
+        excludes:
+          - TokenMonitorConfig.example
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.panyue.TokenBalanceMonitor.watch
+        PRODUCT_NAME: TokenBalanceWatch
+        INFOPLIST_FILE: TokenBalanceWatch/Info.plist

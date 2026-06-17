@@ -1,4 +1,7 @@
 enum TokenMonitorConfig {
     static let mobileSummaryURL = "http://127.0.0.1:5173/api/mobile/summary"
     static let mobileToken = "paste-mobile-token-here"
+    static let quotaSummaryURL = "http://127.0.0.1:5173/api/quota/summary"
+    static let quotaRefreshURL = "http://127.0.0.1:5173/api/quota/refresh"
+    static let quotaToken = "paste-quota-read-token-here"
 }

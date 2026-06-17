@@ -2,6 +2,7 @@ node_modules/
 dist/
 coverage/
 .tools/
+test-results/
 
 # Local secrets and runtime state
 .env

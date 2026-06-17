@@ -19,6 +19,22 @@ import {
   listRecentUsageEvents,
   recordUsageEvents
 } from "./usage-events.mjs";
+import {
+  buildDemoHourlyUsage,
+  buildDemoRecentUsage,
+  buildDemoUsageBreakdown,
+  buildDemoUsageEvents,
+  buildDemoUsageOverview,
+  buildDemoUsageStats,
+  buildDemoUsageTimeline,
+  isDemoMode
+} from "./demo-data.mjs";
+import {
+  buildQuotaSummary,
+  initQuotaStore,
+  recordQuotaSnapshot
+} from "./quota.mjs";
+import { refreshQuotaSnapshots } from "./quota-refresh.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +43,7 @@ const envPath = path.join(root, ".env");
 loadEnv(envPath);
 initHistoryStore(root);
 initUsageEventStore(root);
+initQuotaStore(root);
 
 const requestedPort = Number(process.env.PORT || 5173);
 const host = process.env.HOST || "127.0.0.1";
@@ -54,6 +71,11 @@ app.get("/api/balances", async (_req, res) => {
 });
 
 app.get("/api/usage/hourly", (req, res) => {
+  if (isDemoMode()) {
+    res.json(buildDemoHourlyUsage());
+    return;
+  }
+
   res.json(
     buildHourlyUsage({
       hours: req.query.hours
@@ -84,6 +106,11 @@ app.options("/api/usage/events", (_req, res) => {
 });
 
 app.get("/api/usage/recent", (req, res) => {
+  if (isDemoMode()) {
+    res.json(buildDemoRecentUsage({ limit: Number(req.query.limit) || 20 }));
+    return;
+  }
+
   res.json(
     listRecentUsageEvents({
       limit: req.query.limit
@@ -92,18 +119,47 @@ app.get("/api/usage/recent", (req, res) => {
 });
 
 app.get("/api/usage/events", (req, res) => {
+  if (isDemoMode()) {
+    res.json(
+      buildDemoUsageEvents({
+        limit: Number(req.query.limit) || 50,
+        offset: Number(req.query.offset) || 0
+      })
+    );
+    return;
+  }
+
   res.json(listUsageEvents(req.query));
 });
 
 app.get("/api/usage/overview", (req, res) => {
+  if (isDemoMode()) {
+    res.json(buildDemoUsageOverview());
+    return;
+  }
+
   res.json(buildUsageOverview(req.query));
 });
 
 app.get("/api/usage/timeline", (req, res) => {
+  if (isDemoMode()) {
+    res.json(buildDemoUsageTimeline());
+    return;
+  }
+
   res.json(buildUsageTimeline(req.query));
 });
 
 app.get("/api/usage/stats", (req, res) => {
+  if (isDemoMode()) {
+    res.json(
+      buildDemoUsageStats({
+        groupBy: req.query.groupBy || "projectId"
+      })
+    );
+    return;
+  }
+
   res.json(
     buildUsageStats({
       hours: req.query.hours,
@@ -113,6 +169,15 @@ app.get("/api/usage/stats", (req, res) => {
 });
 
 app.get("/api/usage/breakdown", (req, res) => {
+  if (isDemoMode()) {
+    res.json(
+      buildDemoUsageBreakdown({
+        groupBy: req.query.groupBy || "projectId"
+      })
+    );
+    return;
+  }
+
   res.json(buildUsageBreakdown(req.query));
 });
 
@@ -125,8 +190,82 @@ app.get("/api/mobile/summary", async (req, res) => {
     return;
   }
 
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
   const result = await fetchAndRecordBalances("mobile");
   res.json(buildMobileSummary(result));
+});
+
+app.get("/api/quota/summary", (req, res) => {
+  if (!isQuotaReadAuthorized(req)) {
+    res.status(401).json({
+      ok: false,
+      message: "Missing or invalid quota read token"
+    });
+    return;
+  }
+
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+  res.json(buildQuotaSummary());
+});
+
+app.post("/api/quota/refresh", async (req, res) => {
+  if (!isQuotaReadAuthorized(req)) {
+    res.status(401).json({
+      ok: false,
+      message: "Missing or invalid quota read token"
+    });
+    return;
+  }
+
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+
+  let liveRefresh = null;
+  try {
+    liveRefresh = await refreshQuotaSnapshots({
+      force: parseBoolean(req.body?.force ?? req.query.force),
+      serviceId: req.body?.serviceId || req.query.serviceId || ""
+    });
+  } catch (error) {
+    liveRefresh = {
+      ok: false,
+      skipped: false,
+      message: error.message || "Live quota refresh failed"
+    };
+  }
+
+  res.json({
+    ...buildQuotaSummary(),
+    liveRefresh
+  });
+});
+
+app.options("/api/quota/refresh", (_req, res) => {
+  res.status(204).end();
+});
+
+app.post("/api/quota/snapshots", (req, res) => {
+  if (!isQuotaIngestAuthorized(req)) {
+    res.status(401).json({
+      ok: false,
+      message: "Missing or invalid quota ingest token"
+    });
+    return;
+  }
+
+  const result = recordQuotaSnapshot(req.body, {
+    ingestTokenId: getQuotaIngestTokenId(req)
+  });
+  res.status(result.accepted ? 202 : 400).json({
+    ok: result.accepted > 0,
+    ...result
+  });
+});
+
+app.options("/api/quota/snapshots", (_req, res) => {
+  res.status(204).end();
 });
 
 app.put("/api/mobile/primary-provider", async (req, res) => {
@@ -163,7 +302,7 @@ app.put("/api/mobile/primary-provider", async (req, res) => {
 function buildMobileSummary(result) {
   const alertThresholdCny = Number(process.env.MOBILE_ALERT_THRESHOLD_CNY || 2);
   const primaryProviderId = result.primaryProvider || "aliyun";
-  const usage24h = buildHourlyUsage({ hours: 24 });
+  const usage24h = isDemoMode() ? buildDemoHourlyUsage() : buildHourlyUsage({ hours: 24 });
   const usage24hCny = usage24h.buckets.reduce(
     (sum, bucket) => sum + (bucket.amountCny || 0),
     0
@@ -325,19 +464,48 @@ function isUsageIngestAuthorized(req) {
   return requestToken === configuredToken;
 }
 
+function isQuotaReadAuthorized(req) {
+  const configuredToken = process.env.QUOTA_READ_TOKEN || process.env.MOBILE_API_TOKEN;
+  if (!configuredToken) return host === "127.0.0.1";
+
+  const requestToken =
+    req.get("x-quota-token") ||
+    req.query.token ||
+    req.get("authorization")?.replace(/^Bearer\s+/i, "");
+  return requestToken === configuredToken;
+}
+
+function isQuotaIngestAuthorized(req) {
+  const configuredToken = process.env.QUOTA_INGEST_TOKEN || process.env.USAGE_INGEST_TOKEN;
+  if (!configuredToken) {
+    return process.env.NODE_ENV !== "production" && host === "127.0.0.1";
+  }
+
+  const requestToken =
+    req.get("x-quota-token") ||
+    req.get("x-quota-ingest-token") ||
+    req.get("x-usage-token") ||
+    req.get("authorization")?.replace(/^Bearer\s+/i, "");
+  return requestToken === configuredToken;
+}
+
 function getUsageIngestTokenId(req) {
   return req.get("x-token-id") || req.get("x-project-id") || null;
 }
 
+function getQuotaIngestTokenId(req) {
+  return req.get("x-token-id") || req.get("x-service-id") || null;
+}
+
 function applyUsageCors(req, res, next) {
   const configuredOrigin = process.env.USAGE_INGEST_CORS_ORIGIN;
-  if (configuredOrigin && req.path === "/api/usage/events") {
+  if (configuredOrigin && ["/api/usage/events", "/api/quota/snapshots", "/api/quota/refresh"].includes(req.path)) {
     res.setHeader("Access-Control-Allow-Origin", configuredOrigin);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "content-type, authorization, x-usage-token, x-ingest-token, x-token-id, x-project-id"
+      "content-type, authorization, x-usage-token, x-ingest-token, x-quota-token, x-quota-ingest-token, x-token-id, x-project-id, x-service-id"
     );
   }
   next();
@@ -346,6 +514,12 @@ function applyUsageCors(req, res, next) {
 function roundMoney(value) {
   if (!Number.isFinite(value)) return null;
   return Math.round(value * 100) / 100;
+}
+
+function parseBoolean(value) {
+  if (typeof value === "boolean") return value;
+  if (value === null || value === undefined) return false;
+  return ["1", "true", "yes", "force"].includes(String(value).trim().toLowerCase());
 }
 
 function setEnvValue(targetEnvPath, key, value) {

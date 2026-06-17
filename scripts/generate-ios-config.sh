@@ -12,6 +12,12 @@ fi
 
 read_env() {
   local key="$1"
+  local override="${!key-}"
+  if [[ -n "$override" ]]; then
+    printf '%s' "$override"
+    return 0
+  fi
+
   local line
   line="$(grep -E "^${key}=" "$ENV_FILE" | tail -n 1 || true)"
   if [[ -z "$line" ]]; then
@@ -27,13 +33,29 @@ read_env() {
 }
 
 escape_swift_string() {
-  python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+  node -e 'let input=""; process.stdin.setEncoding("utf8"); process.stdin.on("data", chunk => input += chunk); process.stdin.on("end", () => process.stdout.write(JSON.stringify(input)));'
 }
 
 MOBILE_TOKEN="$(read_env MOBILE_API_TOKEN)"
 API_URL="$(read_env MOBILE_API_URL)"
 if [[ -z "$API_URL" ]]; then
   API_URL="http://127.0.0.1:5173/api/mobile/summary"
+fi
+QUOTA_API_URL="$(read_env QUOTA_API_URL)"
+if [[ -z "$QUOTA_API_URL" ]]; then
+  QUOTA_API_URL="${API_URL%/api/mobile/summary}/api/quota/summary"
+fi
+QUOTA_REFRESH_URL="$(read_env QUOTA_REFRESH_URL)"
+if [[ -z "$QUOTA_REFRESH_URL" ]]; then
+  if [[ "$QUOTA_API_URL" == */api/quota/summary ]]; then
+    QUOTA_REFRESH_URL="${QUOTA_API_URL%/api/quota/summary}/api/quota/refresh"
+  else
+    QUOTA_REFRESH_URL="${QUOTA_API_URL%/}/refresh"
+  fi
+fi
+QUOTA_TOKEN="$(read_env QUOTA_READ_TOKEN)"
+if [[ -z "$QUOTA_TOKEN" ]]; then
+  QUOTA_TOKEN="$MOBILE_TOKEN"
 fi
 
 if [[ -z "$MOBILE_TOKEN" ]]; then
@@ -46,6 +68,9 @@ cat > "$CONFIG_FILE" <<EOF_CONFIG
 enum TokenMonitorConfig {
     static let mobileSummaryURL = $(printf '%s' "$API_URL" | escape_swift_string)
     static let mobileToken = $(printf '%s' "$MOBILE_TOKEN" | escape_swift_string)
+    static let quotaSummaryURL = $(printf '%s' "$QUOTA_API_URL" | escape_swift_string)
+    static let quotaRefreshURL = $(printf '%s' "$QUOTA_REFRESH_URL" | escape_swift_string)
+    static let quotaToken = $(printf '%s' "$QUOTA_TOKEN" | escape_swift_string)
 }
 EOF_CONFIG
 
