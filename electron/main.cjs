@@ -29,13 +29,14 @@ let lastTraySummary = {
   titles: {
     total: ""
   },
-  providerLabels: {}
+  providerLabels: {},
+  quotaLabels: {}
 };
 const expandedSize = { width: 380, height: 574 };
 const expandedUsageSize = { width: 380, height: 642 };
 const collapsedSize = { width: 260, height: 104 };
 
-app.setName("余额监控桌宠");
+app.setName("AI Meter");
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) {
@@ -105,13 +106,14 @@ ipcMain.handle("window:quit", () => {
 ipcMain.on("balances:summary", (_event, summary) => {
   lastTraySummary = {
     title: summary?.title || "",
-    detail: summary?.detail || "余额监控桌宠",
+    detail: summary?.detail || "AI Meter",
     primaryProvider: summary?.primaryProvider || lastTraySummary.primaryProvider || "aliyun",
     titles: {
       total: summary?.title || "",
       ...(summary?.titles || {})
     },
-    providerLabels: summary?.providerLabels || lastTraySummary.providerLabels || {}
+    providerLabels: summary?.providerLabels || lastTraySummary.providerLabels || {},
+    quotaLabels: summary?.quotaLabels || lastTraySummary.quotaLabels || {}
   };
   updateTrayMenu();
 });
@@ -129,7 +131,7 @@ function createWindow() {
     hasShadow: false,
     alwaysOnTop: true,
     skipTaskbar: false,
-    title: "余额监控桌宠",
+    title: "AI Meter",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -159,7 +161,7 @@ function createWindow() {
 
 function createTray() {
   tray = new Tray(createTrayIcon());
-  tray.setToolTip("余额监控桌宠");
+  tray.setToolTip("AI Meter");
   tray.on("click", () => toggleWindow());
   updateTrayMenu();
 }
@@ -184,7 +186,7 @@ function updateTrayMenu() {
   if (!tray) return;
 
   tray.setTitle(getTrayTitle());
-  tray.setToolTip(`余额监控桌宠\n${lastTraySummary.detail}`);
+  tray.setToolTip(`AI Meter\n${lastTraySummary.detail}`);
   tray.setContextMenu(
     Menu.buildFromTemplate([
       {
@@ -198,7 +200,8 @@ function updateTrayMenu() {
           createDisplayModeItem("total", "总余额"),
           createDisplayModeItem("primary", "重点关注"),
           createDisplayModeItem("usage24h", "近24h消耗"),
-          ...getTrayProviderItems()
+          ...getTrayProviderItems(),
+          ...getTrayQuotaItems()
         ]
       },
       {
@@ -283,7 +286,8 @@ async function fetchBalancesAndUpdateTray({ notifyRenderer = false } = {}) {
       titles: {
         total: ""
       },
-      providerLabels: {}
+      providerLabels: {},
+      quotaLabels: {}
     };
     updateTrayMenu();
     if (notifyRenderer) {
@@ -297,10 +301,12 @@ async function fetchBalancesAndUpdateTray({ notifyRenderer = false } = {}) {
 
 async function fetchBalances() {
   loadEnv();
-  const [providerModule, historyModule, usageEventModule] = await Promise.all([
+  const [providerModule, historyModule, usageEventModule, quotaModule, quotaRefreshModule] = await Promise.all([
     import(pathToFileURL(path.join(root, "server/providers/index.mjs")).href),
     import(pathToFileURL(path.join(root, "server/history.mjs")).href),
-    import(pathToFileURL(path.join(root, "server/usage-events.mjs")).href)
+    import(pathToFileURL(path.join(root, "server/usage-events.mjs")).href),
+    import(pathToFileURL(path.join(root, "server/quota.mjs")).href),
+    import(pathToFileURL(path.join(root, "server/quota-refresh.mjs")).href)
   ]);
   historyModule.initHistoryStore(root);
   usageEventModule.initUsageEventStore(root);
@@ -313,12 +319,64 @@ async function fetchBalances() {
     recentUsage: usageEventModule.listRecentUsageEvents({ limit: 8 }),
     usageSource: "local"
   };
-  const remoteUsageData = await fetchRemoteUsageData();
+  const [remoteUsageData, quotaData] = await Promise.all([
+    fetchRemoteUsageData(),
+    fetchQuotaData({ quotaModule, quotaRefreshModule })
+  ]);
 
   return {
     ...balances,
-    ...(remoteUsageData || localUsageData)
+    ...(remoteUsageData || localUsageData),
+    quota: quotaData
   };
+}
+
+async function fetchQuotaData({ quotaModule, quotaRefreshModule }) {
+  const localQuotaData = await fetchLocalQuotaData({ quotaModule, quotaRefreshModule });
+  if (localQuotaData?.services?.length) return localQuotaData;
+  return fetchRemoteQuotaData();
+}
+
+async function fetchLocalQuotaData({ quotaModule, quotaRefreshModule }) {
+  try {
+    quotaModule.initQuotaStore(root);
+    try {
+      await quotaRefreshModule.refreshQuotaSnapshots({
+        force: true,
+        serviceId: getPetQuotaRefreshServiceId()
+      });
+    } catch {
+      // Keep showing the latest stored snapshot if live refresh is unavailable.
+    }
+    return quotaModule.buildQuotaSummary();
+  } catch {
+    return null;
+  }
+}
+
+async function fetchRemoteQuotaData() {
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl || typeof fetch !== "function") return null;
+
+  const serviceId = getPetQuotaRefreshServiceId();
+  try {
+    return await fetchJson(`${apiBaseUrl}/api/quota/refresh`, {
+      method: "POST",
+      headers: buildRemoteQuotaHeaders(),
+      body: JSON.stringify({
+        force: true,
+        serviceId
+      })
+    });
+  } catch {
+    try {
+      return await fetchJson(`${apiBaseUrl}/api/quota/summary`, {
+        headers: buildRemoteQuotaHeaders()
+      });
+    } catch {
+      return null;
+    }
+  }
 }
 
 async function fetchRemoteUsageData() {
@@ -343,14 +401,16 @@ async function fetchRemoteUsageData() {
   }
 }
 
-async function fetchJson(url) {
+async function fetchJson(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
 
   try {
     const response = await fetch(url, {
+      method: options.method || "GET",
       signal: controller.signal,
-      headers: buildRemoteApiHeaders()
+      headers: options.headers || buildRemoteApiHeaders(),
+      body: options.body
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
@@ -365,6 +425,24 @@ function buildRemoteApiHeaders() {
     headers["x-mobile-token"] = process.env.MOBILE_API_TOKEN;
   }
   return headers;
+}
+
+function buildRemoteQuotaHeaders() {
+  const headers = {
+    "content-type": "application/json"
+  };
+  const token = process.env.QUOTA_READ_TOKEN || process.env.MOBILE_API_TOKEN;
+  if (token) headers["x-quota-token"] = token;
+  return headers;
+}
+
+function getPetQuotaRefreshServiceId() {
+  const serviceId = String(
+    process.env.PET_QUOTA_REFRESH_SERVICE_ID ||
+      process.env.MAC_QUOTA_REFRESH_SERVICE_ID ||
+      "claude"
+  ).trim();
+  return serviceId === "all" ? "" : serviceId;
 }
 
 function getDashboardUrl({ usage = false } = {}) {
@@ -442,6 +520,7 @@ function buildTraySummary(data) {
     total: formatCurrency(data.totalCny || 0, "CNY")
   };
   const providerLabels = {};
+  const quotaLabels = {};
   const primary = providers.find((provider) => provider.id === data.primaryProvider);
   if (primary) {
     titles.primary = `${primary.shortName} ${
@@ -457,14 +536,60 @@ function buildTraySummary(data) {
       Number.isFinite(provider.amount) ? formatCurrency(provider.amount, provider.currency) : "--"
     }`;
   }
+  for (const entry of collectQuotaTrayEntries(data.quota)) {
+    titles[entry.mode] = entry.title;
+    quotaLabels[entry.mode] = entry.label;
+  }
+
+  const quotaDetail = collectQuotaTrayEntries(data.quota)
+    .map((entry) => entry.detail)
+    .filter(Boolean)
+    .join(" · ");
+  const balanceDetail = warnings.length ? `${warnings.length} 项偏低` : `${okCount}/${providers.length} 正常`;
 
   return {
     title: titles.total,
-    detail: warnings.length ? `${warnings.length} 项偏低` : `${okCount}/${providers.length} 正常`,
+    detail: [balanceDetail, quotaDetail].filter(Boolean).join(" · "),
     primaryProvider: data.primaryProvider || "aliyun",
     titles,
-    providerLabels
+    providerLabels,
+    quotaLabels
   };
+}
+
+function collectQuotaTrayEntries(quota) {
+  return (quota?.services || [])
+    .map((service) => {
+      const window = chooseQuotaWindow(service);
+      if (!window) return null;
+
+      const serviceName = service.serviceName || service.serviceId || "Quota";
+      const windowValue = formatQuotaWindowValue(window);
+      const label = serviceName;
+      const title = `${serviceName} ${windowValue}`;
+      const detailLabel = `${serviceName} ${window.label || "额度"}`;
+
+      return {
+        mode: `quota:${service.serviceId}`,
+        label,
+        title,
+        detail: [detailLabel, window.remainingText || windowValue, window.limitText].filter(Boolean).join(" / ")
+      };
+    })
+    .filter(Boolean);
+}
+
+function chooseQuotaWindow(service) {
+  const windows = service?.windows || [];
+  if (!windows.length) return null;
+  return windows.find((window) => window.id === "monthly") || windows.find((window) => window.id === "5h") || windows[0];
+}
+
+function formatQuotaWindowValue(window) {
+  const remainingText = String(window?.remainingText || "").trim();
+  if (remainingText) return remainingText.replace(/\s*(剩余|可用)\s*$/u, "");
+  if (Number.isFinite(window?.remainingPercent)) return `${Math.round(window.remainingPercent)}%`;
+  return "--";
 }
 
 function sumHourlyUsage(usage) {
@@ -475,6 +600,15 @@ function getTrayProviderItems() {
   return Object.entries(lastTraySummary.providerLabels || {}).map(([mode, label]) =>
     createDisplayModeItem(mode, label)
   );
+}
+
+function getTrayQuotaItems() {
+  const entries = Object.entries(lastTraySummary.quotaLabels || {});
+  if (!entries.length) return [];
+  return [
+    { type: "separator" },
+    ...entries.map(([mode, label]) => createDisplayModeItem(mode, label))
+  ];
 }
 
 function getPrimaryProviderItems() {

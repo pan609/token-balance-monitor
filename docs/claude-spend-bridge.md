@@ -119,6 +119,16 @@ For a self-hosted setup, run the bridge on the computer that has the Claude cook
 
 If you need fresher Watch / iPhone data, shorten the schedule, but avoid hammering the unofficial claude.ai endpoint.
 
+## macOS menu bar
+
+The AI Meter desktop app also reads quota snapshots for the macOS menu bar. By default it refreshes Claude spend when the pet refreshes:
+
+```bash
+PET_QUOTA_REFRESH_SERVICE_ID=claude
+```
+
+Open the menu bar item and choose `状态栏显示` -> `Claude` to show the remaining Claude spend directly in the macOS status bar. Set `PET_QUOTA_REFRESH_SERVICE_ID=all` if you want the desktop app to refresh every supported quota service.
+
 ## Caveats
 
 - This uses an unofficial claude.ai web endpoint. Anthropic may change the response shape or bot checks.

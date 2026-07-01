@@ -137,6 +137,9 @@ function renderBalances(data) {
     titles: buildTrayTitles(data, providers),
     providerLabels: Object.fromEntries(
       providers.map((provider) => [provider.id, provider.shortName])
+    ),
+    quotaLabels: Object.fromEntries(
+      collectQuotaTrayEntries(data.quota).map((entry) => [entry.mode, entry.label])
     )
   });
 
@@ -203,8 +206,40 @@ function buildTrayTitles(data, providers) {
       : "--";
     titles[provider.id] = `${provider.shortName} ${amount}`;
   }
+  for (const entry of collectQuotaTrayEntries(data.quota)) {
+    titles[entry.mode] = entry.title;
+  }
 
   return titles;
+}
+
+function collectQuotaTrayEntries(quota) {
+  return (quota?.services || [])
+    .map((service) => {
+      const window = chooseQuotaWindow(service);
+      if (!window) return null;
+
+      const serviceName = service.serviceName || service.serviceId || "Quota";
+      return {
+        mode: `quota:${service.serviceId}`,
+        label: serviceName,
+        title: `${serviceName} ${formatQuotaWindowValue(window)}`
+      };
+    })
+    .filter(Boolean);
+}
+
+function chooseQuotaWindow(service) {
+  const windows = service?.windows || [];
+  if (!windows.length) return null;
+  return windows.find((window) => window.id === "monthly") || windows.find((window) => window.id === "5h") || windows[0];
+}
+
+function formatQuotaWindowValue(window) {
+  const remainingText = String(window?.remainingText || "").trim();
+  if (remainingText) return remainingText.replace(/\s*(剩余|可用)\s*$/u, "");
+  if (Number.isFinite(window?.remainingPercent)) return `${Math.round(window.remainingPercent)}%`;
+  return "--";
 }
 
 function sumHourlyUsage(usage) {
