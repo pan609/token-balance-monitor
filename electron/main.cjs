@@ -30,7 +30,8 @@ let lastTraySummary = {
     total: ""
   },
   providerLabels: {},
-  quotaLabels: {}
+  quotaLabels: {},
+  quotaDetailLines: []
 };
 const expandedSize = { width: 380, height: 574 };
 const expandedUsageSize = { width: 380, height: 642 };
@@ -113,7 +114,8 @@ ipcMain.on("balances:summary", (_event, summary) => {
       ...(summary?.titles || {})
     },
     providerLabels: summary?.providerLabels || lastTraySummary.providerLabels || {},
-    quotaLabels: summary?.quotaLabels || lastTraySummary.quotaLabels || {}
+    quotaLabels: summary?.quotaLabels || lastTraySummary.quotaLabels || {},
+    quotaDetailLines: summary?.quotaDetailLines || lastTraySummary.quotaDetailLines || []
   };
   updateTrayMenu();
 });
@@ -162,7 +164,6 @@ function createWindow() {
 function createTray() {
   tray = new Tray(createTrayIcon());
   tray.setToolTip("AI Meter");
-  tray.on("click", () => toggleWindow());
   updateTrayMenu();
 }
 
@@ -185,14 +186,16 @@ function createTrayIcon() {
 function updateTrayMenu() {
   if (!tray) return;
 
+  const quotaDetailLines = lastTraySummary.quotaDetailLines || [];
   tray.setTitle(getTrayTitle());
-  tray.setToolTip(`AI Meter\n${lastTraySummary.detail}`);
+  tray.setToolTip([`AI Meter`, lastTraySummary.detail, ...quotaDetailLines].join("\n"));
   tray.setContextMenu(
     Menu.buildFromTemplate([
       {
         label: lastTraySummary.detail,
         enabled: false
       },
+      ...quotaDetailLines.map((line) => ({ label: line, enabled: false })),
       { type: "separator" },
       {
         label: "状态栏显示",
