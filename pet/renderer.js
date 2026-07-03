@@ -24,6 +24,10 @@ const elements = {
   usageMeta: document.getElementById("usageMeta"),
   usageTokens: document.getElementById("usageTokens"),
   usageRecent: document.getElementById("usageRecent"),
+  quotaSessionRemain: document.getElementById("quotaSessionRemain"),
+  quotaSessionReset: document.getElementById("quotaSessionReset"),
+  quotaWeeklyRemain: document.getElementById("quotaWeeklyRemain"),
+  quotaWeeklyReset: document.getElementById("quotaWeeklyReset"),
   providerList: document.getElementById("providerList"),
   refreshButton: document.getElementById("refreshButton"),
   collapseButton: document.getElementById("collapseButton"),
@@ -126,6 +130,7 @@ function renderBalances(data) {
   elements.usageTokens.textContent = tokenTotal ? formatInteger(tokenTotal) : "--";
   elements.usageRecent.textContent = recentCount ? `最近 ${recentCount} 条请求` : "等待上报";
   renderFocusOptions(providers, data.primaryProvider);
+  renderQuotaWindows(data.quota);
   elements.moodText.textContent = warnings.length
     ? `${warnings.length} 项偏低`
     : `${okCount}/${providers.length} 正常`;
@@ -140,10 +145,65 @@ function renderBalances(data) {
     ),
     quotaLabels: Object.fromEntries(
       collectQuotaTrayEntries(data.quota).map((entry) => [entry.mode, entry.label])
-    )
+    ),
+    quotaDetailLines: buildQuotaDetailLines(data.quota)
   });
 
   elements.providerList.innerHTML = providers.map(renderProvider).join("");
+}
+
+function buildQuotaDetailLines(quota) {
+  const service =
+    (quota?.services || []).find((item) => item.serviceId === "claude") || quota?.primaryService || null;
+  if (!service) return [];
+
+  const sessionWindow = service.windows?.find((window) => window.id === "5h");
+  const weeklyWindow = service.windows?.find((window) => window.id === "weekly");
+
+  return [
+    quotaDetailLine("会话 (5h)", sessionWindow),
+    quotaDetailLine("每周", weeklyWindow)
+  ].filter(Boolean);
+}
+
+function quotaDetailLine(label, window) {
+  if (!window) return null;
+  const remaining = Number.isFinite(window.remainingPercent) ? `剩余 ${Math.round(window.remainingPercent)}%` : "--";
+  const reset = window.resetsAt ? `${formatResetTime(window.resetsAt)} 重置` : "重置时间未知";
+  return `${label} ${remaining} · ${reset}`;
+}
+
+function renderQuotaWindows(quota) {
+  const service =
+    (quota?.services || []).find((item) => item.serviceId === "claude") || quota?.primaryService || null;
+  const sessionWindow = service?.windows?.find((window) => window.id === "5h");
+  const weeklyWindow = service?.windows?.find((window) => window.id === "weekly");
+
+  applyQuotaWindow(elements.quotaSessionRemain, elements.quotaSessionReset, sessionWindow);
+  applyQuotaWindow(elements.quotaWeeklyRemain, elements.quotaWeeklyReset, weeklyWindow);
+}
+
+function applyQuotaWindow(remainEl, resetEl, window) {
+  if (!window) {
+    remainEl.textContent = "--";
+    resetEl.textContent = "等待同步";
+    return;
+  }
+
+  remainEl.textContent = Number.isFinite(window.remainingPercent)
+    ? `剩余 ${Math.round(window.remainingPercent)}%`
+    : "--";
+  resetEl.textContent = window.resetsAt ? `${formatResetTime(window.resetsAt)} 重置` : "重置时间未知";
+}
+
+function formatResetTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "--";
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  return sameDay
+    ? date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })
+    : date.toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
 function renderProvider(provider) {
@@ -257,6 +317,7 @@ function renderError(error) {
   elements.focusName.textContent = "读取失败";
   elements.focusAmount.textContent = "--";
   elements.shell.dataset.mood = "danger";
+  renderQuotaWindows(null);
   window.balancePet.setSummary({
     title: "",
     detail: "同步失败"

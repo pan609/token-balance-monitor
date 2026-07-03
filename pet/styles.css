@@ -273,6 +273,42 @@ button {
   white-space: nowrap;
 }
 
+.quota-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 10px 14px 0;
+}
+
+.quota-card > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.quota-card span,
+.quota-card small {
+  display: block;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quota-card strong {
+  display: block;
+  overflow: hidden;
+  margin: 5px 0 4px;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .provider-list {
   display: grid;
   gap: 8px;
@@ -450,6 +486,7 @@ button {
 .pet-shell.is-collapsed .balance-hero,
 .pet-shell.is-collapsed .focus-card,
 .pet-shell.is-collapsed .usage-card,
+.pet-shell.is-collapsed .quota-card,
 .pet-shell.is-collapsed .provider-list,
 .pet-shell.is-collapsed .pet-foot {
   display: none;
