@@ -234,7 +234,10 @@
 
       .watch-stage {
         position: relative;
-        min-height: 470px;
+        min-height: 500px;
+        display: grid;
+        place-items: center;
+        padding: 28px;
         border: 1px solid var(--line);
         border-radius: 12px;
         background:
@@ -409,14 +412,14 @@
       }
 
       .quota-watch-product {
-        position: absolute;
+        position: relative;
         z-index: 3;
-        right: -2%;
-        top: 8px;
-        width: min(86%, 560px);
+        right: auto;
+        top: auto;
+        width: min(74%, 430px);
         height: auto;
-        transform: rotateY(-7deg) rotateX(2deg) rotateZ(-2deg);
-        transform-origin: 52% 54%;
+        transform: none;
+        transform-origin: center;
         animation: watchFloat 6.6s ease-in-out infinite;
       }
 
@@ -437,16 +440,18 @@
       .watch-face-card {
         position: absolute;
         z-index: 2;
-        left: 8%;
-        top: 86px;
-        width: 230px;
+        left: 34px;
+        bottom: 34px;
+        top: auto;
+        width: min(26%, 156px);
         padding: 0;
         border-radius: 0;
         background: transparent;
         box-shadow: none;
-        transform: rotateY(13deg) rotateX(3deg) rotateZ(-2deg);
+        transform: rotateZ(-3deg);
         animation: watchFloat 6.6s ease-in-out 0.7s infinite;
-        display: none;
+        display: block;
+        opacity: 0.95;
       }
 
       .watch-face-card img {
@@ -771,8 +776,9 @@
         }
 
         .quota-watch-product {
-          right: 14%;
-          width: min(64%, 370px);
+          right: auto;
+          width: min(70%, 390px);
+          transform: none;
         }
 
         .boundary-grid,
@@ -829,8 +835,8 @@
 
         .watch-stage {
           min-height: 420px;
-          padding: 24px 18px 34px;
-          overflow: visible;
+          padding: 22px 18px 30px;
+          overflow: hidden;
         }
 
         .watch-stage::before {
@@ -844,20 +850,21 @@
         }
 
         .quota-watch-product {
-          left: -4px;
+          left: auto;
           right: auto;
-          top: 20px;
-          width: 350px;
-          transform: scale(0.82) rotateY(-15deg) rotateX(4deg) rotateZ(-2deg);
-          transform-origin: left top;
+          top: auto;
+          width: min(84%, 330px);
+          transform: none;
+          transform-origin: center;
         }
 
         .watch-face-card {
-          left: auto;
-          right: 18px;
-          top: 250px;
-          width: 132px;
-          transform: rotateY(8deg) rotateX(2deg) rotateZ(2deg);
+          left: 18px;
+          right: auto;
+          bottom: 20px;
+          top: auto;
+          width: 108px;
+          transform: rotateZ(-3deg);
         }
 
         .watch-frame {
@@ -1004,10 +1011,10 @@
 
           <figure class="watch-stage" aria-label="AI Quota 产品预览">
             <div class="quota-watch-product">
-              <img src="/projects/assets/device-watch-quota-mockup.png" width="760" height="960" decoding="async" alt="Apple Watch AI Quota App 设备效果图。" />
+              <img src="/projects/token-balance-monitor/assets/device-watch-quota-mockup.png" width="760" height="960" decoding="async" alt="Apple Watch AI Quota App 设备效果图。" />
             </div>
             <div class="watch-face-card">
-              <img src="/projects/assets/device-watch-face-mockup.png" width="760" height="960" decoding="async" fetchpriority="high" alt="Apple Watch 表盘上的 Codex 额度入口设备效果图。" />
+              <img src="/projects/token-balance-monitor/assets/device-watch-face-mockup.png" width="760" height="960" decoding="async" fetchpriority="high" alt="Apple Watch 表盘上的 Codex 额度入口设备效果图。" />
             </div>
             <span class="quota-signal" aria-hidden="true"></span>
             <span class="quota-pulse" aria-hidden="true"></span>
@@ -1050,14 +1057,14 @@
           <div class="surface-grid reveal">
             <article class="surface-card">
               <div class="quota-watch-device">
-                <img src="/projects/assets/device-watch-quota-mockup.png" width="760" height="960" decoding="async" loading="lazy" alt="Apple Watch AI Quota App 设备效果图。" />
+                <img src="/projects/token-balance-monitor/assets/device-watch-quota-mockup.png" width="760" height="960" decoding="async" loading="lazy" alt="Apple Watch AI Quota App 设备效果图。" />
               </div>
               <h3>Apple Watch</h3>
               <p>前台刷新并查看当前窗口剩余比例、重置时间与同步状态。</p>
             </article>
             <article class="surface-card">
               <div class="quota-watch-device face">
-                <img src="/projects/assets/device-watch-face-mockup.png" width="760" height="960" decoding="async" loading="lazy" alt="Apple Watch 表盘额度组件设备效果图。" />
+                <img src="/projects/token-balance-monitor/assets/device-watch-face-mockup.png" width="760" height="960" decoding="async" loading="lazy" alt="Apple Watch 表盘额度组件设备效果图。" />
               </div>
               <h3>Watch Face</h3>
               <p>表盘保留关键额度信号，接近限制或数据过期时明确显示。</p>

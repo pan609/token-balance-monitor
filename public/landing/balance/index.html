@@ -238,7 +238,8 @@
 
       .product-visual {
         position: relative;
-        padding: 26px;
+        min-height: 460px;
+        padding: 24px;
         border: 1px solid var(--line);
         border-radius: 12px;
         background:
@@ -265,9 +266,9 @@
       .product-visual::after {
         content: "";
         position: absolute;
-        left: 10%;
-        right: 10%;
-        bottom: 24px;
+        left: 14%;
+        right: 14%;
+        bottom: 30px;
         height: 34px;
         border-radius: 999px;
         background: rgba(15, 23, 42, 0.14);
@@ -279,11 +280,12 @@
         position: relative;
         z-index: 1;
         display: block;
-        width: 100%;
+        width: min(100%, 760px);
         height: auto;
+        margin: 18px auto 76px;
         border-radius: 8px;
         border: 1px solid rgba(8, 18, 37, 0.08);
-        transform: rotateX(7deg) rotateY(-8deg) rotateZ(-1deg);
+        transform: none;
         transform-origin: center;
         box-shadow: 0 24px 54px rgba(15, 23, 42, 0.16);
         animation: balanceDashboardFloat 7s ease-in-out infinite;
@@ -292,25 +294,25 @@
       .phone-shot {
         position: absolute;
         z-index: 3;
-        right: -8px;
-        bottom: -16px;
-        width: min(33%, 220px);
+        right: 20px;
+        bottom: 18px;
+        width: min(24%, 156px);
         height: auto;
         border-radius: 0;
         box-shadow: none;
-        transform: rotateZ(2.6deg);
+        transform: rotateZ(1.5deg);
         animation: balancePhoneFloat 6.2s ease-in-out 0.35s infinite;
       }
 
       .telemetry-rail {
         position: absolute;
         z-index: 2;
-        left: 16%;
-        right: 14%;
-        bottom: 20%;
+        left: 17%;
+        right: 22%;
+        bottom: 18%;
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.7), transparent);
-        transform: rotate(-4deg);
+        transform: none;
       }
 
       .telemetry-rail::before,
@@ -1880,9 +1882,9 @@
             </div>
           </div>
           <figure class="product-visual" aria-label="AI Balance 产品预览">
-            <img class="dashboard-shot" src="/projects/assets/web-usage-dashboard.jpg" width="1800" height="882" decoding="async" fetchpriority="high" alt="AI Balance Web Dashboard 请求用量看板。" />
+            <img class="dashboard-shot" src="/projects/token-balance-monitor/assets/web-usage-dashboard.jpg" width="1800" height="867" decoding="async" fetchpriority="high" alt="AI Balance Web Dashboard 请求用量看板。" />
             <span class="telemetry-rail" aria-hidden="true"></span>
-            <img class="phone-shot" src="/projects/assets/device-iphone-balance-mockup.png" width="900" height="1200" loading="lazy" decoding="async" alt="AI Balance iPhone App 设备效果图。" />
+            <img class="phone-shot" src="/projects/token-balance-monitor/assets/device-iphone-balance-mockup.png" width="900" height="1200" loading="lazy" decoding="async" alt="AI Balance iPhone App 设备效果图。" />
             <span class="status-tile" aria-hidden="true"><strong>24h</strong>usage 事件流</span>
             <span class="scan-line" aria-hidden="true"></span>
           </figure>
@@ -1934,8 +1936,8 @@
               <div class="demo-frame web-demo" aria-label="Web Dashboard 演示">
                 <div class="web-player">
                   <div class="web-player-chrome" aria-hidden="true"><span></span></div>
-                  <video autoplay muted loop playsinline preload="auto" poster="/projects/assets/surface-web-v3.webp" aria-label="AI Balance Web Dashboard 请求明细看板演示。">
-                    <source src="/projects/assets/web-dashboard-demo.webm" type="video/webm" />
+                  <video autoplay muted loop playsinline preload="auto" poster="/projects/token-balance-monitor/assets/surface-web-v3.webp" aria-label="AI Balance Web Dashboard 请求明细看板演示。">
+                    <source src="/projects/token-balance-monitor/assets/web-dashboard-demo.webm" type="video/webm" />
                   </video>
                 </div>
                 <span class="demo-scrubber" aria-hidden="true"></span>
@@ -1968,7 +1970,7 @@
                     <span><em>打开 Web 看板</em><b>↗</b></span>
                   </div>
                   <div class="mac-widget-window">
-                    <img src="/projects/assets/macos-pet.png" width="760" height="1148" decoding="async" loading="lazy" alt="macOS 桌面余额助手界面。" />
+                    <img src="/projects/token-balance-monitor/assets/macos-pet.png" width="760" height="1148" decoding="async" loading="lazy" alt="macOS 桌面余额助手界面。" />
                   </div>
                   <div class="mac-context-card" aria-hidden="true">
                     <h4>状态栏是主入口</h4>
@@ -1990,7 +1992,7 @@
             <article class="surface-panel" id="panel-iphone" role="tabpanel" aria-labelledby="tab-iphone" data-surface-panel="iphone" aria-hidden="true">
               <div class="demo-frame iphone-demo" aria-label="iPhone App 和 Widget 演示">
                 <div class="iphone-device">
-                  <img src="/projects/assets/device-iphone-balance-mockup.png" width="900" height="1200" decoding="async" loading="lazy" alt="AI Balance iPhone App 设备效果图。" />
+                  <img src="/projects/token-balance-monitor/assets/device-iphone-balance-mockup.png" width="900" height="1200" decoding="async" loading="lazy" alt="AI Balance iPhone App 设备效果图。" />
                 </div>
                 <div class="widget-stage" aria-hidden="true">
                   <div class="home-widget large-widget">

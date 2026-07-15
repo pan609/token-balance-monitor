@@ -1,4 +1,4 @@
-/projects/assets/*
+/projects/token-balance-monitor/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
 /projects/token-balance-monitor/assets/*
