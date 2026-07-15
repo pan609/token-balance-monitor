@@ -132,7 +132,7 @@ which node
 ```bash
 sudo tee /etc/systemd/system/token-balance-monitor.service >/dev/null <<'EOF'
 [Unit]
-Description=Token Balance Monitor
+Description=AI Meter
 After=network-online.target
 Wants=network-online.target
 
@@ -234,7 +234,45 @@ MOBILE_API_TOKEN=和服务器一致的长随机字符串
 https://balance.example.com/api/mobile/summary?token=你的MOBILE_API_TOKEN
 ```
 
-## 6. 更新代码
+## 6. 连接 AI Quota
+
+AI Quota 和 AI Balance 共用同一个服务端，但数据来源不同。服务器可以保存阿里云、火山、DeepSeek 这类 provider key；Codex / Claude 订阅额度通常来自本机 bridge 上报。
+
+服务器 `.env` 增加：
+
+```bash
+QUOTA_READ_TOKEN=replace-with-read-token
+QUOTA_INGEST_TOKEN=replace-with-ingest-token
+QUOTA_API_URL=https://balance.example.com/api/quota/summary
+QUOTA_REFRESH_URL=https://balance.example.com/api/quota/refresh
+QUOTA_INGEST_URL=https://balance.example.com/api/quota/snapshots
+PRIMARY_QUOTA_SERVICE_ID=claude
+QUOTA_STALE_SECONDS=120
+```
+
+在能读取本机登录态的电脑上运行 bridge，把快照上报到你的服务器：
+
+```bash
+# Codex rate window
+QUOTA_INGEST_URL=https://balance.example.com/api/quota/snapshots \
+QUOTA_INGEST_TOKEN=replace-with-ingest-token \
+node scripts/codex-quota-bridge.mjs
+
+# Claude Code status line 见 docs/claude-code-quota.md
+# Claude Team spend 见 docs/claude-spend-bridge.md
+```
+
+电脑端查看订阅额度用独立菜单栏：
+
+```bash
+PRIMARY_QUOTA_SERVICE_ID=claude
+QUOTA_MENU_SERVICES=claude,codex
+./quota.command
+```
+
+Apple Watch / iPhone Quota companion 使用 `QUOTA_API_URL`、`QUOTA_REFRESH_URL` 和 `QUOTA_READ_TOKEN` 生成配置。
+
+## 7. 更新代码
 
 服务器上更新到最新版本：
 
@@ -246,7 +284,7 @@ npm run build
 sudo systemctl restart token-balance-monitor
 ```
 
-## 7. 安全建议
+## 8. 安全建议
 
 - 不要把 `.env`、服务器密码、移动端 token、云厂商 AccessKey 提交到仓库。
 - 给阿里云、火山引擎等云厂商 key 使用最小权限。

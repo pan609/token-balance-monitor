@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Meter | 自托管 AI 余额与用量监控</title>
+    <meta
+      name="description"
+      content="AI Meter 是开源自托管的 AI 用量监控入口，包含 AI Balance 模型平台余额与 token 用量监控，以及 AI Quota Codex / Claude Code 订阅额度窗口。"
+    />
+    <link rel="canonical" href="https://ai.meter.panyue.xyz/projects/token-balance-monitor/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://ai.meter.panyue.xyz/projects/token-balance-monitor/" />
+    <link rel="alternate" hreflang="x-default" href="https://ai.meter.panyue.xyz/projects/token-balance-monitor/" />
+    <link rel="sitemap" type="application/xml" href="https://ai.meter.panyue.xyz/sitemap.xml" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AI Meter" />
+    <meta
+      property="og:description"
+      content="开源自托管的 AI 余额、token 用量与订阅额度监控。"
+    />
+    <meta property="og:image" content="https://ai.meter.panyue.xyz/projects/token-balance-monitor/assets/ai-meter-og.png" />
+    <meta property="og:url" content="https://ai.meter.panyue.xyz/projects/token-balance-monitor/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Meter" />
+    <meta name="twitter:description" content="AI Balance 与 AI Quota 的统一入口。" />
+    <meta name="twitter:image" content="https://ai.meter.panyue.xyz/projects/token-balance-monitor/assets/ai-meter-og.png" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #ffffff;
+        --text: #081225;
+        --muted: #526174;
+        --subtle: #7d8999;
+        --line: #dde5ef;
+        --line-strong: #c9d3df;
+        --blue: #2563eb;
+        --teal: #0f9f98;
+        --green: #15a879;
+        --soft-blue: #f2f7ff;
+        --soft-cyan: #f2fbff;
+        --dark: #071226;
+        --shadow-sm: 0 12px 28px rgba(15, 23, 42, 0.08);
+        --shadow: 0 26px 72px rgba(15, 23, 42, 0.13);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 88% 44%, rgba(37, 99, 235, 0.08), transparent 30%),
+          linear-gradient(180deg, #fff 0%, #fff 58%, #f6faff 100%);
+        font-size: 16px;
+        line-height: 1.6;
+        letter-spacing: 0;
+        overflow-x: hidden;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(255, 255, 255, 0.94);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(18px);
+      }
+
+      .page-shell,
+      .nav-wrap {
+        width: min(1432px, calc(100% - 64px));
+        margin: 0 auto;
+      }
+
+      .nav-wrap {
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 20px;
+        font-weight: 850;
+      }
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: #071226;
+        color: #fff;
+        font-size: 22px;
+        font-weight: 900;
+        box-shadow: 0 10px 24px rgba(7, 18, 38, 0.18);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 36px;
+        color: #172033;
+        font-size: 15px;
+        font-weight: 760;
+      }
+
+      .nav a {
+        white-space: nowrap;
+      }
+
+      .nav-cta {
+        min-width: 84px;
+        padding: 12px 18px;
+        border-radius: 8px;
+        background: #071226;
+        color: #fff;
+        text-align: center;
+        box-shadow: 0 14px 30px rgba(7, 18, 38, 0.18);
+      }
+
+      .balance-hero {
+        min-height: 542px;
+        padding: 50px 0 26px;
+      }
+
+      .balance-grid {
+        display: grid;
+        grid-template-columns: minmax(500px, 0.7fr) minmax(820px, 1.3fr);
+        gap: 30px;
+        align-items: center;
+      }
+
+      .section-label {
+        color: var(--blue);
+        font-weight: 850;
+        font-size: 15px;
+      }
+
+      h1 {
+        margin-top: 20px;
+        font-size: clamp(36px, 3.05vw, 46px);
+        line-height: 1.16;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      .hero-copy {
+        max-width: 540px;
+      }
+
+      .hero-copy > p {
+        margin-top: 22px;
+        color: #334256;
+        font-size: 17px;
+        line-height: 1.9;
+      }
+
+      .capability-grid {
+        margin-top: 34px;
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 22px;
+      }
+
+      .capability {
+        min-width: 0;
+      }
+
+      .capability svg {
+        width: 28px;
+        height: 28px;
+        color: var(--teal);
+        stroke-width: 1.9;
+      }
+
+      .capability strong {
+        display: block;
+        margin-top: 14px;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+
+      .capability span {
+        display: block;
+        margin-top: 7px;
+        color: #526174;
+        font-size: 12px;
+        line-height: 1.55;
+        overflow-wrap: anywhere;
+      }
+
+      .hero-actions,
+      .quota-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 34px;
+      }
+
+      .button {
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 0 20px;
+        border-radius: 8px;
+        border: 1px solid var(--line-strong);
+        background: #fff;
+        color: #071226;
+        font-weight: 820;
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+        transition:
+          transform 180ms ease,
+          border-color 180ms ease,
+          box-shadow 180ms ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+        border-color: #aebacd;
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.11);
+      }
+
+      .button.dark,
+      .button.blue {
+        border-color: #071226;
+        background: #071226;
+        color: #fff;
+      }
+
+      .button.blue {
+        border-color: var(--blue);
+        background: var(--blue);
+      }
+
+      .button svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .balance-stage {
+        position: relative;
+        min-height: 432px;
+        perspective: 1200px;
+        isolation: isolate;
+      }
+
+      .balance-stage::after,
+      .quota-visual::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        left: 12%;
+        right: 2%;
+        bottom: 6px;
+        height: 58px;
+        border-radius: 999px;
+        background: rgba(37, 99, 235, 0.12);
+        filter: blur(22px);
+      }
+
+      .dashboard-frame {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: min(84%, 760px);
+        overflow: hidden;
+        border: 1px solid var(--line-strong);
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: var(--shadow);
+        transform-origin: 54% 70%;
+        animation: dashboardFloat 8s ease-in-out infinite;
+      }
+
+      .browser-bar {
+        height: 34px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 0 14px;
+        border-bottom: 1px solid var(--line);
+        color: #657286;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .browser-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #ff5f57;
+        box-shadow:
+          16px 0 #ffbd2e,
+          32px 0 #28c840;
+      }
+
+      .browser-title {
+        margin-left: 42px;
+      }
+
+      .dashboard-frame img {
+        width: 100%;
+        aspect-ratio: 16 / 9.2;
+        object-fit: cover;
+        object-position: top left;
+      }
+
+      .phone-device {
+        position: absolute;
+        z-index: 3;
+        right: 46px;
+        top: 76px;
+        width: min(24%, 198px);
+        transform: rotateZ(7deg) rotateY(-11deg);
+        transform-origin: center;
+        animation: phoneTurntable 9s ease-in-out infinite;
+      }
+
+      .phone-device::before {
+        content: none;
+      }
+
+      .phone-device img {
+        width: 100%;
+        border-radius: 0;
+      }
+
+      .orbit {
+        position: absolute;
+        z-index: -1;
+        right: -40px;
+        bottom: 4px;
+        width: 320px;
+        height: 70px;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 50%;
+        transform: rotate(-7deg);
+      }
+
+      .orbit::after {
+        content: "";
+        position: absolute;
+        right: 44px;
+        top: 18px;
+        width: 11px;
+        height: 11px;
+        border-radius: 999px;
+        background: var(--blue);
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.55);
+        animation: dotPulse 2.8s ease-in-out infinite;
+      }
+
+      .quota-band {
+        position: relative;
+        border-top: 1px solid var(--line);
+        background:
+          radial-gradient(circle at 11% 60%, rgba(37, 99, 235, 0.1), transparent 28%),
+          linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+        padding: 38px 0 58px;
+        overflow: hidden;
+      }
+
+      .quota-grid {
+        display: grid;
+        grid-template-columns: minmax(340px, 0.82fr) minmax(560px, 1.18fr);
+        gap: 58px;
+        align-items: center;
+      }
+
+      .quota-visual {
+        position: relative;
+        min-height: 360px;
+        perspective: 1200px;
+      }
+
+      .watch-product {
+        position: absolute;
+        left: -10px;
+        top: -34px;
+        width: min(100%, 470px);
+        height: auto;
+        transform: rotate(-5deg) rotateY(-7deg) rotateX(2deg);
+        transform-origin: 48% 55%;
+        animation: watchFloat 7.5s ease-in-out infinite;
+      }
+
+      .watch-product::before {
+        content: none;
+      }
+
+      .watch-product::after {
+        content: none;
+      }
+
+      .watch-mockup-img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .quota-copy {
+        max-width: 780px;
+      }
+
+      .quota-copy h2 {
+        margin-top: 16px;
+        font-size: clamp(30px, 3.6vw, 46px);
+        line-height: 1.15;
+        font-weight: 900;
+      }
+
+      .quota-copy > p {
+        margin-top: 20px;
+        max-width: 700px;
+        color: #334256;
+        font-size: 16px;
+        line-height: 1.82;
+      }
+
+      .quota-features {
+        margin-top: 28px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0;
+      }
+
+      .quota-feature {
+        min-height: 74px;
+        padding: 0 22px;
+        border-left: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .quota-feature:first-child {
+        border-left: 0;
+        padding-left: 0;
+      }
+
+      .quota-feature svg {
+        width: 28px;
+        height: 28px;
+        color: var(--blue);
+        stroke-width: 1.9;
+      }
+
+      .quota-feature strong {
+        display: block;
+        font-size: 14px;
+        line-height: 1.25;
+      }
+
+      .quota-feature span {
+        display: block;
+        margin-top: 4px;
+        color: #526174;
+        font-size: 12px;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+      }
+
+      .faq-band {
+        border-top: 1px solid var(--line);
+        background: #fff;
+        padding: 46px 0 58px;
+      }
+
+      .faq-band h2 {
+        margin-top: 16px;
+        font-size: clamp(26px, 2.6vw, 36px);
+        line-height: 1.18;
+        font-weight: 900;
+      }
+
+      .faq-list {
+        margin-top: 26px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        overflow: hidden;
+      }
+
+      .faq-item {
+        padding: 20px 24px;
+        border-top: 1px solid var(--line);
+      }
+
+      .faq-item:first-child {
+        border-top: 0;
+      }
+
+      .faq-item h3 {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.45;
+        font-weight: 820;
+      }
+
+      .faq-item p {
+        margin-top: 8px;
+        max-width: 920px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      footer {
+        padding: 26px 0;
+        color: var(--subtle);
+        border-top: 1px solid var(--line);
+        background: #fff;
+        font-size: 14px;
+      }
+
+      @keyframes dashboardFloat {
+        0%,
+        100% {
+          transform: translateY(0) rotateX(0deg);
+        }
+
+        50% {
+          transform: translateY(-8px) rotateX(1deg);
+        }
+      }
+
+      @keyframes phoneTurntable {
+        0%,
+        100% {
+          transform: rotateZ(7deg) rotateY(-13deg) translateY(0);
+        }
+
+        50% {
+          transform: rotateZ(4deg) rotateY(10deg) translateY(-10px);
+        }
+      }
+
+      @keyframes watchFloat {
+        0%,
+        100% {
+          transform: rotate(-9deg) rotateY(-17deg) rotateX(6deg) translateY(0);
+        }
+
+        50% {
+          transform: rotate(-7deg) rotateY(-8deg) rotateX(4deg) translateY(-9px);
+        }
+      }
+
+      @keyframes dotPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+
+        50% {
+          transform: scale(1.25);
+          opacity: 0.72;
+        }
+      }
+
+      @media (max-width: 1100px) {
+        .balance-grid,
+        .quota-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-copy,
+        .quota-copy {
+          max-width: 760px;
+        }
+
+        .balance-stage {
+          min-height: 460px;
+        }
+
+        .quota-visual {
+          order: 2;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .page-shell,
+        .nav-wrap {
+          width: calc(100% - 32px);
+        }
+
+        .site-header {
+          position: static;
+        }
+
+        .nav-wrap {
+          min-height: auto;
+          padding: 16px 0;
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .nav {
+          width: 100%;
+          gap: 18px;
+          overflow-x: auto;
+          padding-bottom: 4px;
+          font-size: 14px;
+        }
+
+        .balance-hero {
+          padding: 42px 0 30px;
+        }
+
+        h1 {
+          font-size: 34px;
+          line-height: 1.18;
+        }
+
+        .capability-grid,
+        .quota-features {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .quota-feature {
+          border-left: 0;
+          padding: 12px 0 0;
+        }
+
+        .balance-stage {
+          min-height: 360px;
+        }
+
+        .dashboard-frame {
+          width: 92%;
+        }
+
+        .phone-device {
+          width: 112px;
+          top: 122px;
+          right: 8px;
+          border-radius: 24px;
+        }
+
+        .phone-device img {
+          border-radius: 19px;
+        }
+
+        .orbit {
+          width: 220px;
+          right: -70px;
+        }
+
+        .quota-band {
+          padding-top: 34px;
+        }
+
+        .quota-grid {
+          gap: 28px;
+        }
+
+        .quota-visual {
+          min-height: 330px;
+        }
+
+        .watch-product {
+          left: 12px;
+          top: 0;
+          transform: scale(0.82) rotate(-8deg) rotateY(-16deg) rotateX(4deg);
+          transform-origin: left top;
+        }
+
+      }
+
+      @media (max-width: 480px) {
+        .capability-grid,
+        .quota-features {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-actions,
+        .quota-actions {
+          display: grid;
+        }
+
+        .button {
+          width: 100%;
+        }
+
+        .balance-stage {
+          min-height: 300px;
+        }
+
+        h1 {
+          font-size: 31px;
+        }
+
+        .browser-title {
+          margin-left: 22px;
+        }
+
+        .phone-device {
+          right: 8px;
+          width: 78px;
+          top: 124px;
+        }
+
+        .watch-product {
+          transform: scale(0.68) rotate(-8deg) rotateY(-16deg) rotateX(4deg);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "AI Meter",
+        "description": "Self-hosted open-source AI balance, token usage, and subscription quota monitoring.",
+        "url": "https://ai.meter.panyue.xyz/projects/token-balance-monitor/",
+        "codeRepository": "https://github.com/pan609/token-balance-monitor/",
+        "programmingLanguage": ["JavaScript", "Swift"]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "AI Meter 是什么？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AI Meter 是开源、自托管的 AI 用量监控套件，包含两条产品线：AI Balance 负责模型平台余额与请求级 token 用量，AI Quota 负责 Codex / Claude Code 的订阅额度窗口。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "AI Meter 开源吗？怎么部署？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "开源，采用 MIT License，代码托管在 GitHub。clone 仓库后复制 .env.example 为 .env、按需填入平台 key，即可在自己的机器上启动 Web 看板等入口。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "我的 API Key 和用量数据存在哪里？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "云厂商 AccessKey 只保存在你自己服务端的 .env，不会打包进浏览器、macOS 客户端或 iPhone App；用量记录只保留结构化字段，不保存 prompt 和 response。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "AI Balance 和 AI Quota 有什么区别？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AI Balance 回答“账户里还剩多少钱、哪次请求用了多少 token”；AI Quota 回答“Codex / Claude Code 这一轮订阅额度还剩多少、多久重置”。两类数据分开维护，不混算。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "支持哪些使用入口？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Web 看板、Agent Skill、macOS 状态栏与桌宠、iPhone App 与 iOS Widget、Apple Watch App 与表盘 complication，以及本机 bridge 脚本，每个入口都可以独立使用。"
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-wrap">
+        <a class="brand" href="/projects/token-balance-monitor/" aria-label="AI Meter 首页">
+          <span class="brand-mark">￥</span>
+          <span>AI Meter</span>
+        </a>
+        <nav class="nav" aria-label="AI Meter 导航">
+          <a href="/projects/ai-balance/">AI Balance</a>
+          <a href="/projects/ai-quota/">AI Quota</a>
+          <a href="https://github.com/pan609/token-balance-monitor/blob/main/docs/api-reference.md">API 文档</a>
+          <a class="nav-cta" href="/go/token-balance-monitor-github">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="balance-hero">
+        <div class="page-shell balance-grid">
+          <div class="hero-copy">
+            <div class="section-label">开源 · 自托管</div>
+            <h1>AI Balance：统一监控<br />AI 余额和 token 使用</h1>
+            <p>
+              Open-source 的 AI 使用监控平台，聚合多平台余额、24h 用量与请求明细，帮助团队掌握成本、预防超额并优化资源使用。
+            </p>
+
+            <div class="capability-grid" aria-label="AI Balance 核心能力">
+              <div class="capability">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 7.5A3.5 3.5 0 0 1 7.5 4H18a2 2 0 0 1 2 2v12.5a1.5 1.5 0 0 1-1.5 1.5h-11A3.5 3.5 0 0 1 4 16.5z" /><path d="M4 8h16" /><path d="M16 13h4v4h-4a2 2 0 0 1 0-4Z" /></svg>
+                <strong>多平台聚合</strong>
+                <span>支持 6+ 平台余额与使用数据聚合</span>
+              </div>
+              <div class="capability">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 20V9" /><path d="M10 20V4" /><path d="M16 20v-7" /><path d="M22 20H2" /><rect x="7" y="4" width="6" height="16" rx="2" /><rect x="13" y="13" width="6" height="7" rx="2" /></svg>
+                <strong>24h 用量洞察</strong>
+                <span>趋势、排行、明细同屏</span>
+              </div>
+              <div class="capability">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 6h12" /><path d="M4 12h16" /><path d="M4 18h9" /><path d="m17 15 3 3-3 3" /></svg>
+                <strong>请求级可追溯</strong>
+                <span>按项目 / 模型 / 账号精细定位</span>
+              </div>
+              <div class="capability">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m12 3 7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" /><path d="m9 12 2 2 4-5" /></svg>
+                <strong>隐私优先</strong>
+                <span>不保存提示词和回答</span>
+              </div>
+            </div>
+
+            <div class="hero-actions">
+              <a class="button dark" href="/go/token-balance-monitor-github" aria-label="查看 GitHub 项目">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 8.36 22.9c.58.1.79-.25.79-.56v-2.02c-3.22.7-3.9-1.38-3.9-1.38-.53-1.33-1.29-1.69-1.29-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.1-.75.4-1.26.73-1.55-2.57-.3-5.27-1.29-5.27-5.73 0-1.27.45-2.3 1.2-3.12-.12-.3-.52-1.49.11-3.08 0 0 .98-.31 3.18 1.19A11 11 0 0 1 12 6.03c.98 0 1.97.13 2.9.39 2.2-1.5 3.17-1.19 3.17-1.19.63 1.59.23 2.78.11 3.08.75.82 1.2 1.85 1.2 3.12 0 4.45-2.71 5.43-5.29 5.72.42.36.8 1.07.8 2.16v3.03c0 .31.2.67.8.56A11.5 11.5 0 0 0 12 .5Z" /></svg>
+                查看项目 (GitHub)
+              </a>
+              <a class="button" href="/projects/ai-balance/">快速开始
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
+              </a>
+            </div>
+          </div>
+
+          <figure class="balance-stage" aria-label="AI Balance Web 与 iPhone 产品效果图">
+            <div class="dashboard-frame">
+              <div class="browser-bar">
+                <span class="browser-dot" aria-hidden="true"></span>
+                <span class="browser-title">AI Balance / Web Dashboard</span>
+              </div>
+              <img src="/projects/assets/web-usage-dashboard.jpg" width="1800" height="882" decoding="async" fetchpriority="high" alt="AI Balance Web Dashboard 用量看板。" />
+            </div>
+            <div class="phone-device">
+              <img src="/projects/assets/device-iphone-balance-mockup.png" width="900" height="1200" decoding="async" fetchpriority="high" alt="AI Balance iPhone 余额概览设备效果图。" />
+            </div>
+            <span class="orbit" aria-hidden="true"></span>
+          </figure>
+        </div>
+      </section>
+
+      <section class="quota-band" aria-labelledby="quota-title">
+        <div class="page-shell quota-grid">
+          <figure class="quota-visual" aria-label="AI Quota Apple Watch 产品效果图">
+            <div class="watch-product">
+              <img class="watch-mockup-img" src="/projects/assets/device-watch-quota-mockup.png" width="760" height="960" decoding="async" loading="lazy" alt="AI Quota Apple Watch 额度界面设备效果图。" />
+            </div>
+            <span class="orbit" aria-hidden="true"></span>
+          </figure>
+
+          <div class="quota-copy">
+            <div class="section-label">AI Quota · 订阅额度</div>
+            <h2 id="quota-title">订阅额度一目了然，超额提前预警</h2>
+            <p>
+              AI Quota 通过 Codex / Claude Code status line 与 Apple Watch 主动刷新，仅负责快速展示与提醒，不参与汇总总计。
+            </p>
+
+            <div class="quota-features" aria-label="AI Quota 核心能力">
+              <div class="quota-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 12h4l2-6 4 12 2-6h4" /><rect x="2.8" y="3.5" width="18.4" height="17" rx="4" /></svg>
+                <div>
+                  <strong>一眼看余额与风险</strong>
+                  <span>桌面小组件与 Apple Watch 随时掌握可用额度</span>
+                </div>
+              </div>
+              <div class="quota-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></svg>
+                <div>
+                  <strong>即将过期提醒</strong>
+                  <span>接近限制或即将到期立即通知</span>
+                </div>
+              </div>
+              <div class="quota-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.5 6.2" /><path d="M3 12A9 9 0 0 1 18.5 5.8" /><path d="M18 2v4h-4" /><path d="M6 22v-4h4" /></svg>
+                <div>
+                  <strong>状态行集成</strong>
+                  <span>Codex / Claude Code status line 实时显示额度</span>
+                </div>
+              </div>
+              <div class="quota-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
+                <div>
+                  <strong>只读访问</strong>
+                  <span>不写入、不修改，仅展示与提醒</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="quota-actions">
+              <a class="button blue" href="/projects/ai-quota/">了解 Quota 接入方式
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
+              </a>
+              <a class="button" href="https://github.com/pan609/token-balance-monitor/blob/main/docs/api-reference.md">查看 API 文档</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq-band" aria-labelledby="faq-title">
+        <div class="page-shell">
+          <div class="section-label">FAQ · 常见问题</div>
+          <h2 id="faq-title">关于 AI Meter</h2>
+          <div class="faq-list">
+            <div class="faq-item">
+              <h3>AI Meter 是什么？</h3>
+              <p>AI Meter 是开源、自托管的 AI 用量监控套件，包含两条产品线：AI Balance 负责模型平台余额与请求级 token 用量，AI Quota 负责 Codex / Claude Code 的订阅额度窗口。</p>
+            </div>
+            <div class="faq-item">
+              <h3>AI Meter 开源吗？怎么部署？</h3>
+              <p>开源，采用 MIT License，代码托管在 GitHub。clone 仓库后复制 .env.example 为 .env、按需填入平台 key，即可在自己的机器上启动 Web 看板等入口。</p>
+            </div>
+            <div class="faq-item">
+              <h3>我的 API Key 和用量数据存在哪里？</h3>
+              <p>云厂商 AccessKey 只保存在你自己服务端的 .env，不会打包进浏览器、macOS 客户端或 iPhone App；用量记录只保留结构化字段，不保存 prompt 和 response。</p>
+            </div>
+            <div class="faq-item">
+              <h3>AI Balance 和 AI Quota 有什么区别？</h3>
+              <p>AI Balance 回答“账户里还剩多少钱、哪次请求用了多少 token”；AI Quota 回答“Codex / Claude Code 这一轮订阅额度还剩多少、多久重置”。两类数据分开维护，不混算。</p>
+            </div>
+            <div class="faq-item">
+              <h3>支持哪些使用入口？</h3>
+              <p>Web 看板、Agent Skill、macOS 状态栏与桌宠、iPhone App 与 iOS Widget、Apple Watch App 与表盘 complication，以及本机 bridge 脚本，每个入口都可以独立使用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="page-shell">AI Meter · Open-source self-hosted AI usage monitoring.</div>
+    </footer>
+  </body>
+</html>

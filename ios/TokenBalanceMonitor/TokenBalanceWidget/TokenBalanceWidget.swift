@@ -233,8 +233,8 @@ struct TokenBalanceWidget: Widget {
         ) { entry in
             TokenBalanceWidgetView(entry: entry)
         }
-        .configurationDisplayName("模型余额")
-        .description("选择并查看指定模型账户余额。")
+        .configurationDisplayName("AI Balance")
+        .description("查看模型平台账户余额。")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
@@ -243,6 +243,7 @@ struct TokenBalanceWidget: Widget {
 struct TokenBalanceWidgetBundle: WidgetBundle {
     var body: some Widget {
         TokenBalanceWidget()
+        QuotaWidget()
     }
 }
 

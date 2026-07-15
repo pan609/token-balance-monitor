@@ -3,7 +3,7 @@
 这份文档面向业务项目里的 Agent、后端服务或自动化脚本。接入目标有两个：
 
 - 查询当前模型平台余额，决定是否继续执行、提醒充值或切换模型。
-- 在每次模型调用结束后，上报请求级 token 用量，方便在 Token Balance Monitor 看板里追踪消耗来源。
+- 在每次模型调用结束后，上报请求级 token 用量，方便在 AI Balance 看板里追踪消耗来源。
 
 生产环境推荐使用自托管服务，例如：
 
@@ -15,7 +15,7 @@ https://balance.example.com/token-monitor
 
 ## 1. Agent 需要的环境变量
 
-业务 Agent 不应该持有阿里云、火山、DeepSeek 等云厂商密钥。云厂商密钥只放在 Token Balance Monitor 服务端 `.env`。
+业务 Agent 不应该持有阿里云、火山、DeepSeek 等云厂商密钥。云厂商密钥只放在 AI Meter 服务端 `.env`。
 
 Agent 只需要下面这些配置：
 
@@ -371,7 +371,7 @@ async function shouldWarnBeforeLongTask() {
 建议给 Agent 加上这段规则：
 
 ```text
-你可以通过 Token Balance Monitor 查询模型平台余额。
+你可以通过 AI Balance 查询模型平台余额。
 查询余额时调用 GET {TOKEN_MONITOR_BASE_URL}/api/mobile/summary，并携带 Bearer TOKEN_MONITOR_MOBILE_TOKEN。
 余额查询失败时，不要泄露 token，不要重试超过 2 次，不要直接调用云厂商控制台。
 每次模型调用结束后，异步 POST usage event 到 /api/usage/events，并携带 Bearer TOKEN_MONITOR_INGEST_TOKEN。

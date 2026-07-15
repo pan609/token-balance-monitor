@@ -69,4 +69,4 @@ xcrun simctl terminate "$SIM_UDID" "$BUNDLE_ID" 2>/dev/null || true
 xcrun simctl install "$SIM_UDID" "$APP_PATH"
 xcrun simctl launch "$SIM_UDID" "$BUNDLE_ID"
 
-echo "已启动 iOS 余额监控：$DEVICE_NAME / $SIM_UDID"
+echo "已启动 AI Meter iOS：$DEVICE_NAME / $SIM_UDID"

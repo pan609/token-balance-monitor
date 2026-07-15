@@ -60,4 +60,4 @@ open -a Simulator --args -CurrentDeviceUDID "$WATCH_SIM_UDID" >/dev/null 2>&1 ||
 xcrun simctl install "$WATCH_SIM_UDID" "$APP_PATH"
 xcrun simctl launch "$WATCH_SIM_UDID" "$BUNDLE_ID"
 
-echo "已启动 Apple Watch 额度监控：$WATCH_SIM_UDID"
+echo "已启动 AI Quota Watch：$WATCH_SIM_UDID"

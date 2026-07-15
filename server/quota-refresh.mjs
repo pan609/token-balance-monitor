@@ -1,4 +1,8 @@
 import { collectCodexQuotaSnapshots } from "../scripts/codex-quota-bridge.mjs";
+import {
+  collectCodexProxyQuotaSnapshots,
+  isCodexProxyQuotaConfigured
+} from "../scripts/codex-proxy-quota-bridge.mjs";
 import { collectClaudeQuotaSnapshots } from "../scripts/claude-quota-bridge.mjs";
 import { recordQuotaSnapshot } from "./quota.mjs";
 
@@ -76,7 +80,12 @@ function selectSnapshots(snapshots, serviceId) {
 }
 
 function collectorsFor(serviceId) {
-  if (!serviceId) return [codexCollector(), claudeCollector()];
+  if (!serviceId) {
+    const collectors = [codexCollector(), claudeCollector()];
+    if (isCodexProxyQuotaConfigured()) collectors.push(codexProxyCollector());
+    return collectors;
+  }
+  if (isCodexProxyService(serviceId)) return [codexProxyCollector(serviceId)];
   if (serviceId.startsWith("codex")) return [codexCollector()];
   if (serviceId.startsWith("claude")) return [claudeCollector()];
   return [];
@@ -89,6 +98,13 @@ function codexCollector() {
   };
 }
 
+function codexProxyCollector(serviceId = getCodexProxyServiceId()) {
+  return {
+    serviceId,
+    collect: collectCodexProxyQuotaSnapshots
+  };
+}
+
 function claudeCollector() {
   return {
     serviceId: "claude",
@@ -97,16 +113,28 @@ function claudeCollector() {
 }
 
 function isSupportedService(serviceId) {
-  return serviceId.startsWith("codex") || serviceId.startsWith("claude");
+  return serviceId.startsWith("codex") || serviceId.startsWith("claude") || isCodexProxyService(serviceId);
 }
 
 function getTimeoutMs(serviceId) {
   if (serviceId === "claude") {
     return Math.max(1000, Number(process.env.CLAUDE_QUOTA_TIMEOUT_MS || 30000));
   }
+  if (isCodexProxyService(serviceId)) {
+    return Math.max(1000, Number(process.env.CODEX_PROXY_TIMEOUT_MS || 15000));
+  }
   return Math.max(1000, Number(process.env.CODEX_QUOTA_TIMEOUT_MS || 10000));
 }
 
 function getMinIntervalMs() {
   return Math.max(1000, Number(process.env.CODEX_QUOTA_REFRESH_MIN_INTERVAL_MS || 10000));
+}
+
+function getCodexProxyServiceId() {
+  return String(process.env.CODEX_PROXY_SERVICE_ID || "codex_proxy").trim();
+}
+
+function isCodexProxyService(serviceId) {
+  const normalized = String(serviceId || "").trim();
+  return normalized === getCodexProxyServiceId() || normalized === "codex_proxy" || normalized === "codex_enterprise";
 }

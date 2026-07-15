@@ -165,6 +165,7 @@ function buildSnapshot(fallbackId, limit) {
     serviceId,
     serviceName: serviceNameFor(serviceId, limit.limitName),
     planLabel: stringOrNull(limit.planType),
+    quotaType: "rate_window",
     source: "codex-app-server",
     fetchedAt: new Date().toISOString(),
     windows,

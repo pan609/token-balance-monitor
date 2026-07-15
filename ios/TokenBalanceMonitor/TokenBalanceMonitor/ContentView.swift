@@ -1,6 +1,36 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedSection: AppSection = .balance
+
+    var body: some View {
+        TabView(selection: $selectedSection) {
+            BalanceHomeView()
+                .tabItem {
+                    Label("Balance", systemImage: "creditcard")
+                }
+                .tag(AppSection.balance)
+
+            QuotaHomeView()
+                .tabItem {
+                    Label(QuotaL10n.text("Quota 配置", "Quota Setup"), systemImage: "applewatch")
+                }
+                .tag(AppSection.quota)
+        }
+        .onOpenURL { url in
+            if url.host == "quota" || url.path.localizedCaseInsensitiveContains("quota") {
+                selectedSection = .quota
+            }
+        }
+    }
+}
+
+private enum AppSection: Hashable {
+    case balance
+    case quota
+}
+
+private struct BalanceHomeView: View {
     @StateObject private var store = BalanceStore()
     @State private var isShowingSettings = false
 
@@ -28,7 +58,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("余额监控")
+            .navigationTitle("AI Balance")
             .background(Color(.systemGroupedBackground))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -658,13 +688,13 @@ private struct ErrorView: View {
 #Preview("正常") {
     NavigationStack {
         SummaryView(summary: .preview, isUpdatingPrimaryProvider: false) {} setPrimaryProvider: { _ in }
-            .navigationTitle("余额监控")
+            .navigationTitle("AI Balance")
     }
 }
 
 #Preview("低余额") {
     NavigationStack {
         SummaryView(summary: .lowBalancePreview, isUpdatingPrimaryProvider: false) {} setPrimaryProvider: { _ in }
-            .navigationTitle("余额监控")
+            .navigationTitle("AI Balance")
     }
 }

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#0F766E"/>
+  <rect y="560" width="1024" height="464" fill="#020617" opacity="0.48"/>
+  <circle cx="216" cy="220" r="120" fill="#FFFFFF" opacity="0.12"/>
+  <circle cx="828" cy="812" r="148" fill="#FACC15" opacity="0.12"/>
+  <g>
+    <circle cx="512" cy="512" r="288" fill="#021B22" opacity="0.56"/>
+    <circle cx="512" cy="512" r="246" fill="none" stroke="#E0F2FE" stroke-width="30" opacity="0.24"/>
+    <path d="M512 266a246 246 0 1 1-212.6 369.8" fill="none" stroke="#34D399" stroke-width="86" stroke-linecap="round"/>
+    <path d="M704 358c45.7 45.1 72.9 104.8 76.5 168.8" fill="none" stroke="#FACC15" stroke-width="86" stroke-linecap="round"/>
+    <g stroke="#E0F2FE" stroke-linecap="round" opacity="0.92">
+      <path d="M512 216v52" stroke-width="18"/>
+      <path d="M512 756v52" stroke-width="18"/>
+      <path d="M216 512h52" stroke-width="18"/>
+      <path d="M756 512h52" stroke-width="18"/>
+    </g>
+    <circle cx="512" cy="512" r="148" fill="#063E46"/>
+    <path d="M512 395v128l100 62" fill="none" stroke="#A7F3D0" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="720" cy="704" r="96" fill="#FACC15"/>
+    <path d="M720 646v74" stroke="#0F172A" stroke-width="34" stroke-linecap="round"/>
+    <circle cx="720" cy="768" r="16" fill="#0F172A"/>
+  </g>
+</svg>

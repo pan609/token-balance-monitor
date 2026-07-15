@@ -383,7 +383,7 @@ app.listen(port, host, () => {
   if (port !== requestedPort) {
     console.log(`端口 ${requestedPort} 已占用，已切换到 ${port}`);
   }
-  console.log(`Token 余额监控已启动: http://${host}:${port}`);
+  console.log(`AI Meter server started: http://${host}:${port}`);
   startBackgroundBalanceRecorder();
 });
 

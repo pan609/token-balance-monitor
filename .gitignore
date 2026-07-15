@@ -8,6 +8,9 @@ test-results/
 .env
 .env.*
 !.env.example
+.local/
+.private/
+private-adapters/
 .pet-settings.json
 data/
 *.log

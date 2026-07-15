@@ -1,6 +1,11 @@
 # API Reference
 
-这份文档描述 Token Balance Monitor 对外集成时建议依赖的 HTTP API。它适合后端服务、Agent、自动化脚本、macOS 菜单栏、iPhone App 和 Widget 读取余额摘要或上报请求级 token 用量。
+这份文档描述 AI Meter 对外集成时建议依赖的 HTTP API。AI Meter 在同一个自托管服务里提供两组独立接口：
+
+- **AI Balance API**：读取模型平台余额、credits、重点平台和近 24h token usage，并写入请求级 usage 事件。
+- **AI Quota API**：读取或写入 Codex / Claude Code 订阅窗口，以及 Claude Team spend limit。
+
+这两组接口共享部署和鉴权方式，但不会把 provider 余额、账单成本、token usage 和订阅额度窗口混算。
 
 如果你要看接入场景和 Agent 行为建议，请读 [Agent 接入文档](agent-integration.md)。如果你要部署服务，请读 [部署文档](deployment.md)。
 
@@ -23,14 +28,14 @@ https://example.com/token-monitor
 
 ## 鉴权
 
-Token Balance Monitor 把读取和写入分成两个 token。
+AI Meter 把 AI Balance 和 AI Quota 的读取、写入 token 分开。
 
 | 用途 | 环境变量 | 推荐 header | 说明 |
 | --- | --- | --- | --- |
-| 只读查询余额摘要 | `MOBILE_API_TOKEN` | `Authorization: Bearer <token>` | 给 Agent、iPhone、Widget、macOS 客户端使用 |
-| 写入 usage 事件 | `USAGE_INGEST_TOKEN` | `Authorization: Bearer <token>` | 给业务服务或 Agent 在模型请求结束后上报 |
-| 只读查询订阅额度摘要 | `QUOTA_READ_TOKEN` | `Authorization: Bearer <token>` | 给 Apple Watch、iPhone 或 Web 读取 Codex / Claude 额度窗口 |
-| 写入订阅额度快照 | `QUOTA_INGEST_TOKEN` | `Authorization: Bearer <token>` | 给本机 Codex / Claude Code bridge 上报额度窗口 |
+| AI Balance 只读查询余额摘要 | `MOBILE_API_TOKEN` | `Authorization: Bearer <token>` | 给 Agent、iPhone、Widget、macOS 客户端使用 |
+| AI Balance 写入 usage 事件 | `USAGE_INGEST_TOKEN` | `Authorization: Bearer <token>` | 给业务服务或 Agent 在模型请求结束后上报 |
+| AI Quota 只读查询订阅额度摘要 | `QUOTA_READ_TOKEN` | `Authorization: Bearer <token>` | 给 Apple Watch、iPhone companion、macOS Quota 或 Web 读取订阅额度 |
+| AI Quota 写入订阅额度快照 | `QUOTA_INGEST_TOKEN` | `Authorization: Bearer <token>` | 给本机 Codex / Claude bridge 上报额度窗口或 spend limit |
 
 只读查询也支持：
 
@@ -273,6 +278,17 @@ curl -X POST "$TOKEN_MONITOR_BASE_URL/api/usage/events" \
 }
 ```
 
+## Subscription Quota API
+
+订阅额度接口独立于 provider 余额接口。它用于 Codex / Claude Code 这类订阅工具的 5 小时、每周额度窗口，也用于 Claude Team 这类月度 spend limit；这些数据不参与 CNY 或 USD 余额汇总。
+
+`quotaType` 用来区分订阅额度形态：
+
+| `quotaType` | 场景 | 常见窗口 |
+| --- | --- | --- |
+| `rate_window` | Codex / Claude Code 个人订阅限制 | `5h`、`weekly` |
+| `spend_limit` | Claude Team / claude.ai usage spend | `monthly` |
+
 ### GET /api/quota/summary
 
 读取 Codex / Claude Code 这类订阅额度窗口的最新快照。这个接口和模型平台余额不是同一类数据：它回答的是 5 小时、每周等订阅周期里还剩多少可用空间。
@@ -297,6 +313,7 @@ curl "$TOKEN_MONITOR_BASE_URL/api/quota/summary" \
     "serviceId": "codex",
     "serviceName": "Codex",
     "planLabel": "Codex",
+    "quotaType": "rate_window",
     "source": "codex-app-server",
     "fetchedAt": "2026-06-17T02:29:30.000Z",
     "isStale": false,
@@ -324,7 +341,9 @@ curl "$TOKEN_MONITOR_BASE_URL/api/quota/summary" \
 | --- | --- |
 | `primaryServiceId` | 当前重点关注服务，例如 `codex` 或 `claude` |
 | `services` | 所有服务的最新额度快照 |
+| `quotaType` | `rate_window` 或 `spend_limit`；旧快照可能没有，服务端会推断 |
 | `windows[].remainingPercent` | 当前窗口剩余百分比 |
+| `windows[].remainingText` / `usedText` / `limitText` | 金额或文本口径，常用于 `spend_limit` |
 | `windows[].resetsAt` | 窗口重置时间，可能为 `null` |
 | `isStale` | 数据是否超过 `QUOTA_STALE_SECONDS` |
 | `status` / `statusLabel` | `ok`、`warning`、`critical`、`stale` 等状态 |
@@ -358,6 +377,7 @@ curl -X POST "$TOKEN_MONITOR_BASE_URL/api/quota/snapshots" \
     "serviceId": "claude",
     "serviceName": "Claude",
     "planLabel": "Claude Code",
+    "quotaType": "rate_window",
     "source": "claude-statusline",
     "fetchedAt": "2026-06-17T02:30:00.000Z",
     "windows": [
@@ -376,6 +396,32 @@ curl -X POST "$TOKEN_MONITOR_BASE_URL/api/quota/snapshots" \
       }
     ]
   }'
+```
+
+Claude Team / claude.ai spend limit 示例：
+
+```json
+{
+  "serviceId": "claude",
+  "serviceName": "Claude",
+  "accountLabel": "Team",
+  "planLabel": "claude.ai usage",
+  "quotaType": "spend_limit",
+  "source": "claude-usage-cookie",
+  "fetchedAt": "2026-06-17T02:30:00.000Z",
+  "windows": [
+    {
+      "id": "monthly",
+      "label": "本月",
+      "usedPercent": 2.1,
+      "remainingPercent": 97.9,
+      "resetsAt": "2026-07-01T00:00:00.000Z",
+      "usedText": "$21.26 已用",
+      "remainingText": "$978.74 剩余",
+      "limitText": "$1000.00 上限"
+    }
+  ]
+}
 ```
 
 响应示例：
@@ -397,6 +443,7 @@ curl -X POST "$TOKEN_MONITOR_BASE_URL/api/quota/snapshots" \
 | `serviceName` | 建议 | 展示名 |
 | `accountLabel` | 可选 | 账号或订阅标签 |
 | `planLabel` | 可选 | 套餐或来源标签 |
+| `quotaType` | 可选 | `rate_window` 或 `spend_limit`；不传时服务端会按窗口或来源推断 |
 | `source` | 建议 | `codex-app-server`、`claude-statusline`、`manual` 等 |
 | `fetchedAt` | 建议 | 快照实际读取时间 |
 | `windows` | 是 | 一个或多个额度窗口 |
@@ -472,7 +519,7 @@ POST, OPTIONS
 content-type, authorization, x-usage-token, x-ingest-token, x-quota-token, x-quota-ingest-token, x-token-id, x-project-id, x-service-id
 ```
 
-如果业务服务和 Token Balance Monitor 都在服务端，优先使用服务端到服务端调用，不需要浏览器跨域。
+如果业务服务和 AI Meter 都在服务端，优先使用服务端到服务端调用，不需要浏览器跨域。
 
 ## 错误响应
 
@@ -494,7 +541,7 @@ usage 上报建议做 best-effort：上报失败不应该影响原本的模型�
 
 ## 隐私边界
 
-Token Balance Monitor 的 usage 事件只需要定位成本和排查所需的结构化字段。
+AI Balance 的 usage 事件只需要定位成本和排查所需的结构化字段。
 
 不要上报：
 

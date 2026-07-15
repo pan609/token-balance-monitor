@@ -121,13 +121,33 @@ If you need fresher Watch / iPhone data, shorten the schedule, but avoid hammeri
 
 ## macOS menu bar
 
-The AI Meter desktop app also reads quota snapshots for the macOS menu bar. By default it refreshes Claude spend when the pet refreshes:
+Use the standalone AI Quota menu bar app when you want Claude spend visible while coding:
+
+```bash
+PRIMARY_QUOTA_SERVICE_ID=claude
+QUOTA_MENU_SERVICES=claude,codex
+./quota.command
+```
+
+`quota.command` is separate from the AI Balance pet. It can show `Claude $35.60/$1000` for `spend_limit` snapshots or `Codex 5 小时 72%` for `rate_window` snapshots.
+
+If your Codex data comes from a company proxy API key instead of the local personal Codex app-server, use `codex_proxy`:
+
+```bash
+PRIMARY_QUOTA_SERVICE_ID=codex_proxy
+QUOTA_MENU_SERVICES=claude,codex_proxy
+./quota.command
+```
+
+See [Codex enterprise proxy spend](codex-proxy-quota.md).
+
+If you intentionally want the AI Balance pet to include quota data as an advanced mixed view, opt in explicitly:
 
 ```bash
 PET_QUOTA_REFRESH_SERVICE_ID=claude
 ```
 
-Open the menu bar item and choose `状态栏显示` -> `Claude` to show the remaining Claude spend directly in the macOS status bar. Set `PET_QUOTA_REFRESH_SERVICE_ID=all` if you want the desktop app to refresh every supported quota service.
+Without that variable, `./pet.command` stays focused on provider credits and will not mix Claude / Codex subscription quota into the Balance menu.
 
 ## Caveats
 

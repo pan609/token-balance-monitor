@@ -1,0 +1,23 @@
+/projects/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/projects/token-balance-monitor/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/projects/token-balance-monitor/favicon.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+/projects/token-balance-monitor/
+  Cache-Control: public, max-age=300, must-revalidate
+
+/projects/ai-balance/
+  Cache-Control: public, max-age=300, must-revalidate
+
+/projects/ai-quota/
+  Cache-Control: public, max-age=300, must-revalidate
+
+/sitemap.xml
+  Cache-Control: public, max-age=300, must-revalidate
+
+/robots.txt
+  Cache-Control: public, max-age=300, must-revalidate

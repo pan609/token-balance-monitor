@@ -105,6 +105,7 @@ def build_snapshot(raw: dict[str, Any]) -> dict[str, Any]:
         "serviceName": "Claude",
         "accountLabel": os.environ.get("CLAUDE_QUOTA_ACCOUNT_LABEL") or "Claude",
         "planLabel": os.environ.get("CLAUDE_QUOTA_PLAN_LABEL") or "claude.ai usage",
+        "quotaType": "spend_limit",
         "source": "claude-usage-cookie",
         "fetchedAt": now_iso(),
         "windows": [

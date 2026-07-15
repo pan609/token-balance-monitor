@@ -90,6 +90,7 @@ function normalizeSnapshot(input, context) {
       serviceName: String(input?.serviceName || serviceNameFor(serviceId)),
       accountLabel: optionalString(input?.accountLabel),
       planLabel: optionalString(input?.planLabel),
+      quotaType: normalizeQuotaType(input),
       source: String(input?.source || "manual"),
       fetchedAt: fetchedAt.toISOString(),
       ingestedAt: new Date().toISOString(),
@@ -129,6 +130,20 @@ function normalizeWindow(input) {
     remainingText: optionalString(input?.remainingText),
     limitText: optionalString(input?.limitText)
   };
+}
+
+function normalizeQuotaType(input) {
+  const explicit = optionalString(input?.quotaType || input?.quota_type || input?.type);
+  if (explicit === "spend_limit" || explicit === "rate_window") return explicit;
+
+  const windows = Array.isArray(input?.windows) ? input.windows : [];
+  if (windows.some((window) => String(window?.id || window?.windowId || "").toLowerCase() === "monthly")) {
+    return "spend_limit";
+  }
+
+  const source = String(input?.source || "").toLowerCase();
+  if (source.includes("usage-cookie") || source.includes("spend")) return "spend_limit";
+  return "rate_window";
 }
 
 function decorateSnapshot(snapshot) {
@@ -201,7 +216,7 @@ function resolvePrimaryQuotaServiceId(services) {
 }
 
 function serviceOrder(serviceId) {
-  const order = ["codex", "claude"];
+  const order = ["codex", "codex_proxy", "codex_enterprise", "claude"];
   const index = order.indexOf(serviceId);
   return index === -1 ? order.length : index;
 }
@@ -209,6 +224,9 @@ function serviceOrder(serviceId) {
 function serviceNameFor(serviceId) {
   switch (serviceId) {
   case "codex":
+    return "Codex";
+  case "codex_proxy":
+  case "codex_enterprise":
     return "Codex";
   case "claude":
     return "Claude";

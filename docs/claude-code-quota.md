@@ -72,6 +72,7 @@ echo '{
 ```json
 {
   "serviceId": "claude",
+  "quotaType": "rate_window",
   "windows": [
     { "id": "5h", "remainingPercent": 63 },
     { "id": "weekly", "remainingPercent": 48 }

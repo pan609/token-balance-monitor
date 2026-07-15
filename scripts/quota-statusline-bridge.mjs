@@ -42,6 +42,7 @@ function buildSnapshot(input, requestedServiceId) {
     serviceName: requestedServiceId === "codex" ? "Codex" : "Claude",
     accountLabel: findFirstString(input, ["accountLabel", "account", "plan", "subscription"]),
     planLabel: findFirstString(input, ["planLabel", "model", "modelName", "display_name"]),
+    quotaType: "rate_window",
     source: requestedServiceId === "claude" ? "claude-statusline" : "codex-status",
     fetchedAt: new Date().toISOString(),
     windows,

@@ -16,6 +16,21 @@ Run this process whenever a project adds, removes, renames, or materially change
 - pricing, store status, open-source status, deployment model;
 - target growth channel: GitHub, website SEO, GEO, ASO, Xiaohongshu, docs SEO.
 
+## Step 0: Capture The Product Diff
+
+Before deciding content, write a compact product diff:
+
+```text
+Changed feature:
+Changed user job:
+Changed public surface:
+Changed data/privacy boundary:
+Changed proof assets:
+Changed growth channel priority:
+```
+
+If the feature is still experimental or local-only, mark that clearly. Do not let an internal prototype become a public claim by accident.
+
 ## Step 1: Classify The Feature Change
 
 Use this table before editing copy:
@@ -28,7 +43,22 @@ Use this table before editing copy:
 | New provider | Adds provider-specific long-tail queries | Update provider matrix and docs |
 | New API | Adds integration search intent | Update API Reference and examples |
 | New privacy boundary | Changes trust copy | Update FAQ/security claims |
+| Product-line split | Changes positioning, navigation, measurement, and asset taxonomy | Rewrite adapter around product lines; keep canonical URL stable until migration is planned |
 | Removed feature | Prevents outdated claims | Remove copy, screenshots, schema references |
+
+## Step 1.5: Choose Channel Response
+
+Every feature change should produce a channel decision, not necessarily a channel update.
+
+| Channel | Update when | Typical output |
+|---|---|---|
+| Landing page | The feature changes positioning, proof, trust, or conversion | Hero change only for a new core job; otherwise a secondary section, FAQ, CTA, schema update |
+| GitHub README | The feature changes install value, supported surfaces, API, or open-source credibility | Top summary, surface table, quick-start link, docs link, preview asset |
+| API Reference | The feature adds or changes public endpoints or auth tokens | Endpoint contract, examples, error table, security notes |
+| Long-tail docs | The feature has setup complexity or searchable integration intent | Dedicated setup guide with constraints and troubleshooting |
+| Xiaohongshu | The feature creates a concrete scene people can recognize in one image | One problem-first post plan with proof asset requirement |
+| Screenshot/material package | The feature changes UI, device surface, or claim proof | Regenerate screenshots from real/mock-data product state before composing marketing visuals |
+| Indexing/measurement | The public URL or query cluster changed | Sitemap lastmod, IndexNow/Search Console resubmission, query cluster baseline |
 
 ## Step 2: Decide Whether The Hero Changes
 
@@ -39,6 +69,18 @@ Only change the landing page hero when all are true:
 3. README, docs, and user intent all support the new story.
 
 Otherwise, keep the hero and add a lower-page section. This prevents every feature release from turning the landing page into a crowded changelog.
+
+If the change splits one product into multiple product lines, the hero may change from a single-feature category to a suite/category framing. In that case, each product line still needs its own:
+
+- vocabulary;
+- primary user job;
+- proof assets;
+- docs links;
+- CTA;
+- query cluster;
+- measurement bucket.
+
+Do not buy or switch to a new slug/domain until redirects, sitemap, canonical tags, GitHub links, and Search Console resubmission are part of the migration plan.
 
 ## Step 3: Update The Search Intent Map
 
@@ -122,6 +164,21 @@ Measurement update:
 ```
 
 This diff is what should be committed back to a project-specific growth adapter or shared with the user before larger asset work.
+
+## Step 7.5: Create The Next Publishing Brief
+
+For each meaningful release, produce one next-channel brief. It keeps the SEO plan from becoming only docs maintenance.
+
+```text
+Next GitHub update:
+Next landing update:
+Next Xiaohongshu post:
+Required proof asset:
+Manual input still needed:
+7-day measurement:
+```
+
+The Xiaohongshu brief must be scene-first, for example "Apple Watch 上确认 Codex / Claude 额度是否快到限制", not "我做了一个开源项目".
 
 ## Step 8: Guardrails
 

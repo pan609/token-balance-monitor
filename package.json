@@ -18,8 +18,10 @@
   "scripts": {
     "dev": "node server/index.mjs",
     "build": "vite build",
-    "check": "node --check server/index.mjs && node --check server/history.mjs && node --check server/usage-events.mjs && node --check server/quota.mjs && node --check server/quota-refresh.mjs && node --check server/providers/index.mjs && node --check sdk/javascript/index.js && node --check scripts/quota-statusline-bridge.mjs && node --check scripts/codex-quota-bridge.mjs && node --check electron/main.cjs && node --check electron/preload.cjs",
+    "check": "node --check server/index.mjs && node --check server/history.mjs && node --check server/usage-events.mjs && node --check server/quota.mjs && node --check server/quota-refresh.mjs && node --check server/providers/index.mjs && node --check sdk/javascript/index.js && node --check scripts/quota-statusline-bridge.mjs && node --check scripts/codex-quota-bridge.mjs && node --check scripts/codex-proxy-quota-bridge.mjs && node --check scripts/claude-quota-bridge.mjs && node --check scripts/seo-log-report.mjs && node --check examples/local-quota-adapter.example.mjs && node --check electron/main.cjs && node --check electron/quota-main.cjs && node --check electron/preload.cjs",
+    "seo:report": "node scripts/seo-log-report.mjs",
     "pet": "electron electron/main.cjs",
+    "quota": "electron electron/quota-main.cjs",
     "preview": "NODE_ENV=production node server/index.mjs"
   },
   "engines": {

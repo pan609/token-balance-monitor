@@ -26,7 +26,7 @@ find_xcodegen() {
 
 find_connected_device() {
   xcrun devicectl list devices 2>/dev/null |
-    awk 'NR > 2 && $0 ~ /connected/ { print $3; exit }'
+    perl -ne 'if (/available \(paired\)/ && /iPhone/ && /([A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12})/i) { print "$1\n"; exit }'
 }
 
 if [[ -z "$DEVICE_ID" ]]; then
@@ -41,22 +41,20 @@ fi
 "$ROOT_DIR/scripts/generate-ios-config.sh"
 "$(find_xcodegen)" generate --spec "$PROJECT_DIR/project.yml" --project "$PROJECT_DIR"
 
-BUILD_SETTINGS=()
+XCODEBUILD_ARGS=(
+  -project "$PROJECT_DIR/TokenBalanceMonitor.xcodeproj"
+  -scheme TokenBalanceMonitor
+  -configuration Debug
+  -destination "generic/platform=iOS"
+  -derivedDataPath "$DERIVED_DATA_PATH"
+  -allowProvisioningUpdates
+  -allowProvisioningDeviceRegistration
+)
 if [[ -n "$TEAM_ID" ]]; then
-  BUILD_SETTINGS+=("DEVELOPMENT_TEAM=$TEAM_ID" "CODE_SIGN_STYLE=Automatic")
+  XCODEBUILD_ARGS+=("DEVELOPMENT_TEAM=$TEAM_ID" "CODE_SIGN_STYLE=Automatic")
 fi
 
-xcodebuild \
-  -project "$PROJECT_DIR/TokenBalanceMonitor.xcodeproj" \
-  -scheme TokenBalanceMonitor \
-  -configuration Debug \
-  -sdk iphoneos \
-  -destination "generic/platform=iOS" \
-  -derivedDataPath "$DERIVED_DATA_PATH" \
-  -allowProvisioningUpdates \
-  -allowProvisioningDeviceRegistration \
-  "${BUILD_SETTINGS[@]}" \
-  build
+xcodebuild "${XCODEBUILD_ARGS[@]}" build
 
 APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphoneos/TokenBalanceMonitor.app"
 xcrun devicectl device install app --device "$DEVICE_ID" "$APP_PATH"

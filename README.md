@@ -1,28 +1,27 @@
 <p align="center">
-  <img src="docs/assets/pet-widget.png" alt="Token Balance Monitor" width="160">
+  <img src="design/ai-meter-icon.svg" alt="AI Meter" width="144">
 </p>
 
-<h1 align="center">Token 余额监控</h1>
+<h1 align="center">AI Meter</h1>
 
 <p align="center">
-  把阿里云百炼、DeepSeek、豆包、Kimi、硅基流动、OpenRouter 的余额放到一个地方看。
-  支持 Web 看板、Agent Skill、macOS 状态栏桌宠、iPhone App 和小组件。
+  一个自托管的 AI 用量仪表盘。把模型平台余额、请求级 token 明细、Codex / Claude 订阅额度窗口分开看清楚。
 </p>
 
 <p align="center">
-  <strong>Token Balance Monitor</strong> is a self-hosted open-source monitor for AI provider balances
-  and request-level token usage across Web, macOS, iPhone widgets, and agent workflows.
+  <strong>AI Balance</strong> tracks provider credits and token usage.
+  <strong>AI Quota</strong> tracks subscription quota windows for Codex / Claude.
 </p>
 
 <p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/pan609/token-balance-monitor"></a>
   <img alt="Node" src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white">
-  <img alt="Platforms" src="https://img.shields.io/badge/Web%20%7C%20Skill%20%7C%20macOS%20%7C%20iOS-111827">
+  <img alt="Platforms" src="https://img.shields.io/badge/Web%20%7C%20Skill%20%7C%20macOS%20%7C%20iOS%20%7C%20Watch-111827">
   <img alt="Privacy" src="https://img.shields.io/badge/keys-server%20side-0f766e">
 </p>
 
 <p align="center">
-  <a href="https://panyue.xyz/projects/token-balance-monitor/">Website</a> ·
+  <a href="https://ai.meter.panyue.xyz/projects/token-balance-monitor/">Website</a> ·
   <a href="#5-分钟跑起来">Quick Start</a> ·
   <a href="#agent-skill">Agent Skill</a> ·
   <a href="docs/api-reference.md">API Reference</a> ·
@@ -30,13 +29,21 @@
   <a href="#安全模型">Privacy & Security</a>
 </p>
 
-## Overview
+## Product Lines
 
-模型平台用多了以后，余额会散在不同控制台里：阿里云百炼一处、DeepSeek 一处、豆包/Kimi/OpenRouter 又是另一处。Token 余额监控把这些账户余额收在一个自托管服务里，并提供几个不同入口：
+AI Meter 由两条产品线组成。它们在同一个仓库里开发，也共用同一个自托管服务，但后续按两个项目来做页面、文档、截图和 SEO：
 
-- **统一看余额**：阿里云、DeepSeek、豆包、Kimi、硅基流动、OpenRouter 放到同一个看板。
-- **随手看状态**：macOS 状态栏、桌宠、iPhone App、小组件都可以显示重点关注平台。
-- **追踪请求级 token**：业务项目可以上报每次模型调用的 token，用 Web 看板看到是谁、哪个功能、哪个资源在消耗。
+| 产品线 | 看什么 | 典型入口 |
+| --- | --- | --- |
+| **AI Balance** | 阿里云百炼、DeepSeek、豆包、Kimi、硅基流动、OpenRouter 的账户余额，以及请求级 token 明细 | Web 看板、Agent Skill、macOS 状态栏/桌宠、iPhone App、iOS Widget |
+| **AI Quota** | Codex / Claude Code 的 5 小时 / 每周窗口，Claude Team / 企业 Codex 代理这类月度 spend limit | macOS `quota.command`、Apple Watch App、Watch complication、iPhone companion、本机 bridge |
+
+AI Balance 回答“账户里还剩多少钱、哪次请求用了多少 token”。AI Quota 回答“这一轮订阅额度还剩多少、多久重置”。这两个概念不会混算。
+
+官网入口：
+
+- [AI Balance](https://ai.meter.panyue.xyz/projects/ai-balance/)：模型平台余额、credits 和请求级 token usage。
+- [AI Quota](https://ai.meter.panyue.xyz/projects/ai-quota/)：Codex / Claude Code 的订阅额度窗口。
 
 云厂商 AccessKey 只保存在你自己的服务端 `.env`，不会打包进浏览器、macOS 客户端或 iPhone App。
 
@@ -44,6 +51,7 @@
 
 - **多平台 AI 开发者**：同时使用阿里云百炼、DeepSeek、豆包、Kimi、硅基流动、OpenRouter，希望不用每天打开多个控制台查余额。
 - **Agent / 后端项目维护者**：想知道每次模型调用来自哪个项目、功能、账号或业务对象，而不把 prompt 和 response 存进看板。
+- **Codex / Claude Code 重度用户**：希望在写代码时确认 5 小时或每周订阅额度窗口，而不是等到请求被限速才发现。
 - **自托管优先的团队**：希望云厂商密钥留在自己的服务端，只把只读 token 或上报 token 发给客户端、Widget 或业务系统。
 
 For English readers: this project is a local-first, self-hosted balance and token-usage monitor for teams that call multiple LLM providers and want operational visibility without sending provider keys or prompt content to a third-party dashboard.
@@ -56,10 +64,12 @@ For English readers: this project is a local-first, self-hosted balance and toke
 | --- | --- | --- |
 | **Web 看板** | 查看余额、近 24h 消耗、请求级 token 明细 | `./start.command` |
 | **Agent Skill** | 让 Codex/Agent 查询余额、上报 usage | [skills/token-balance-monitor](skills/token-balance-monitor) |
-| **macOS 状态栏 / 桌宠** | 在电脑右上角随手看余额 | `./pet.command` |
-| **iPhone App / Widget** | 在手机和小组件里看余额，低于阈值提醒 | [ios/TokenBalanceMonitor](ios/TokenBalanceMonitor) |
-| **Apple Watch 订阅额度** | 看 Codex / Claude 的 5 小时、每周剩余额度窗口 | [docs/subscription-quota-watch.md](docs/subscription-quota-watch.md) |
+| **macOS Balance 桌宠** | 在电脑右上角看预付费余额、重点平台、近 24h 消耗 | `./pet.command` |
+| **macOS Quota 菜单栏** | 写代码时看 Codex / Claude 订阅额度 | `./quota.command` |
+| **iPhone App / Widget** | `AI Balance` 余额查看、重点平台切换、低余额提醒；`AI Quota` 只做配置和最近快照 | [ios/TokenBalanceMonitor](ios/TokenBalanceMonitor) |
+| **Apple Watch App / Complication** | `AI Quota` 查看 Codex / Claude 的 5 小时、每周剩余额度窗口 | [docs/subscription-quota-watch.md](docs/subscription-quota-watch.md) |
 | **Claude Code 额度桥接** | 用 Claude Code status line 上报 Pro / Max 订阅额度 | [docs/claude-code-quota.md](docs/claude-code-quota.md) |
+| **本机私有 Quota Adapter** | 把公司内部代理、SSO 后台或私有账单接口转换成标准 spend limit JSON | [docs/local-private-quota-adapter.md](docs/local-private-quota-adapter.md) |
 | **Scriptable 小组件** | 不装原生 App，只要一个轻量 iPhone 小组件 | [docs/ios-scriptable-widget.js](docs/ios-scriptable-widget.js) |
 
 ## 预览
@@ -117,8 +127,11 @@ OPENROUTER_API_KEY=
 # Web 看板
 ./start.command
 
-# macOS 桌宠 / 状态栏
+# macOS Balance 桌宠 / 状态栏
 ./pet.command
+
+# macOS 订阅额度菜单栏
+./quota.command
 ```
 
 iOS:
@@ -198,6 +211,31 @@ node ~/.codex/skills/token-balance-monitor/scripts/token-monitor.mjs report ./us
 
 内置 JS SDK 在 [sdk/javascript](sdk/javascript)。完整事件模型、旧字段兼容和接入示例见 [Agent 接入文档](docs/agent-integration.md)，接口鉴权、请求体和响应格式见 [API Reference](docs/api-reference.md)。
 
+## Codex / Claude 订阅额度窗口
+
+Codex / Claude Code 的订阅额度不是模型平台账户余额。这里的“额度窗口”指 5 小时、每周这类订阅周期里还剩多少可用空间。
+
+AI Meter 用独立的 quota 通道处理这类数据，不会把订阅额度混进余额汇总：
+
+- Codex 可以通过本机 `scripts/codex-quota-bridge.mjs` 读取 rate limit 后上报，`quotaType=rate_window`。
+- Claude Code 推荐用 status line 把 `rate_limits` 字段上报到服务端，`quotaType=rate_window`。
+- Claude Team / claude.ai usage spend 可以通过 `scripts/claude-quota-bridge.mjs` 读取月度 spend limit，`quotaType=spend_limit`。
+- 企业 Codex / OpenAI-compatible 代理如果提供 API Key 余额接口，可以通过 `scripts/codex-proxy-quota-bridge.mjs` 接入，`quotaType=spend_limit`。
+- 如果企业代理只能通过内部后台、SSO 登录态或私有接口查询 spend，请在 `.local/` 或仓库外写本机私有 adapter，再把 `CODEX_PROXY_BALANCE_URL` 指向 `http://127.0.0.1:17891/balance`。详见 [Local private quota adapter](docs/local-private-quota-adapter.md)。
+- Apple Watch 前台 App 读取 `/api/quota/summary` 或触发 `/api/quota/refresh`，并在数据过期时显示“可能过期”。
+- macOS 上用 `./quota.command` 单独显示订阅额度；`./pet.command` 默认只显示 AI Balance。
+
+```bash
+# Codex: 只查看本机读取结果
+node scripts/codex-quota-bridge.mjs --json --no-post
+
+# Claude Code: 用 mock status line JSON 测试桥接脚本
+echo '{"rate_limits":{"five_hour":{"used_percentage":37},"seven_day":{"used_percentage":52}}}' \
+  | node scripts/quota-statusline-bridge.mjs --service claude --json
+```
+
+详细说明见 [Apple Watch 订阅额度监控](docs/subscription-quota-watch.md)、[Claude Code 订阅额度接入](docs/claude-code-quota.md)、[Claude spend bridge](docs/claude-spend-bridge.md)、[Codex enterprise proxy spend](docs/codex-proxy-quota.md) 和 [Local private quota adapter](docs/local-private-quota-adapter.md)。稳定 API 见 [API Reference](docs/api-reference.md#subscription-quota-api)。
+
 ## 支持平台
 
 | 平台 | 接入方式 | 余额汇总 |
@@ -217,11 +255,12 @@ OpenAI / Anthropic / Gemini 更适合做“本月成本 / 用量报表”，不�
 
 - 服务端默认每 1 分钟刷新余额并记录历史快照。
 - Web 看板根据余额快照估算近 24h 消耗。
-- macOS 状态栏默认每 1 分钟刷新。
+- macOS Balance 桌宠默认每 1 分钟刷新。
+- macOS Quota 菜单栏默认每 1 分钟刷新，可用 `QUOTA_MENU_REFRESH_INTERVAL_MS` 调整。
 - iPhone App 前台打开时每 1 分钟刷新。
 - WidgetKit 小组件通常不会严格每分钟刷新，最终频率由 iOS 调度。
 - iPhone 低余额提醒阈值由 `MOBILE_ALERT_THRESHOLD_CNY` 控制，默认 2 元。
-- Codex / Claude 这类订阅额度窗口走独立 quota 通道。Codex 可由本机服务实时读取；Claude Code 推荐通过 status line 上报，详见 [Claude Code 额度接入](docs/claude-code-quota.md)。
+- Codex / Claude 这类订阅额度窗口走独立 quota 通道。Codex 可由本机服务实时读取；Claude Code 推荐通过 status line 上报；Claude Team spend 通过 claude.ai usage bridge 读取。详见 [Claude Code 额度接入](docs/claude-code-quota.md) 和 [Claude spend bridge](docs/claude-spend-bridge.md)。
 
 ## 服务器部署
 
@@ -294,11 +333,11 @@ TOKEN_MONITOR_REMOTE_DIR=/home/user/token-monitor \
 ## 项目结构
 
 ```text
-server/                  余额 provider、历史快照、usage events API
+server/                  余额 provider、历史快照、usage events API、quota API
 src/                     Web 看板
 pet/                     macOS 桌宠 UI
-electron/                macOS 状态栏和桌宠外壳
-ios/TokenBalanceMonitor  iPhone App 和 WidgetKit
+electron/                macOS Balance 桌宠和 AI Quota 菜单栏外壳
+ios/TokenBalanceMonitor  iPhone App、WidgetKit 和 Apple Watch App
 skills/token-balance-monitor
                          给 Agent / Codex 使用的 Skill
 sdk/javascript           请求级 token 上报 SDK

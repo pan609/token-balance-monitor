@@ -1,0 +1,2218 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Balance | 模型平台余额与请求用量监控</title>
+    <meta
+      name="description"
+      content="AI Balance 是开源自托管的模型平台余额与请求用量监控工具，用于查看 provider 余额、credits、近 24h token usage、项目排行和请求明细。"
+    />
+    <link rel="canonical" href="https://ai.meter.panyue.xyz/projects/ai-balance/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://ai.meter.panyue.xyz/projects/ai-balance/" />
+    <link rel="alternate" hreflang="x-default" href="https://ai.meter.panyue.xyz/projects/ai-balance/" />
+    <link rel="icon" href="/projects/token-balance-monitor/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AI Balance" />
+    <meta
+      property="og:description"
+      content="模型平台余额、credits、近 24h token usage 和请求级来源归因，统一进入自托管看板。"
+    />
+    <meta property="og:image" content="https://ai.meter.panyue.xyz/projects/token-balance-monitor/assets/ai-balance-og.png" />
+    <meta property="og:url" content="https://ai.meter.panyue.xyz/projects/ai-balance/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Balance" />
+    <meta
+      name="twitter:description"
+      content="模型平台余额、credits、近 24h token usage 和请求来源归因。"
+    />
+    <meta name="twitter:image" content="https://ai.meter.panyue.xyz/projects/token-balance-monitor/assets/ai-balance-og.png" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f9fc;
+        --paper: #ffffff;
+        --soft: #f2f6fb;
+        --text: #081225;
+        --muted: #5d6b7e;
+        --subtle: #7c8898;
+        --line: #dce5f0;
+        --blue: #2563eb;
+        --blue-dark: #1747c8;
+        --green: #109c92;
+        --radius: 8px;
+        --shadow: 0 20px 54px rgba(15, 23, 42, 0.08);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: linear-gradient(180deg, #fff 0%, var(--bg) 44%, #fff 100%);
+        font-size: 16px;
+        line-height: 1.65;
+        letter-spacing: 0;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(255, 255, 255, 0.94);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(16px);
+      }
+
+      .nav-wrap,
+      .section-inner,
+      .hero-inner {
+        width: min(1180px, calc(100% - 48px));
+        margin: 0 auto;
+      }
+
+      .nav-wrap {
+        min-height: 76px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 21px;
+        font-weight: 850;
+      }
+
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #081225;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 900;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        color: #344256;
+        font-weight: 760;
+      }
+
+      .nav a {
+        white-space: nowrap;
+      }
+
+      .nav-cta {
+        padding: 12px 18px;
+        border-radius: var(--radius);
+        background: #081225;
+        color: #fff;
+      }
+
+      .hero {
+        padding: 74px 0 54px;
+      }
+
+      .hero-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 0.86fr) minmax(520px, 1.14fr);
+        gap: 54px;
+        align-items: center;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(42px, 5vw, 66px);
+        line-height: 1.06;
+        letter-spacing: 0;
+        font-weight: 900;
+      }
+
+      .lead {
+        margin-top: 22px;
+        color: var(--muted);
+        font-size: clamp(18px, 2vw, 22px);
+        line-height: 1.7;
+      }
+
+      .hero-actions,
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .button {
+        min-height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 22px;
+        border: 1px solid #b7c4d4;
+        border-radius: var(--radius);
+        background: #fff;
+        color: #081225;
+        font-weight: 850;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+        transition:
+          transform 180ms ease,
+          border-color 180ms ease,
+          box-shadow 180ms ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+        border-color: #8fa1b8;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+      }
+
+      .button.primary {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: #fff;
+      }
+
+      .button.dark {
+        background: #081225;
+        border-color: #081225;
+        color: #fff;
+      }
+
+      .scope-list {
+        margin-top: 34px;
+        display: grid;
+        gap: 12px;
+        color: var(--muted);
+      }
+
+      .scope-list div {
+        display: grid;
+        grid-template-columns: 118px 1fr;
+        gap: 14px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+
+      .scope-list strong {
+        color: var(--text);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition:
+          opacity 640ms ease,
+          transform 640ms ease;
+      }
+
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .product-visual {
+        position: relative;
+        padding: 26px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(244, 248, 252, 0.96)),
+          #fff;
+        box-shadow: 0 34px 90px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+        isolation: isolate;
+        perspective: 1100px;
+      }
+
+      .product-visual::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background:
+          linear-gradient(rgba(8, 18, 37, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(8, 18, 37, 0.035) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: radial-gradient(circle at 68% 70%, #000 0%, transparent 64%);
+      }
+
+      .product-visual::after {
+        content: "";
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        bottom: 24px;
+        height: 34px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.14);
+        filter: blur(20px);
+        z-index: 0;
+      }
+
+      .dashboard-shot {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid rgba(8, 18, 37, 0.08);
+        transform: rotateX(7deg) rotateY(-8deg) rotateZ(-1deg);
+        transform-origin: center;
+        box-shadow: 0 24px 54px rgba(15, 23, 42, 0.16);
+        animation: balanceDashboardFloat 7s ease-in-out infinite;
+      }
+
+      .phone-shot {
+        position: absolute;
+        z-index: 3;
+        right: -8px;
+        bottom: -16px;
+        width: min(33%, 220px);
+        height: auto;
+        border-radius: 0;
+        box-shadow: none;
+        transform: rotateZ(2.6deg);
+        animation: balancePhoneFloat 6.2s ease-in-out 0.35s infinite;
+      }
+
+      .telemetry-rail {
+        position: absolute;
+        z-index: 2;
+        left: 16%;
+        right: 14%;
+        bottom: 20%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.7), transparent);
+        transform: rotate(-4deg);
+      }
+
+      .telemetry-rail::before,
+      .telemetry-rail::after {
+        content: "";
+        position: absolute;
+        top: -4px;
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: var(--blue);
+        box-shadow: 0 0 18px rgba(37, 99, 235, 0.5);
+      }
+
+      .telemetry-rail::before {
+        left: 0;
+        animation: telemetryTravel 3.6s ease-in-out infinite;
+      }
+
+      .telemetry-rail::after {
+        left: 36%;
+        animation: telemetryTravel 3.6s ease-in-out 1.15s infinite;
+      }
+
+      .status-tile {
+        position: absolute;
+        z-index: 4;
+        left: 22px;
+        bottom: 22px;
+        display: grid;
+        gap: 3px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(220, 229, 240, 0.9);
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
+        backdrop-filter: blur(14px);
+        color: #334155;
+        font-size: 12px;
+        font-weight: 780;
+      }
+
+      .status-tile strong {
+        color: var(--text);
+        font-size: 18px;
+        line-height: 1.05;
+      }
+
+      .scan-line {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        pointer-events: none;
+        background: linear-gradient(105deg, transparent 40%, rgba(37, 99, 235, 0.13) 48%, transparent 56%);
+        transform: translateX(-120%);
+        animation: balanceScan 5.6s ease-in-out infinite;
+      }
+
+      @keyframes balanceDashboardFloat {
+        0%,
+        100% {
+          translate: 0 0;
+        }
+
+        50% {
+          translate: 0 -10px;
+        }
+      }
+
+      @keyframes balancePhoneFloat {
+        0%,
+        100% {
+          translate: 0 0;
+        }
+
+        50% {
+          translate: 0 -12px;
+        }
+      }
+
+      @keyframes telemetryTravel {
+        0% {
+          transform: translateX(0);
+          opacity: 0;
+        }
+
+        20%,
+        80% {
+          opacity: 1;
+        }
+
+        100% {
+          transform: translateX(360px);
+          opacity: 0;
+        }
+      }
+
+      @keyframes balanceScan {
+        0%,
+        42% {
+          transform: translateX(-120%);
+          opacity: 0;
+        }
+
+        52% {
+          opacity: 1;
+        }
+
+        72%,
+        100% {
+          transform: translateX(120%);
+          opacity: 0;
+        }
+      }
+
+      .section {
+        padding: 54px 0;
+      }
+
+      .section[id] {
+        scroll-margin-top: 96px;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.74fr) minmax(280px, 0.56fr);
+        gap: 40px;
+        align-items: end;
+        margin-bottom: 28px;
+      }
+
+      .section h2 {
+        font-size: clamp(28px, 3.3vw, 42px);
+        line-height: 1.12;
+        font-weight: 900;
+      }
+
+      .section-head p,
+      .copy {
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .proof-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .proof-item {
+        min-height: 188px;
+        padding: 24px;
+        border-right: 1px solid var(--line);
+      }
+
+      .proof-item:last-child {
+        border-right: 0;
+      }
+
+      .proof-item span {
+        color: var(--blue);
+        font-weight: 900;
+      }
+
+      .proof-item h3 {
+        margin-top: 18px;
+        font-size: 24px;
+        line-height: 1.2;
+      }
+
+      .proof-item p {
+        margin-top: 10px;
+        color: var(--muted);
+      }
+
+      .faq-list {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        overflow: hidden;
+      }
+
+      .faq-item {
+        padding: 22px 24px;
+        border-top: 1px solid var(--line);
+      }
+
+      .faq-item:first-child {
+        border-top: 0;
+      }
+
+      .faq-item h3 {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.4;
+      }
+
+      .faq-item p {
+        margin: 8px 0 0;
+        max-width: 960px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.8;
+      }
+
+      .surface-tabs {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .surface-panels {
+        position: relative;
+        min-height: 608px;
+      }
+
+      .tab-controls {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        border-bottom: 1px solid var(--line);
+        background: rgba(248, 251, 255, 0.86);
+      }
+
+      .tab-button {
+        min-height: 68px;
+        border: 0;
+        border-right: 1px solid var(--line);
+        background: transparent;
+        color: #344256;
+        font: inherit;
+        font-weight: 850;
+        cursor: pointer;
+      }
+
+      .tab-button:last-child {
+        border-right: 0;
+      }
+
+      .tab-button[aria-selected="true"] {
+        background: #081225;
+        color: #fff;
+      }
+
+      .tab-button:focus {
+        outline: none;
+      }
+
+      .tab-button:focus-visible {
+        outline: 2px solid rgba(37, 99, 235, 0.46);
+        outline-offset: -6px;
+      }
+
+      .surface-panel {
+        display: grid;
+        grid-template-columns: minmax(0, 1.42fr) minmax(280px, 0.58fr);
+        gap: 30px;
+        align-items: center;
+        padding: 28px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        transform: translateY(16px) scale(0.992);
+        transition:
+          opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+          transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+          visibility 420ms ease;
+      }
+
+      .surface-panel.is-active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        position: relative;
+        transform: translateY(0) scale(1);
+      }
+
+      .surface-copy h3 {
+        font-size: clamp(28px, 3vw, 38px);
+        line-height: 1.12;
+      }
+
+      .surface-copy p {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .surface-copy ul {
+        margin: 22px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 12px;
+        color: #344256;
+        font-weight: 720;
+      }
+
+      .surface-copy li {
+        position: relative;
+        padding-left: 20px;
+      }
+
+      .surface-copy li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.78em;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--green);
+      }
+
+      .demo-frame {
+        position: relative;
+        min-height: 520px;
+        border: 1px solid rgba(220, 229, 240, 0.9);
+        border-radius: 14px;
+        background:
+          linear-gradient(rgba(8, 18, 37, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(8, 18, 37, 0.035) 1px, transparent 1px),
+          linear-gradient(180deg, #f8fbff, #eef7f5);
+        background-size: 44px 44px, 44px 44px, auto;
+        overflow: hidden;
+        box-shadow: 0 28px 80px rgba(15, 23, 42, 0.1);
+      }
+
+      .demo-frame img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .web-demo {
+        padding: 30px 30px 58px;
+      }
+
+      .web-demo video,
+      .web-demo img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(8, 18, 37, 0.1);
+        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.14);
+        animation: webDemoPan 12s ease-in-out infinite;
+        transform-origin: center top;
+      }
+
+      .demo-browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        color: #526174;
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .demo-browser-bar span {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #ef4444;
+        box-shadow:
+          16px 0 #f59e0b,
+          32px 0 #22c55e;
+      }
+
+      .demo-browser-bar strong {
+        margin-left: 34px;
+      }
+
+      .demo-cursor {
+        position: absolute;
+        z-index: 4;
+        left: 64%;
+        top: 34%;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: var(--blue);
+        box-shadow: 0 0 0 9px rgba(37, 99, 235, 0.13);
+        animation: cursorTour 9s ease-in-out infinite;
+      }
+
+      .demo-scrubber {
+        position: absolute;
+        left: 34px;
+        right: 34px;
+        bottom: 28px;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(37, 99, 235, 0.14);
+      }
+
+      .demo-scrubber::after {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 36%;
+        border-radius: inherit;
+        background: var(--blue);
+        animation: scrubberRun 9s ease-in-out infinite;
+      }
+
+      .mac-demo,
+      .agent-demo {
+        min-height: 520px;
+        padding: 34px;
+        display: grid;
+        place-items: center;
+      }
+
+      .agent-demo img {
+        width: min(100%, 880px);
+        border-radius: 10px;
+        box-shadow: 0 26px 70px rgba(15, 23, 42, 0.14);
+        animation: surfaceFloat 7s ease-in-out infinite;
+      }
+
+      .agent-demo img {
+        width: min(124%, 1060px);
+        max-width: none;
+      }
+
+      .macos-stage {
+        position: relative;
+        width: min(100%, 840px);
+        min-height: 430px;
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 15% 80%, rgba(17, 185, 169, 0.24), transparent 34%),
+          linear-gradient(135deg, #f7fbff, #eaf4ff 56%, #f7fffb);
+        border: 1px solid rgba(208, 220, 236, 0.95);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        overflow: hidden;
+      }
+
+      .macos-live-stage {
+        position: relative;
+        width: min(100%, 900px);
+        min-height: 500px;
+        overflow: hidden;
+        border: 1px solid rgba(208, 220, 236, 0.95);
+        border-radius: 16px;
+        background:
+          radial-gradient(circle at 18% 84%, rgba(17, 185, 169, 0.18), transparent 34%),
+          radial-gradient(circle at 76% 15%, rgba(37, 99, 235, 0.12), transparent 30%),
+          linear-gradient(135deg, #f7fbff 0%, #edf5ff 56%, #fbfffd 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        isolation: isolate;
+      }
+
+      .macos-live-stage::after {
+        content: "";
+        position: absolute;
+        inset: auto 34px 34px;
+        height: 28px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.12);
+        filter: blur(18px);
+        z-index: 0;
+      }
+
+      .mac-status-row {
+        position: absolute;
+        z-index: 3;
+        left: 38px;
+        right: 38px;
+        top: 32px;
+        height: 38px;
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        align-items: center;
+        gap: 18px;
+        padding: 0 14px;
+        border: 1px solid rgba(208, 220, 236, 0.86);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.86);
+        color: #081225;
+        font-size: 12px;
+        font-weight: 820;
+        backdrop-filter: blur(18px);
+      }
+
+      .mac-status-row nav {
+        display: flex;
+        gap: 16px;
+        color: #344256;
+      }
+
+      .mac-status-row time {
+        color: #526174;
+      }
+
+      .mac-balance-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 78px;
+        height: 24px;
+        border-radius: 999px;
+        background: #081225;
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(8, 18, 37, 0.16);
+        animation: menuChipPulse 4.4s ease-in-out infinite;
+      }
+
+      .mac-popover-panel {
+        position: absolute;
+        z-index: 4;
+        right: 86px;
+        top: 82px;
+        width: 224px;
+        padding: 12px;
+        border: 1px solid rgba(208, 220, 236, 0.9);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 22px 54px rgba(15, 23, 42, 0.14);
+        backdrop-filter: blur(18px);
+        animation: popoverIn 6.2s ease-in-out infinite;
+      }
+
+      .mac-popover-panel strong {
+        display: block;
+        font-size: 13px;
+        line-height: 1.2;
+      }
+
+      .mac-popover-panel span {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 10px 0;
+        border-top: 1px solid rgba(220, 229, 240, 0.9);
+        color: #344256;
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .mac-popover-panel em,
+      .mac-popover-panel b {
+        font-style: normal;
+      }
+
+      .mac-popover-panel span:first-of-type {
+        margin-top: 10px;
+      }
+
+      .mac-widget-window {
+        position: absolute;
+        z-index: 2;
+        left: 70px;
+        bottom: 42px;
+        width: min(48%, 360px);
+        padding: 10px;
+        border: 1px solid rgba(208, 220, 236, 0.9);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 30px 70px rgba(15, 23, 42, 0.14);
+        transform: rotateY(-10deg) rotateX(4deg) rotateZ(-1deg);
+        transform-origin: 30% 50%;
+        animation: macWindowFloat 7s ease-in-out infinite;
+      }
+
+      .mac-widget-window img {
+        width: 100%;
+        max-height: 382px;
+        object-fit: cover;
+        object-position: top;
+        border-radius: 12px;
+      }
+
+      .mac-context-card {
+        position: absolute;
+        z-index: 2;
+        right: 68px;
+        bottom: 60px;
+        width: 280px;
+        padding: 22px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(208, 220, 236, 0.9);
+        box-shadow: 0 22px 52px rgba(15, 23, 42, 0.12);
+      }
+
+      .mac-context-card h4 {
+        margin: 0;
+        font-size: 20px;
+        line-height: 1.2;
+      }
+
+      .mac-context-card p {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .mac-menu {
+        position: absolute;
+        left: 42px;
+        right: 42px;
+        top: 34px;
+        height: 44px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 28px;
+        padding: 0 18px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
+        color: #081225;
+        font-weight: 850;
+      }
+
+      .mac-menu em {
+        font-style: normal;
+        color: var(--muted);
+        font-weight: 720;
+      }
+
+      .mac-popover {
+        position: absolute;
+        z-index: 2;
+        left: 34%;
+        top: 106px;
+        width: 260px;
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(220, 229, 240, 0.95);
+        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.14);
+        animation: menuDrop 8s ease-in-out infinite;
+      }
+
+      .mac-popover div {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 10px;
+        border-radius: 10px;
+        color: #334155;
+        font-weight: 800;
+      }
+
+      .mac-popover div:first-child {
+        background: #eef5ff;
+        color: #081225;
+      }
+
+      .mac-widget-shot {
+        position: absolute;
+        z-index: 1;
+        right: 54px;
+        bottom: -34px;
+        width: 300px;
+        border-radius: 24px;
+        box-shadow: 0 34px 80px rgba(15, 23, 42, 0.18);
+        transform: rotateY(-10deg) rotateX(3deg);
+        animation: surfaceFloat 7s ease-in-out 0.4s infinite;
+      }
+
+      @keyframes menuDrop {
+        0%,
+        100% {
+          opacity: 0.88;
+          transform: translateY(0);
+        }
+
+        48% {
+          opacity: 1;
+          transform: translateY(-8px);
+        }
+      }
+
+      .iphone-demo {
+        min-height: 560px;
+        display: grid;
+        grid-template-columns: 0.48fr 0.52fr;
+        gap: 26px;
+        align-items: center;
+        padding: 34px;
+        perspective: 1200px;
+      }
+
+      .phone-rotator {
+        display: grid;
+        place-items: center;
+        min-height: 500px;
+      }
+
+      .phone-rotator img {
+        width: min(72%, 260px);
+        border-radius: 34px;
+        filter: drop-shadow(0 34px 40px rgba(15, 23, 42, 0.18));
+        transform-origin: 50% 55%;
+        animation: phoneRotate 10s ease-in-out infinite;
+      }
+
+      .widget-board {
+        position: relative;
+        min-height: 430px;
+        display: grid;
+        align-content: center;
+        gap: 18px;
+      }
+
+      .widget-card {
+        position: relative;
+        width: min(82%, 280px);
+        padding: 18px;
+        border-radius: 22px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 245, 233, 0.92)),
+          #fff;
+        border: 1px solid rgba(220, 229, 240, 0.9);
+        box-shadow: 0 30px 70px rgba(15, 23, 42, 0.14);
+        animation: widgetLift 7s ease-in-out infinite;
+      }
+
+      .widget-label {
+        color: #f97316;
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .widget-value {
+        margin-top: 10px;
+        color: var(--text);
+        font-size: clamp(36px, 4vw, 48px);
+        line-height: 0.95;
+        font-weight: 900;
+      }
+
+      .widget-meta {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .widget-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 18px;
+        color: #344256;
+        font-weight: 850;
+      }
+
+      .widget-row span {
+        display: grid;
+        gap: 4px;
+      }
+
+      .widget-row b {
+        color: var(--text);
+        font-size: 16px;
+      }
+
+      .widget-mini {
+        width: min(64%, 200px);
+        margin-left: 34px;
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(220, 229, 240, 0.9);
+        box-shadow: 0 20px 52px rgba(15, 23, 42, 0.12);
+        animation: widgetLift 7s ease-in-out 1.2s infinite;
+      }
+
+      .widget-mini strong {
+        display: block;
+        font-size: 24px;
+      }
+
+      .widget-mini span {
+        color: var(--muted);
+        font-weight: 760;
+      }
+
+      @keyframes webDemoPan {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+
+        50% {
+          transform: translateY(-18px) scale(1.035);
+        }
+      }
+
+      @keyframes cursorTour {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+
+        32% {
+          transform: translate(-190px, 78px);
+        }
+
+        62% {
+          transform: translate(74px, 180px);
+        }
+      }
+
+      @keyframes scrubberRun {
+        0%,
+        100% {
+          transform: translateX(0);
+          width: 28%;
+        }
+
+        50% {
+          transform: translateX(140%);
+          width: 42%;
+        }
+      }
+
+      @keyframes surfaceFloat {
+        0%,
+        100% {
+          translate: 0 0;
+        }
+
+        50% {
+          translate: 0 -10px;
+        }
+      }
+
+      @keyframes phoneRotate {
+        0%,
+        100% {
+          transform: rotateY(-14deg) rotateZ(-2deg) translateY(0);
+        }
+
+        45% {
+          transform: rotateY(16deg) rotateZ(1deg) translateY(-14px);
+        }
+      }
+
+      @keyframes widgetLift {
+        0%,
+        100% {
+          translate: 0 0;
+        }
+
+        50% {
+          translate: 0 -12px;
+        }
+      }
+
+      .web-demo {
+        padding: 24px 24px 56px;
+        display: grid;
+        align-content: center;
+      }
+
+      .web-player {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(8, 18, 37, 0.1);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.14);
+      }
+
+      .web-player-chrome {
+        height: 28px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        border-bottom: 1px solid rgba(220, 229, 240, 0.85);
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .web-player-chrome span {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #ef4444;
+        box-shadow:
+          15px 0 #f59e0b,
+          30px 0 #22c55e;
+      }
+
+      .web-player video {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        object-position: top left;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        animation: none;
+      }
+
+      .demo-browser-bar,
+      .demo-cursor {
+        display: none;
+      }
+
+      .surface-art-wrap {
+        position: relative;
+        width: min(100%, 920px);
+        isolation: isolate;
+      }
+
+      .surface-art {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 14px;
+        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.14);
+        animation: surfaceFloat 7s ease-in-out infinite;
+      }
+
+      .mac-art-wrap::after,
+      .widget-stage::after,
+      .agent-shell::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+        left: 9%;
+        right: 9%;
+        bottom: -18px;
+        height: 30px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.14);
+        filter: blur(20px);
+        z-index: -1;
+      }
+
+      .status-beam {
+        position: absolute;
+        left: 16%;
+        right: 20%;
+        top: 14%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.72), transparent);
+        animation: statusSweep 4.8s ease-in-out infinite;
+      }
+
+      .iphone-demo {
+        min-height: 560px;
+        grid-template-columns: 0.43fr 0.57fr;
+        gap: 30px;
+        align-items: center;
+        padding: 34px;
+      }
+
+      .iphone-device {
+        display: grid;
+        place-items: center;
+        min-height: 500px;
+        perspective: 1200px;
+      }
+
+      .iphone-device img {
+        width: min(96%, 330px);
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        transform-origin: 50% 55%;
+        animation: phoneRotate 10s ease-in-out infinite;
+      }
+
+      .widget-stage {
+        position: relative;
+        min-height: 420px;
+        display: grid;
+        align-content: center;
+        gap: 28px;
+        perspective: 1000px;
+      }
+
+      .home-widget {
+        position: relative;
+        width: min(88%, 318px);
+        padding: 19px;
+        border-radius: 24px;
+        background:
+          radial-gradient(circle at 86% 18%, rgba(255, 246, 230, 0.95), transparent 34%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(246, 252, 251, 0.94));
+        border: 1px solid rgba(220, 229, 240, 0.9);
+        box-shadow: 0 30px 70px rgba(15, 23, 42, 0.13);
+        transform: rotateY(-8deg) rotateZ(-1deg);
+        animation: widgetLift 7s ease-in-out infinite;
+      }
+
+      .home-widget span,
+      .home-widget em {
+        display: block;
+        color: var(--muted);
+        font-style: normal;
+        font-weight: 820;
+      }
+
+      .home-widget strong {
+        display: block;
+        margin-top: 8px;
+        color: var(--text);
+        font-size: clamp(32px, 3.4vw, 46px);
+        line-height: 1;
+        font-weight: 900;
+      }
+
+      .home-widget em {
+        margin-top: 10px;
+        font-size: 15px;
+      }
+
+      .home-widget div {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .home-widget b {
+        color: #081225;
+        font-size: 14px;
+        line-height: 1.25;
+      }
+
+      .small-widget {
+        width: min(62%, 218px);
+        margin-left: 58px;
+        padding: 18px 20px;
+        transform: rotateY(8deg) rotateZ(1deg);
+        animation-delay: 0.9s;
+      }
+
+      .small-widget strong {
+        font-size: 32px;
+      }
+
+      .small-widget div {
+        display: none;
+      }
+
+      .agent-demo {
+        min-height: 500px;
+        padding: 22px;
+        display: grid;
+        place-items: center;
+      }
+
+      .agent-shell {
+        position: relative;
+        width: min(100%, 880px);
+        padding: 22px;
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.16), transparent 34%),
+          #071226;
+        color: #e5eefc;
+        box-shadow: 0 34px 82px rgba(8, 18, 37, 0.24);
+        animation: surfaceFloat 7s ease-in-out infinite;
+      }
+
+      .agent-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .agent-mark {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #2563eb, #13c2b4);
+        color: #fff;
+        font-weight: 900;
+      }
+
+      .agent-head strong,
+      .agent-head span {
+        display: block;
+      }
+
+      .agent-head strong {
+        font-size: 22px;
+        line-height: 1.1;
+      }
+
+      .agent-head span {
+        margin-top: 3px;
+        color: #9fb0c8;
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .terminal-window {
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 14px;
+        background: #091423;
+      }
+
+      .terminal-bar {
+        height: 38px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+        color: #9fb0c8;
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .terminal-bar span {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #ff5f57;
+        box-shadow:
+          15px 0 #ffbd2e,
+          30px 0 #28c840;
+      }
+
+      .terminal-window pre {
+        margin: 0;
+        padding: 20px 24px 22px;
+        color: #dbeafe;
+        background: transparent;
+        border-radius: 0;
+        font-size: clamp(15px, 1.24vw, 17px);
+        line-height: 1.52;
+        white-space: pre-wrap;
+      }
+
+      .agent-notes {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .agent-notes span {
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: rgba(15, 30, 52, 0.9);
+        color: #cbd7ea;
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      @keyframes statusSweep {
+        0%,
+        100% {
+          opacity: 0.3;
+          transform: translateX(-18px);
+        }
+
+        50% {
+          opacity: 1;
+          transform: translateX(26px);
+        }
+      }
+
+      @keyframes menuChipPulse {
+        0%,
+        100% {
+          transform: translateY(0);
+          box-shadow: 0 8px 18px rgba(8, 18, 37, 0.16);
+        }
+
+        50% {
+          transform: translateY(-1px);
+          box-shadow: 0 12px 26px rgba(8, 18, 37, 0.22);
+        }
+      }
+
+      @keyframes popoverIn {
+        0%,
+        100% {
+          opacity: 0.82;
+          transform: translateY(0) scale(0.985);
+        }
+
+        42%,
+        62% {
+          opacity: 1;
+          transform: translateY(-4px) scale(1);
+        }
+      }
+
+      @keyframes macWindowFloat {
+        0%,
+        100% {
+          transform: rotateY(-10deg) rotateX(4deg) rotateZ(-1deg) translateY(0);
+        }
+
+        50% {
+          transform: rotateY(-7deg) rotateX(5deg) rotateZ(-0.3deg) translateY(-8px);
+        }
+      }
+
+      .workflow {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 18px;
+      }
+
+      .workflow-copy,
+      .code-panel {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        padding: 26px;
+      }
+
+      .workflow-copy h3 {
+        font-size: 28px;
+      }
+
+      .workflow-copy ul {
+        margin: 20px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 14px;
+      }
+
+      .workflow-copy li {
+        padding-left: 20px;
+        position: relative;
+        color: var(--muted);
+      }
+
+      .workflow-copy li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.72em;
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--blue);
+      }
+
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        color: #c7d2fe;
+        background: #081225;
+        border-radius: 10px;
+        padding: 22px;
+        font-size: 15px;
+        line-height: 1.65;
+      }
+
+      .provider-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .provider-strip span {
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        color: #344256;
+        font-weight: 760;
+      }
+
+      .final {
+        padding: 48px 0 78px;
+      }
+
+      .final-panel {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        padding: 30px;
+        border-radius: 12px;
+        background: #081225;
+        color: #fff;
+      }
+
+      .final-panel p {
+        margin-top: 6px;
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      footer {
+        padding: 28px 0;
+        color: var(--subtle);
+        border-top: 1px solid var(--line);
+      }
+
+      @media (max-width: 980px) {
+        .hero-inner,
+        .section-head,
+        .workflow,
+        .surface-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-inner {
+          gap: 34px;
+        }
+
+        .proof-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .tab-controls {
+          display: flex;
+          overflow-x: auto;
+        }
+
+        .tab-button {
+          min-width: 180px;
+        }
+
+        .demo-frame,
+        .iphone-demo {
+          min-height: 460px;
+        }
+
+        .iphone-demo {
+          grid-template-columns: 0.42fr 0.58fr;
+        }
+
+        .proof-item {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .proof-item:last-child {
+          border-bottom: 0;
+        }
+
+        .phone-shot {
+          right: 10px;
+          bottom: 10px;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .site-header {
+          position: static;
+        }
+
+        .nav-wrap,
+        .section-inner,
+        .hero-inner {
+          width: calc(100% - 32px);
+          max-width: 1180px;
+        }
+
+        .nav-wrap {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 16px 0;
+        }
+
+        .nav {
+          width: 100%;
+          gap: 14px;
+          overflow-x: auto;
+          font-size: 14px;
+        }
+
+        .hero {
+          padding-top: 46px;
+        }
+
+        h1 {
+          font-size: 46px;
+        }
+
+        .scope-list div {
+          grid-template-columns: 1fr;
+        }
+
+        .phone-shot {
+          display: none;
+        }
+
+        .surface-panel {
+          padding: 16px;
+        }
+
+        .web-demo,
+        .mac-demo,
+        .agent-demo,
+        .iphone-demo {
+          padding: 18px;
+        }
+
+        .demo-frame,
+        .iphone-demo {
+          min-height: 360px;
+        }
+
+        .demo-cursor,
+        .demo-scrubber {
+          display: none;
+        }
+
+        .iphone-demo {
+          grid-template-columns: 1fr;
+        }
+
+        .phone-rotator {
+          min-height: 360px;
+        }
+
+        .phone-rotator img {
+          width: min(70%, 230px);
+        }
+
+        .widget-board {
+          min-height: 0;
+        }
+
+        .widget-row {
+          grid-template-columns: 1fr;
+        }
+
+        .widget-mini {
+          width: 100%;
+          margin-left: 0;
+        }
+
+        .final-panel {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "AI Balance",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web, macOS, iOS",
+        "description": "Self-hosted AI provider balance and request-level token usage monitor.",
+        "url": "https://ai.meter.panyue.xyz/projects/ai-balance/",
+        "codeRepository": "https://github.com/pan609/token-balance-monitor/"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "AI Balance 支持哪些模型平台？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "目前支持阿里云百炼、DeepSeek、火山引擎 / 豆包、Kimi (Moonshot)、硅基流动和 OpenRouter，由服务端调用各平台官方余额或 credits 接口，也可以按文档自行适配新平台。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "余额多久刷新一次？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "服务端默认每 60 秒轮询一次各平台余额，间隔可通过 BALANCE_POLL_INTERVAL_MS 调整（最小 60 秒），每条余额都保留最近同步时间。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "token 用量能看到什么粒度？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "请求级。每条 usage 事件记录 provider、model、tokens、project、account、resource 和时间戳，可以按项目、模型、账号或资源聚合，定位具体消耗来源。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "会保存我的 prompt 和模型回复吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "不会。AI Balance 只记录结构化用量字段，不保存 prompt、response 或业务正文；云厂商 key 也始终留在服务端，不下发到任何客户端。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "不同币种的余额怎么汇总？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "只有 CNY（或平台显式给出的人民币金额）计入人民币总额；OpenRouter 等 USD credits 按原币种单独显示，不做汇率折算后混入总额。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Codex / Claude Code 的订阅额度也在这里看吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "不在。5 小时、每周订阅额度窗口属于另一条产品线 AI Quota，它不进入 AI Balance 的余额汇总，也不和 credits 混算。"
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-wrap">
+        <a class="brand" href="/projects/token-balance-monitor/" aria-label="AI Meter 首页">
+          <span class="brand-mark">￥</span>
+          <span>AI Balance</span>
+        </a>
+        <nav class="nav" aria-label="AI Balance 导航">
+          <a href="/projects/token-balance-monitor/">AI Meter</a>
+          <a href="/projects/ai-quota/">AI Quota</a>
+          <a href="#surfaces">产品形态</a>
+          <a href="#workflow">接入方式</a>
+          <a href="https://github.com/pan609/token-balance-monitor/blob/main/docs/api-reference.md">API 文档</a>
+          <a class="nav-cta" href="/go/token-balance-monitor-github">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-inner">
+          <div>
+            <h1>余额与用量监控</h1>
+            <p class="lead">
+              把模型平台余额、credits、近 24h token usage 和请求明细放进同一套自托管服务，服务 Web、macOS、iPhone 和 Agent 工作流。
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="/go/token-balance-monitor-github">查看 GitHub</a>
+              <a class="button" href="https://github.com/pan609/token-balance-monitor/blob/main/docs/api-reference.md">API Reference</a>
+            </div>
+            <div class="scope-list" aria-label="AI Balance 能力边界">
+              <div><strong>平台余额</strong><span>阿里云百炼、DeepSeek、Kimi、豆包、硅基流动、OpenRouter 等余额或 credits。</span></div>
+              <div><strong>请求用量</strong><span>provider、model、tokens、project、account、resource 与时间戳。</span></div>
+              <div><strong>数据边界</strong><span>Codex / Claude Code 订阅额度属于 AI Quota，不进入余额汇总。</span></div>
+            </div>
+          </div>
+          <figure class="product-visual" aria-label="AI Balance 产品预览">
+            <img class="dashboard-shot" src="/projects/assets/web-usage-dashboard.jpg" width="1800" height="882" decoding="async" fetchpriority="high" alt="AI Balance Web Dashboard 请求用量看板。" />
+            <span class="telemetry-rail" aria-hidden="true"></span>
+            <img class="phone-shot" src="/projects/assets/device-iphone-balance-mockup.png" width="900" height="1200" loading="lazy" decoding="async" alt="AI Balance iPhone App 设备效果图。" />
+            <span class="status-tile" aria-hidden="true"><strong>24h</strong>usage 事件流</span>
+            <span class="scan-line" aria-hidden="true"></span>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="proof-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="proof-title">余额、用量、来源</h2>
+            <p>从余额概览进入请求归因，定位成本变化的具体来源。</p>
+          </div>
+          <div class="proof-grid reveal">
+            <article class="proof-item">
+              <span>01</span>
+              <h3>余额总览</h3>
+              <p>按 provider 查看余额、credits、低余额状态和最近同步时间。</p>
+            </article>
+            <article class="proof-item">
+              <span>02</span>
+              <h3>请求归因</h3>
+              <p>按项目、模型、账号、资源定位 token 消耗来源。</p>
+            </article>
+            <article class="proof-item">
+              <span>03</span>
+              <h3>隐私边界</h3>
+              <p>只记录结构化字段，不保存 prompt、response 或业务正文。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="surfaces" aria-labelledby="surfaces-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="surfaces-title">按场景进入</h2>
+            <p>同一套余额服务，在不同工作场景里呈现不同的信息密度。</p>
+          </div>
+          <div class="surface-tabs reveal">
+            <div class="tab-controls" role="tablist" aria-label="AI Balance 产品形态">
+              <button class="tab-button" id="tab-web" type="button" role="tab" aria-selected="true" aria-controls="panel-web" data-surface-tab="web">Web Dashboard</button>
+              <button class="tab-button" id="tab-macos" type="button" role="tab" aria-selected="false" aria-controls="panel-macos" data-surface-tab="macos">macOS Menu Bar</button>
+              <button class="tab-button" id="tab-iphone" type="button" role="tab" aria-selected="false" aria-controls="panel-iphone" data-surface-tab="iphone">iPhone Widget</button>
+              <button class="tab-button" id="tab-agent" type="button" role="tab" aria-selected="false" aria-controls="panel-agent" data-surface-tab="agent">Agent Skill</button>
+            </div>
+
+            <div class="surface-panels">
+            <article class="surface-panel is-active" id="panel-web" role="tabpanel" aria-labelledby="tab-web" data-surface-panel="web" aria-hidden="false">
+              <div class="demo-frame web-demo" aria-label="Web Dashboard 演示">
+                <div class="web-player">
+                  <div class="web-player-chrome" aria-hidden="true"><span></span></div>
+                  <video autoplay muted loop playsinline preload="auto" poster="/projects/assets/surface-web-v3.webp" aria-label="AI Balance Web Dashboard 请求明细看板演示。">
+                    <source src="/projects/assets/web-dashboard-demo.webm" type="video/webm" />
+                  </video>
+                </div>
+                <span class="demo-scrubber" aria-hidden="true"></span>
+              </div>
+              <div class="surface-copy">
+                <h3>Web 看全量</h3>
+                <p>适合排查消耗来源。大屏保留表格、筛选器和图表密度，不把看板压缩成小缩略图。</p>
+                <ul>
+                  <li>余额、近 24h usage、项目排行同屏查看。</li>
+                  <li>请求明细保持可读，定位具体模型、账号和资源。</li>
+                  <li>只记录结构化字段，不保存 prompt 或 response。</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="surface-panel" id="panel-macos" role="tabpanel" aria-labelledby="tab-macos" data-surface-panel="macos" aria-hidden="true">
+              <div class="demo-frame mac-demo" aria-label="macOS Menu Bar 演示">
+                <div class="macos-live-stage">
+                  <div class="mac-status-row" aria-hidden="true">
+                    <strong>AI Meter</strong>
+                    <nav><span>余额</span><span>请求</span><span>设置</span></nav>
+                    <span class="mac-balance-chip">¥54.30</span>
+                    <time>15:40</time>
+                  </div>
+                  <div class="mac-popover-panel" aria-hidden="true">
+                    <strong>余额助手</strong>
+                    <span><em>总可用余额</em><b>¥54.30</b></span>
+                    <span><em>阿里云百炼</em><b>¥12.62</b></span>
+                    <span><em>近 24h usage</em><b>¥1.47</b></span>
+                    <span><em>打开 Web 看板</em><b>↗</b></span>
+                  </div>
+                  <div class="mac-widget-window">
+                    <img src="/projects/assets/macos-pet.png" width="760" height="1148" decoding="async" loading="lazy" alt="macOS 桌面余额助手界面。" />
+                  </div>
+                  <div class="mac-context-card" aria-hidden="true">
+                    <h4>状态栏是主入口</h4>
+                    <p>写代码时只保留余额、重点平台和近 24h usage；需要排查时再进入 Web 看板。</p>
+                  </div>
+                </div>
+              </div>
+              <div class="surface-copy">
+                <h3>macOS 常驻</h3>
+                <p>状态栏和桌面小窗用于日常扫一眼，不需要每天打开多个平台控制台。</p>
+                <ul>
+                  <li>总余额、重点 provider、近 24h usage 快速切换。</li>
+                  <li>低余额状态来自服务端阈值。</li>
+                  <li>客户端只读 summary，不持有 provider key。</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="surface-panel" id="panel-iphone" role="tabpanel" aria-labelledby="tab-iphone" data-surface-panel="iphone" aria-hidden="true">
+              <div class="demo-frame iphone-demo" aria-label="iPhone App 和 Widget 演示">
+                <div class="iphone-device">
+                  <img src="/projects/assets/device-iphone-balance-mockup.png" width="900" height="1200" decoding="async" loading="lazy" alt="AI Balance iPhone App 设备效果图。" />
+                </div>
+                <div class="widget-stage" aria-hidden="true">
+                  <div class="home-widget large-widget">
+                    <span>总可用余额</span>
+                    <strong>¥54.30</strong>
+                    <em>6 个平台 · 近 24h 消耗 ¥1.47</em>
+                    <div>
+                      <b>阿里云 ¥12.62</b>
+                      <b>Kimi ¥18.40</b>
+                      <b>DeepSeek ¥7.08</b>
+                    </div>
+                  </div>
+                  <div class="home-widget small-widget">
+                    <span>重点关注</span>
+                    <strong>¥6.47</strong>
+                    <em>阿里云百炼 · 余额正常</em>
+                  </div>
+                </div>
+              </div>
+              <div class="surface-copy">
+                <h3>iPhone 看摘要</h3>
+                <p>App 负责配置和详情，桌面小组件负责出门前的余额确认。</p>
+                <ul>
+                  <li>手机 App 保留 provider 列表和刷新入口。</li>
+                  <li>Widget 单独展示总余额或重点平台。</li>
+                  <li>设备端不保存云厂商 key。</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="surface-panel" id="panel-agent" role="tabpanel" aria-labelledby="tab-agent" data-surface-panel="agent" aria-hidden="true">
+              <div class="demo-frame agent-demo" aria-label="Agent Skill 演示">
+                <div class="agent-shell">
+                  <div class="agent-head">
+                    <span class="agent-mark">￥</span>
+                    <div>
+                      <strong>Token Balance Monitor Skill</strong>
+                      <span>余额查询、看板打开、usage 上报</span>
+                    </div>
+                  </div>
+                  <div class="terminal-window">
+                    <div class="terminal-bar"><span></span><strong>agent-demo — zsh</strong></div>
+                    <pre><code>$ token-monitor balance --provider aliyun
+{
+  "totalCny": 54.30,
+  "primary": { "provider": "aliyun", "amount": 12.62 },
+  "usage24hCny": 1.47,
+  "belowAlert": false
+}
+
+$ token-monitor dashboard
+https://demo.example.com/token-monitor/#usage-dashboard
+
+$ token-monitor report usage-event-demo.json
+{ "accepted": 1, "rejected": 0 }</code></pre>
+                  </div>
+                  <div class="agent-notes">
+                    <span>只读 token 查询余额</span>
+                    <span>ingest token 写入 usage</span>
+                    <span>不保存 prompt / response</span>
+                  </div>
+                </div>
+              </div>
+              <div class="surface-copy">
+                <h3>Agent 读接口</h3>
+                <p>Agent 可以查询余额、打开看板，也可以在模型调用结束后上报 usage。</p>
+                <ul>
+                  <li>只读 token 查询余额。</li>
+                  <li>ingest token 写入 usage 事件。</li>
+                  <li>云厂商 key 始终留在服务端。</li>
+                </ul>
+              </div>
+            </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="workflow" aria-labelledby="workflow-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="workflow-title">Report-only 接入</h2>
+            <p>AI Balance 接收请求结束后的用量事件，不改变业务请求路径。</p>
+          </div>
+          <div class="workflow reveal">
+            <div class="workflow-copy">
+              <h3>服务端写入，前端只读</h3>
+              <ul>
+                <li>Provider key 保留在服务端，不下发到设备端。</li>
+                <li>查询 token 和 ingest token 分离，适配 Web、Agent、iPhone 与 macOS。</li>
+                <li>支持按业务维度聚合：project、account、actor、resource。</li>
+              </ul>
+            </div>
+            <div class="code-panel">
+              <pre><code>POST /api/usage-events
+{
+  "provider": "deepseek",
+  "model": "deepseek-chat",
+  "project": "class-teacher",
+  "tokens": 12003,
+  "resource": "answer_extract"
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="providers" aria-labelledby="providers-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="providers-title">数据来源</h2>
+            <p>通过服务端调用官方或稳定的余额接口；币种、账务口径和刷新时间保留来源标识，避免误合并。</p>
+          </div>
+          <div class="provider-strip reveal" aria-label="AI Balance 支持平台">
+            <span>阿里云百炼</span>
+            <span>DeepSeek</span>
+            <span>Kimi / Moonshot</span>
+            <span>豆包</span>
+            <span>硅基流动</span>
+            <span>OpenRouter</span>
+            <span>Usage API</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="faq" aria-labelledby="faq-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="faq-title">常见问题</h2>
+            <p>关于 AI Balance 的数据来源、刷新频率和隐私边界。</p>
+          </div>
+          <div class="faq-list reveal">
+            <div class="faq-item">
+              <h3>AI Balance 支持哪些模型平台？</h3>
+              <p>目前支持阿里云百炼、DeepSeek、火山引擎 / 豆包、Kimi (Moonshot)、硅基流动和 OpenRouter，由服务端调用各平台官方余额或 credits 接口，也可以按文档自行适配新平台。</p>
+            </div>
+            <div class="faq-item">
+              <h3>余额多久刷新一次？</h3>
+              <p>服务端默认每 60 秒轮询一次各平台余额，间隔可通过 BALANCE_POLL_INTERVAL_MS 调整（最小 60 秒），每条余额都保留最近同步时间。</p>
+            </div>
+            <div class="faq-item">
+              <h3>token 用量能看到什么粒度？</h3>
+              <p>请求级。每条 usage 事件记录 provider、model、tokens、project、account、resource 和时间戳，可以按项目、模型、账号或资源聚合，定位具体消耗来源。</p>
+            </div>
+            <div class="faq-item">
+              <h3>会保存我的 prompt 和模型回复吗？</h3>
+              <p>不会。AI Balance 只记录结构化用量字段，不保存 prompt、response 或业务正文；云厂商 key 也始终留在服务端，不下发到任何客户端。</p>
+            </div>
+            <div class="faq-item">
+              <h3>不同币种的余额怎么汇总？</h3>
+              <p>只有 CNY（或平台显式给出的人民币金额）计入人民币总额；OpenRouter 等 USD credits 按原币种单独显示，不做汇率折算后混入总额。</p>
+            </div>
+            <div class="faq-item">
+              <h3>Codex / Claude Code 的订阅额度也在这里看吗？</h3>
+              <p>不在。5 小时、每周订阅额度窗口属于另一条产品线 AI Quota，它不进入 AI Balance 的余额汇总，也不和 credits 混算。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="final">
+        <div class="section-inner">
+          <div class="final-panel">
+            <div>
+              <h2>接入 AI Balance</h2>
+              <p>部署服务端，配置 provider 来源，再接入 Web、macOS、iPhone 或 Agent。</p>
+            </div>
+            <div class="actions">
+              <a class="button primary" href="/go/token-balance-monitor-github">打开 GitHub</a>
+              <a class="button" href="/projects/ai-quota/">查看 AI Quota</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="section-inner">AI Meter · AI Balance 是模型平台余额与请求用量产品线。</div>
+    </footer>
+    <script>
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+      document.querySelectorAll(".reveal").forEach((node) => revealObserver.observe(node));
+
+      const surfaceTabs = Array.from(document.querySelectorAll("[data-surface-tab]"));
+      const surfacePanels = Array.from(document.querySelectorAll("[data-surface-panel]"));
+
+      function activateSurface(surface) {
+        surfaceTabs.forEach((tab) => {
+          const selected = tab.dataset.surfaceTab === surface;
+          tab.setAttribute("aria-selected", selected ? "true" : "false");
+        });
+        surfacePanels.forEach((panel) => {
+          const selected = panel.dataset.surfacePanel === surface;
+          panel.classList.toggle("is-active", selected);
+          panel.setAttribute("aria-hidden", selected ? "false" : "true");
+        });
+      }
+
+      surfaceTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          activateSurface(tab.dataset.surfaceTab);
+          const url = new URL(window.location.href);
+          url.searchParams.set("surface", tab.dataset.surfaceTab);
+          url.hash = "surfaces";
+          window.history.replaceState(null, "", url);
+        });
+      });
+
+      const initialSurface = new URLSearchParams(window.location.search).get("surface");
+      if (initialSurface && surfaceTabs.some((tab) => tab.dataset.surfaceTab === initialSurface)) {
+        activateSurface(initialSurface);
+      }
+    </script>
+  </body>
+</html>

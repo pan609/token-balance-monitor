@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Quota | Codex / Claude Code 额度窗口</title>
+    <meta
+      name="description"
+      content="AI Quota 是开源自托管的 Codex / Claude Code 订阅额度监控工具，用于查看 5 小时、每周 quota 剩余比例、重置时间和数据新鲜度。"
+    />
+    <link rel="canonical" href="https://ai.meter.panyue.xyz/projects/ai-quota/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://ai.meter.panyue.xyz/projects/ai-quota/" />
+    <link rel="alternate" hreflang="x-default" href="https://ai.meter.panyue.xyz/projects/ai-quota/" />
+    <link rel="icon" href="/projects/token-balance-monitor/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AI Quota" />
+    <meta
+      property="og:description"
+      content="Codex / Claude Code 的 5 小时、每周订阅额度窗口，和模型平台余额分开监控。"
+    />
+    <meta property="og:image" content="https://ai.meter.panyue.xyz/projects/token-balance-monitor/assets/ai-quota-og.png" />
+    <meta property="og:url" content="https://ai.meter.panyue.xyz/projects/ai-quota/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Quota" />
+    <meta
+      name="twitter:description"
+      content="查看 Codex / Claude Code 订阅额度窗口、剩余比例、重置时间和数据新鲜度。"
+    />
+    <meta name="twitter:image" content="https://ai.meter.panyue.xyz/projects/token-balance-monitor/assets/ai-quota-og.png" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f9fc;
+        --paper: #ffffff;
+        --soft: #f2f6fb;
+        --text: #081225;
+        --muted: #5d6b7e;
+        --subtle: #7c8898;
+        --line: #dce5f0;
+        --teal: #109c92;
+        --teal-dark: #087a74;
+        --blue: #2563eb;
+        --yellow: #f5b83d;
+        --radius: 8px;
+        --shadow: 0 20px 54px rgba(15, 23, 42, 0.08);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: linear-gradient(180deg, #fff 0%, var(--bg) 44%, #fff 100%);
+        font-size: 16px;
+        line-height: 1.65;
+        letter-spacing: 0;
+        overflow-x: hidden;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(255, 255, 255, 0.94);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(16px);
+      }
+
+      .nav-wrap,
+      .section-inner,
+      .hero-inner {
+        width: min(1180px, calc(100% - 48px));
+        margin: 0 auto;
+      }
+
+      .nav-wrap {
+        min-height: 76px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 21px;
+        font-weight: 850;
+      }
+
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #081225;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 900;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        color: #344256;
+        font-weight: 760;
+      }
+
+      .nav a {
+        white-space: nowrap;
+      }
+
+      .nav-cta {
+        padding: 12px 18px;
+        border-radius: var(--radius);
+        background: #081225;
+        color: #fff;
+      }
+
+      .hero {
+        padding: 74px 0 54px;
+      }
+
+      .hero-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1.18fr);
+        gap: 54px;
+        align-items: center;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(42px, 5vw, 66px);
+        line-height: 1.06;
+        letter-spacing: 0;
+        font-weight: 900;
+      }
+
+      .lead {
+        margin-top: 22px;
+        color: var(--muted);
+        font-size: clamp(18px, 2vw, 22px);
+        line-height: 1.7;
+      }
+
+      .hero-actions,
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .button {
+        min-height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 22px;
+        border: 1px solid #b7c4d4;
+        border-radius: var(--radius);
+        background: #fff;
+        color: #081225;
+        font-weight: 850;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+        transition:
+          transform 180ms ease,
+          border-color 180ms ease,
+          box-shadow 180ms ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+        border-color: #8fa1b8;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+      }
+
+      .button.primary {
+        color: #fff;
+        background: var(--teal);
+        border-color: var(--teal);
+      }
+
+      .scope-list {
+        margin-top: 34px;
+        display: grid;
+        gap: 12px;
+        color: var(--muted);
+      }
+
+      .scope-list div {
+        display: grid;
+        grid-template-columns: 118px 1fr;
+        gap: 14px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+
+      .scope-list strong {
+        color: var(--text);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition:
+          opacity 640ms ease,
+          transform 640ms ease;
+      }
+
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .watch-stage {
+        position: relative;
+        min-height: 470px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 252, 0.98)),
+          #fff;
+        box-shadow: 0 34px 90px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+        perspective: 1100px;
+        isolation: isolate;
+      }
+
+      .watch-stage::before {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        z-index: 0;
+        height: 45%;
+        background: #eef7f5;
+        border-top: 1px solid #d8ebe8;
+      }
+
+      .watch-stage::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background:
+          linear-gradient(rgba(8, 18, 37, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(8, 18, 37, 0.035) 1px, transparent 1px);
+        background-size: 46px 46px;
+        mask-image: radial-gradient(circle at 63% 55%, #000 0%, transparent 62%);
+      }
+
+      .watch-frame {
+        position: absolute;
+        z-index: 2;
+        right: 12%;
+        top: 64px;
+        width: min(32%, 244px);
+        padding: 16px;
+        border-radius: 38px;
+        background: linear-gradient(135deg, #192232, #070b12 48%, #1f2937);
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+          0 34px 80px rgba(8, 18, 37, 0.26);
+        transform: rotateY(-10deg) rotateX(4deg) rotateZ(1deg);
+        animation: watchFloat 6.6s ease-in-out infinite;
+      }
+
+      .watch-frame .watch-crown,
+      .watch-frame .watch-side {
+        position: absolute;
+        right: -10px;
+        width: 11px;
+        border-radius: 0 10px 10px 0;
+        background: linear-gradient(90deg, #2f3a4a, #111827);
+        box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.12);
+      }
+
+      .watch-frame .watch-crown {
+        top: 35%;
+        height: 54px;
+      }
+
+      .watch-frame .watch-side {
+        top: 53%;
+        height: 34px;
+      }
+
+      .watch-frame::before,
+      .watch-frame::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        width: 46%;
+        height: 30px;
+        transform: translateX(-50%);
+        background: linear-gradient(180deg, #111827, #060912);
+      }
+
+      .watch-frame::before {
+        top: -28px;
+        border-radius: 18px 18px 5px 5px;
+      }
+
+      .watch-frame::after {
+        bottom: -28px;
+        border-radius: 5px 5px 18px 18px;
+      }
+
+      .watch-frame img {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 26px;
+      }
+
+      .watch-face-frame {
+        position: absolute;
+        z-index: 1;
+        left: 8%;
+        top: 78px;
+        width: 214px;
+        padding: 12px;
+        border-radius: 42px;
+        background: linear-gradient(135deg, #1f2937, #05070c 52%, #263244);
+        box-shadow: 0 26px 62px rgba(8, 18, 37, 0.2);
+        transform: rotateY(16deg) rotateX(3deg) rotateZ(-2deg);
+        animation: watchFloat 6.6s ease-in-out 0.7s infinite;
+      }
+
+      .watch-face-frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 26px;
+      }
+
+      .quota-signal {
+        position: absolute;
+        z-index: 1;
+        left: 27%;
+        right: 31%;
+        top: 45%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(16, 156, 146, 0.75), transparent);
+        transform: rotate(-5deg);
+      }
+
+      .quota-signal::before,
+      .quota-signal::after {
+        content: "";
+        position: absolute;
+        top: -4px;
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: var(--teal);
+        box-shadow: 0 0 22px rgba(16, 156, 146, 0.55);
+      }
+
+      .quota-signal::before {
+        left: 0;
+        animation: quotaPacket 3.2s ease-in-out infinite;
+      }
+
+      .quota-signal::after {
+        left: 42%;
+        animation: quotaPacket 3.2s ease-in-out 1.05s infinite;
+      }
+
+      .quota-pulse {
+        position: absolute;
+        z-index: 0;
+        right: 15%;
+        top: 38%;
+        width: 150px;
+        height: 150px;
+        border-radius: 999px;
+        border: 1px solid rgba(16, 156, 146, 0.2);
+        animation: quotaPulse 3.8s ease-out infinite;
+      }
+
+      .quota-pulse::after {
+        content: "";
+        position: absolute;
+        inset: 28px;
+        border-radius: inherit;
+        border: 1px solid rgba(37, 99, 235, 0.18);
+      }
+
+      .quota-watch-product {
+        position: absolute;
+        z-index: 3;
+        right: -2%;
+        top: 8px;
+        width: min(86%, 560px);
+        height: auto;
+        transform: rotateY(-7deg) rotateX(2deg) rotateZ(-2deg);
+        transform-origin: 52% 54%;
+        animation: watchFloat 6.6s ease-in-out infinite;
+      }
+
+      .quota-watch-product::before {
+        content: none;
+      }
+
+      .quota-watch-product::after {
+        content: none;
+      }
+
+      .quota-watch-product img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .watch-face-card {
+        position: absolute;
+        z-index: 2;
+        left: 8%;
+        top: 86px;
+        width: 230px;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        transform: rotateY(13deg) rotateX(3deg) rotateZ(-2deg);
+        animation: watchFloat 6.6s ease-in-out 0.7s infinite;
+        display: none;
+      }
+
+      .watch-face-card img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 0;
+        background: transparent;
+      }
+
+      @keyframes watchFloat {
+        0%,
+        100% {
+          translate: 0 0;
+        }
+
+        50% {
+          translate: 0 -12px;
+        }
+      }
+
+      @keyframes quotaPacket {
+        0% {
+          opacity: 0;
+          transform: translateX(0);
+        }
+
+        16%,
+        78% {
+          opacity: 1;
+        }
+
+        100% {
+          opacity: 0;
+          transform: translateX(260px);
+        }
+      }
+
+      @keyframes quotaPulse {
+        0% {
+          opacity: 0.48;
+          transform: scale(0.72);
+        }
+
+        100% {
+          opacity: 0;
+          transform: scale(1.45);
+        }
+      }
+
+      .section {
+        padding: 54px 0;
+      }
+
+      .section[id] {
+        scroll-margin-top: 96px;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.74fr) minmax(280px, 0.56fr);
+        gap: 40px;
+        align-items: end;
+        margin-bottom: 28px;
+      }
+
+      .section h2 {
+        font-size: clamp(28px, 3.3vw, 42px);
+        line-height: 1.12;
+        font-weight: 900;
+      }
+
+      .section-head p,
+      .copy {
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .boundary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .boundary-item {
+        min-height: 188px;
+        padding: 24px;
+        border-right: 1px solid var(--line);
+      }
+
+      .boundary-item:last-child {
+        border-right: 0;
+      }
+
+      .boundary-item span {
+        color: var(--teal);
+        font-weight: 900;
+      }
+
+      .boundary-item h3 {
+        margin-top: 18px;
+        font-size: 24px;
+        line-height: 1.2;
+      }
+
+      .boundary-item p {
+        margin-top: 10px;
+        color: var(--muted);
+      }
+
+      .faq-list {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        overflow: hidden;
+      }
+
+      .faq-item {
+        padding: 22px 24px;
+        border-top: 1px solid var(--line);
+      }
+
+      .faq-item:first-child {
+        border-top: 0;
+      }
+
+      .faq-item h3 {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.4;
+      }
+
+      .faq-item p {
+        margin: 8px 0 0;
+        max-width: 960px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.8;
+      }
+
+      .surface-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .surface-card {
+        min-height: 350px;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        perspective: 1000px;
+        overflow: hidden;
+      }
+
+      .quota-watch-device {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: min(92%, 320px);
+        margin: 0 auto;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        transform: rotateY(-12deg) rotateX(5deg);
+        animation: watchFloat 7s ease-in-out infinite;
+      }
+
+      .quota-watch-device::before,
+      .quota-watch-device::after {
+        content: none;
+      }
+
+      .quota-watch-device img {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        border-radius: 0;
+      }
+
+      .quota-watch-device.face {
+        width: min(96%, 330px);
+        transform: rotateY(12deg) rotateX(4deg);
+        animation-delay: 0.45s;
+      }
+
+      .bridge-panel {
+        min-height: 190px;
+        display: grid;
+        align-content: center;
+        gap: 12px;
+        padding: 22px;
+        border-radius: 10px;
+        background: #081225;
+        color: #dbeafe;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      }
+
+      .bridge-panel span {
+        color: #8ee6df;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13px;
+      }
+
+      .bridge-panel strong {
+        font-size: 26px;
+        line-height: 1.18;
+      }
+
+      .bridge-panel code {
+        color: #bae6fd;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 14px;
+      }
+
+      .surface-card h3 {
+        margin-top: 18px;
+        font-size: 24px;
+        line-height: 1.2;
+      }
+
+      .surface-card p {
+        margin-top: 10px;
+        color: var(--muted);
+      }
+
+      .api-grid {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 18px;
+      }
+
+      .api-copy,
+      .code-panel {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        padding: 26px;
+      }
+
+      .api-copy h3 {
+        font-size: 28px;
+      }
+
+      .api-copy ul {
+        margin: 20px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 14px;
+      }
+
+      .api-copy li {
+        padding-left: 20px;
+        position: relative;
+        color: var(--muted);
+      }
+
+      .api-copy li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.72em;
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--teal);
+      }
+
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        color: #ccfbf1;
+        background: #081225;
+        border-radius: 10px;
+        padding: 22px;
+        font-size: 15px;
+        line-height: 1.65;
+      }
+
+      .final {
+        padding: 48px 0 78px;
+      }
+
+      .final-panel {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        padding: 30px;
+        border-radius: 12px;
+        background: #081225;
+        color: #fff;
+      }
+
+      .final-panel p {
+        margin-top: 6px;
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      footer {
+        padding: 28px 0;
+        color: var(--subtle);
+        border-top: 1px solid var(--line);
+      }
+
+      @media (max-width: 980px) {
+        .hero-inner,
+        .section-head,
+        .api-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .watch-stage {
+          min-height: 500px;
+        }
+
+        .quota-watch-product {
+          right: 14%;
+          width: min(64%, 370px);
+        }
+
+        .boundary-grid,
+        .surface-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .boundary-item {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .boundary-item:last-child {
+          border-bottom: 0;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .site-header {
+          position: static;
+        }
+
+        .nav-wrap,
+        .section-inner,
+        .hero-inner {
+          width: calc(100% - 32px);
+          max-width: 1180px;
+        }
+
+        .nav-wrap {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 16px 0;
+        }
+
+        .nav {
+          width: 100%;
+          gap: 14px;
+          overflow-x: auto;
+          font-size: 14px;
+        }
+
+        .hero {
+          padding-top: 46px;
+        }
+
+        h1 {
+          font-size: 46px;
+        }
+
+        .scope-list div {
+          grid-template-columns: 1fr;
+        }
+
+        .watch-stage {
+          min-height: 420px;
+          padding: 24px 18px 34px;
+          overflow: visible;
+        }
+
+        .watch-stage::before {
+          display: none;
+        }
+
+        .watch-stage::after,
+        .quota-signal,
+        .quota-pulse {
+          display: none;
+        }
+
+        .quota-watch-product {
+          left: -4px;
+          right: auto;
+          top: 20px;
+          width: 350px;
+          transform: scale(0.82) rotateY(-15deg) rotateX(4deg) rotateZ(-2deg);
+          transform-origin: left top;
+        }
+
+        .watch-face-card {
+          left: auto;
+          right: 18px;
+          top: 250px;
+          width: 132px;
+          transform: rotateY(8deg) rotateX(2deg) rotateZ(2deg);
+        }
+
+        .watch-frame {
+          position: relative;
+          right: auto;
+          top: auto;
+          width: min(100%, 230px);
+          margin: 0 auto;
+          transform: none;
+        }
+
+        .watch-face-frame {
+          position: relative;
+          left: auto;
+          top: auto;
+          bottom: auto;
+          width: min(100%, 230px);
+          margin: 0 auto;
+          transform: none;
+        }
+
+        .final-panel {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "AI Quota",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "iOS, watchOS, macOS",
+        "description": "Self-hosted Codex and Claude Code subscription quota monitor.",
+        "url": "https://ai.meter.panyue.xyz/projects/ai-quota/",
+        "codeRepository": "https://github.com/pan609/token-balance-monitor/"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "怎么看 Claude Code 的 5 小时 / 每周额度窗口？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "在 Claude Code 的 status line 里配置项目提供的 bridge 脚本，Claude Code 会把 rate_limits 字段传给脚本并上报到你的服务端，然后就能在 Watch、iPhone 或菜单栏查看剩余比例和重置时间。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "支持 Codex 的额度吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "支持。Codex 的 5 小时和每周 rate limits 从本机 Codex app-server 读取；当服务端能访问本机 Codex 登录态时，还可以触发实时刷新。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "额度重置时间怎么算？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "重置时间直接来自官方返回的 resets_at 字段（Unix 时间戳），AI Quota 按窗口原样展示重置时间，不做自行估算。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "需要提供 Claude 账号密码或登录态吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "不需要。不读取 Claude 登录文件、不抓取网页，只上报额度窗口的剩余百分比和重置时间；上报使用独立的 ingest token。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "额度数据是实时的吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "尽量新鲜但可能滞后。Claude Code 未运行或电脑离线时只保留最后一次快照，超过新鲜度窗口会明确标记“可能过期”，不伪装实时。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "订阅额度和 API 余额是一回事吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "不是。5 小时 / 每周窗口是订阅制的 rate window，与 API Key 余额、credits 属于不同数据类型；余额监控请使用 AI Balance。"
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-wrap">
+        <a class="brand" href="/projects/token-balance-monitor/" aria-label="AI Meter 首页">
+          <span class="brand-mark">￥</span>
+          <span>AI Quota</span>
+        </a>
+        <nav class="nav" aria-label="AI Quota 导航">
+          <a href="/projects/token-balance-monitor/">AI Meter</a>
+          <a href="/projects/ai-balance/">AI Balance</a>
+          <a href="#surfaces">产品形态</a>
+          <a href="#api">API</a>
+          <a href="https://github.com/pan609/token-balance-monitor/blob/main/docs/subscription-quota-watch.md">Apple Watch 文档</a>
+          <a class="nav-cta" href="/go/token-balance-monitor-github">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-inner">
+          <div>
+            <h1>订阅额度监控</h1>
+            <p class="lead">
+              面向 Codex / Claude Code 的 5 小时与每周 quota 窗口，独立显示剩余比例、重置时间、同步状态和数据新鲜度。
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="https://github.com/pan609/token-balance-monitor/blob/main/docs/subscription-quota-watch.md">Apple Watch 文档</a>
+              <a class="button" href="https://github.com/pan609/token-balance-monitor/blob/main/docs/claude-code-quota.md">Claude Code 接入</a>
+            </div>
+            <div class="scope-list" aria-label="AI Quota 能力边界">
+              <div><strong>监控对象</strong><span>Codex、Claude Code 等订阅制工具的额度窗口。</span></div>
+              <div><strong>核心字段</strong><span>剩余比例、重置时间、同步时间、过期状态和来源。</span></div>
+              <div><strong>边界</strong><span>余额、账单和请求级 usage 归 AI Balance。</span></div>
+            </div>
+          </div>
+
+          <figure class="watch-stage" aria-label="AI Quota 产品预览">
+            <div class="quota-watch-product">
+              <img src="/projects/assets/device-watch-quota-mockup.png" width="760" height="960" decoding="async" alt="Apple Watch AI Quota App 设备效果图。" />
+            </div>
+            <div class="watch-face-card">
+              <img src="/projects/assets/device-watch-face-mockup.png" width="760" height="960" decoding="async" fetchpriority="high" alt="Apple Watch 表盘上的 Codex 额度入口设备效果图。" />
+            </div>
+            <span class="quota-signal" aria-hidden="true"></span>
+            <span class="quota-pulse" aria-hidden="true"></span>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="boundary-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="boundary-title">额度独立成线</h2>
+            <p>订阅窗口不是账户余额，也不是一次模型请求的 token 消耗。AI Quota 只维护 quota 状态。</p>
+          </div>
+          <div class="boundary-grid reveal">
+            <article class="boundary-item">
+              <span>Balance</span>
+              <h3>模型平台余额</h3>
+              <p>阿里云百炼、DeepSeek、Kimi 等 provider 账户余额属于 AI Balance 数据域。</p>
+            </article>
+            <article class="boundary-item">
+              <span>Usage</span>
+              <h3>请求级用量</h3>
+              <p>provider、model、tokens、project、resource 等字段由 AI Balance 聚合。</p>
+            </article>
+            <article class="boundary-item">
+              <span>Quota</span>
+              <h3>订阅额度窗口</h3>
+              <p>Codex / Claude Code 的 5 小时、每周限制由 AI Quota 单独维护。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="surfaces" aria-labelledby="surfaces-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="surfaces-title">写代码前确认</h2>
+            <p>在进入长任务前确认额度窗口，不进入财务口径，不展示 provider 账单。</p>
+          </div>
+          <div class="surface-grid reveal">
+            <article class="surface-card">
+              <div class="quota-watch-device">
+                <img src="/projects/assets/device-watch-quota-mockup.png" width="760" height="960" decoding="async" loading="lazy" alt="Apple Watch AI Quota App 设备效果图。" />
+              </div>
+              <h3>Apple Watch</h3>
+              <p>前台刷新并查看当前窗口剩余比例、重置时间与同步状态。</p>
+            </article>
+            <article class="surface-card">
+              <div class="quota-watch-device face">
+                <img src="/projects/assets/device-watch-face-mockup.png" width="760" height="960" decoding="async" loading="lazy" alt="Apple Watch 表盘额度组件设备效果图。" />
+              </div>
+              <h3>Watch Face</h3>
+              <p>表盘保留关键额度信号，接近限制或数据过期时明确显示。</p>
+            </article>
+            <article class="surface-card">
+              <div class="bridge-panel" aria-label="Local Bridge 状态">
+                <span>local bridge</span>
+                <strong>quota snapshot</strong>
+                <code>POST /api/quota/snapshots</code>
+                <code>source: codex · window: 5h</code>
+              </div>
+              <h3>Local Bridge</h3>
+              <p>本机 bridge 收集额度状态，服务端只保存 quota snapshot。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="api" aria-labelledby="api-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="api-title">独立 Quota API</h2>
+            <p>AI Quota 使用独立 endpoint 和 token，不复用 AI Balance 的余额查询或 usage ingest token。</p>
+          </div>
+          <div class="api-grid reveal">
+            <div class="api-copy">
+              <h3>权限边界</h3>
+              <ul>
+                <li>Watch 和 iPhone 只读取 quota summary，不持有 provider key。</li>
+                <li>刷新动作进入 quota refresh，不写入余额或账单数据。</li>
+                <li>数据超过新鲜度窗口时显示过期状态，不伪装实时。</li>
+              </ul>
+            </div>
+            <div class="code-panel">
+              <pre><code>GET  /api/quota/summary
+POST /api/quota/refresh
+POST /api/quota/snapshots
+
+{
+  "source": "codex",
+  "window": "5h",
+  "remainingRatio": 0.92,
+  "resetAt": "2026-06-29T20:12:00Z"
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="faq" aria-labelledby="faq-title">
+        <div class="section-inner">
+          <div class="section-head">
+            <h2 id="faq-title">常见问题</h2>
+            <p>关于 Codex / Claude Code 额度窗口的接入方式、重置时间和数据边界。</p>
+          </div>
+          <div class="faq-list reveal">
+            <div class="faq-item">
+              <h3>怎么看 Claude Code 的 5 小时 / 每周额度窗口？</h3>
+              <p>在 Claude Code 的 status line 里配置项目提供的 bridge 脚本，Claude Code 会把 rate_limits 字段传给脚本并上报到你的服务端，然后就能在 Watch、iPhone 或菜单栏查看剩余比例和重置时间。</p>
+            </div>
+            <div class="faq-item">
+              <h3>支持 Codex 的额度吗？</h3>
+              <p>支持。Codex 的 5 小时和每周 rate limits 从本机 Codex app-server 读取；当服务端能访问本机 Codex 登录态时，还可以触发实时刷新。</p>
+            </div>
+            <div class="faq-item">
+              <h3>额度重置时间怎么算？</h3>
+              <p>重置时间直接来自官方返回的 resets_at 字段（Unix 时间戳），AI Quota 按窗口原样展示重置时间，不做自行估算。</p>
+            </div>
+            <div class="faq-item">
+              <h3>需要提供 Claude 账号密码或登录态吗？</h3>
+              <p>不需要。不读取 Claude 登录文件、不抓取网页，只上报额度窗口的剩余百分比和重置时间；上报使用独立的 ingest token。</p>
+            </div>
+            <div class="faq-item">
+              <h3>额度数据是实时的吗？</h3>
+              <p>尽量新鲜但可能滞后。Claude Code 未运行或电脑离线时只保留最后一次快照，超过新鲜度窗口会明确标记“可能过期”，不伪装实时。</p>
+            </div>
+            <div class="faq-item">
+              <h3>订阅额度和 API 余额是一回事吗？</h3>
+              <p>不是。5 小时 / 每周窗口是订阅制的 rate window，与 API Key 余额、credits 属于不同数据类型；余额监控请使用 AI Balance。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="final">
+        <div class="section-inner">
+          <div class="final-panel">
+            <div>
+              <h2>接入 AI Quota</h2>
+              <p>查看 Apple Watch 文档或 Claude Code 接入说明，保持 quota 与余额数据分离。</p>
+            </div>
+            <div class="actions">
+              <a class="button primary" href="https://github.com/pan609/token-balance-monitor/blob/main/docs/subscription-quota-watch.md">Apple Watch 文档</a>
+              <a class="button" href="/projects/ai-balance/">查看 AI Balance</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="section-inner">AI Meter · AI Quota 是订阅额度窗口产品线。</div>
+    </footer>
+    <script>
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+      document.querySelectorAll(".reveal").forEach((node) => revealObserver.observe(node));
+    </script>
+  </body>
+</html>

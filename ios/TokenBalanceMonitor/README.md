@@ -1,11 +1,16 @@
-# iOS 余额监控
+# AI Meter for iOS
 
-这是一个轻量 SwiftUI + WidgetKit 工程，用来在 iPhone 上查看余额。
+这是一个轻量 SwiftUI + WidgetKit / watchOS 工程。iPhone 主 App 叫 `AI Meter`，里面包含两条线：
+
+- `AI Balance`：查看模型平台余额、重点关注平台和低余额提醒。
+- `AI Quota`：查看 Codex / Claude Code 的订阅额度窗口，并给 Apple Watch 做中继。
 
 ## 结构
 
-- `TokenBalanceMonitor/`：主 App，打开即可刷新查看余额。
-- `TokenBalanceWidget/`：桌面小组件，可选择显示总余额或某个平台余额。
+- `TokenBalanceMonitor/`：主 App，打开即可刷新余额和订阅额度。
+- `TokenBalanceWidget/`：桌面小组件，可选择显示总余额、重点关注或某个平台余额。
+- `TokenBalanceWatch/`：Apple Watch App，前台查看 Codex / Claude 额度。
+- `TokenBalanceWatchComplication/`：Watch 表盘复杂功能，显示最近快照并作为快捷入口。
 - `Shared/`：API、数据模型和本地配置。
 - `project.yml`：XcodeGen 工程配置。
 
@@ -59,19 +64,19 @@ IOS_DEVELOPMENT_TEAM=你的TeamID ./scripts/run-ios-device.sh
 
 主 App 在前台打开时会每 1 分钟自动刷新一次。
 
-构建安装后，模拟器或真机主屏幕长按添加小组件，搜索“余额监控”或“模型余额”。WidgetKit 的后台刷新频率由 iOS 调度，代码里请求每 15 分钟刷新一次，但系统可能按电量、网络和使用情况调整，不能保证每分钟后台刷新。
+构建安装后，模拟器或真机主屏幕长按添加小组件，搜索 `AI Balance`、`AI Quota` 或 `AI Meter`。WidgetKit 的后台刷新频率由 iOS 调度，代码里请求每 15 分钟刷新一次，但系统可能按电量、网络和使用情况调整，不能保证每分钟后台刷新。
 
 在 Simulator 里添加：
 
 1. 按 `Shift + Command + H` 回到主屏幕。
 2. 长按主屏幕空白处，进入编辑模式。
 3. 点左上角 `+`。
-4. 搜索 `余额监控`，如果搜不到再试 `模型余额` 或 `TokenBalanceMonitor`。
+4. 搜索 `AI Balance` 或 `AI Quota`，如果搜不到再试 `AI Meter` 或 `TokenBalanceMonitor`。
 5. 选择小号或中号尺寸，点添加。
 
 如果小组件图库里仍然看不到，先运行一次 App，再回到主屏幕等十几秒；还不出现的话，关掉并重新启动同一个模拟器后再试。脚本会保证同项目只保留一个模拟器实例。
 
-添加小组件后，可以长按这个小组件，选择“编辑小组件”，在“显示”里切换：
+`AI Balance` 小组件添加后，可以长按这个小组件，选择“编辑小组件”，在“显示”里切换：
 
 - 重点关注
 - 阿里云
@@ -82,11 +87,17 @@ IOS_DEVELOPMENT_TEAM=你的TeamID ./scripts/run-ios-device.sh
 - OpenRouter
 - 总余额
 
-“重点关注”跟随服务端 `.env` 的 `PRIMARY_PROVIDER_ID`；其它选项是固定显示某个平台。
+`AI Quota` 小组件也支持小号和中号：
+
+- 小号：显示重点服务或指定服务的 5 小时剩余额度。
+- 中号：同时显示 5 小时和每周额度窗口、重置时间和最近同步状态。
+- 编辑小组件时可以选择“重点关注 / Codex / Claude”。
+
+`AI Balance` 的“重点关注”跟随服务端 `.env` 的 `PRIMARY_PROVIDER_ID`；其它选项是固定显示某个平台。`AI Quota` 的“重点关注”跟随 quota summary 返回的 `primaryServiceId`，通常是 `codex` 或 `claude`。
 
 主 App 里可以直接切换重点关注平台：
 
-1. 打开 `余额监控`。
+1. 打开 `AI Meter`。
 2. 点首页“重点关注平台”卡片右侧的切换按钮，或点右上角齿轮。
 3. 选择阿里云、DeepSeek、豆包等平台。
 

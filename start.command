@@ -27,6 +27,6 @@ if [[ ! -d "$ROOT_DIR/node_modules" ]]; then
   "$ROOT_DIR/scripts/install-deps.sh"
 fi
 
-echo "启动 Token 余额监控..."
+echo "启动 AI Meter..."
 echo "实际浏览器地址会在下方显示。"
 PATH="$NODE_DIR:$PATH" "$NODE_BIN" "$ROOT_DIR/server/index.mjs"

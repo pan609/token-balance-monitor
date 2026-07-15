@@ -7,35 +7,76 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0003CD1342A93A22557CF63C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BA7271EB7EC9A40FA78083CE /* Localizable.strings */; };
+		020DCA0EE1A5EF89A0C5F1BA /* QuotaHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F6E0E24C60A307D25349A5 /* QuotaHomeView.swift */; };
+		03A2F307FFA797F4A566AA4E /* QuotaStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C908813AA9AB2E4CADE748EE /* QuotaStore.swift */; };
 		061365D6F15FA101C2F77D69 /* QuotaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454FA948041435B43638A062 /* QuotaModels.swift */; };
+		088A7C0D487CA9B00859B29D /* PhoneQuotaBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396118567C7951DBE65770B6 /* PhoneQuotaBridge.swift */; };
 		0E8C5F50141C4368B31EA4F1 /* QuotaAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028D555DADEB7064908046AC /* QuotaAPI.swift */; };
 		0EE4678F74C4C4644B577177 /* BalanceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6418C86586A86B72EA24B245 /* BalanceAPI.swift */; };
 		10AB69F5ECB77046C8970F9E /* TokenMonitorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */; };
+		11339183B2CA8587ABCBB317 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BA7271EB7EC9A40FA78083CE /* Localizable.strings */; };
+		11959D965D7E44E3523A5041 /* QuotaLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98762D8A9099B61E2E4A6A3E /* QuotaLocalization.swift */; };
 		1D63277739C8AB7079EE0F39 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BA0C76EC9AB2E86316AAC007 /* Assets.xcassets */; };
 		22D6313C1DA568E09E3A62E7 /* BalanceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */; };
 		240BB19804E5013969533E32 /* BalanceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6418C86586A86B72EA24B245 /* BalanceAPI.swift */; };
 		2ED48A80494D4B496FD43983 /* TokenBalanceWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E4426FC958D0AC9CDF24FEA7 /* TokenBalanceWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		310C38E33BB6B70DAA4285EF /* QuotaLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98762D8A9099B61E2E4A6A3E /* QuotaLocalization.swift */; };
 		3610CA0DACDBED6DAAB4E0E8 /* QuotaAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028D555DADEB7064908046AC /* QuotaAPI.swift */; };
 		400629AB22EAA689FC733689 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 809D239CF93BE261778E0F06 /* Assets.xcassets */; };
+		456A3D04BD32A4B0FD62FE7E /* TokenBalanceWatchComplication.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 545C73873E7DB18694659ECD /* TokenBalanceWatchComplication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4CCE677B817E0D330C12C996 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BA7271EB7EC9A40FA78083CE /* Localizable.strings */; };
 		53EBE82B8C989EE7A2317369 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B07BD4ECE9FC7E1401BCDB0 /* WatchContentView.swift */; };
+		551FA9782001D3A73BF77569 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BA7271EB7EC9A40FA78083CE /* Localizable.strings */; };
 		5BB627FA2464834BBA4AD2A7 /* WatchBalanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6091C4FBC19E337E372E62A0 /* WatchBalanceStore.swift */; };
+		6395CD9DDC59694AF509819E /* TokenBalanceWatchComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB7F736E3AEE4C7F2CD0DDE /* TokenBalanceWatchComplication.swift */; };
 		64C9309399305229261DDBF2 /* TokenBalanceWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA27F7EEA94DBCEA7619FA7A /* TokenBalanceWatchApp.swift */; };
 		747EE04E98C35B980948BCCD /* QuotaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454FA948041435B43638A062 /* QuotaModels.swift */; };
+		74A7E6EA4A9723B414A59736 /* TokenBalanceWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 6C851BB04896B71717F0FF6A /* TokenBalanceWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7684EF719F192EF8472867F6 /* QuotaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454FA948041435B43638A062 /* QuotaModels.swift */; };
+		7A6875B6CA3867F313D43E1A /* BalanceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6418C86586A86B72EA24B245 /* BalanceAPI.swift */; };
+		7CCDF4A2D4929A85424D6496 /* QuotaAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028D555DADEB7064908046AC /* QuotaAPI.swift */; };
 		8556F3FDEA5D755A19EF026B /* BalanceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */; };
 		8697FFEE3447B9D2166648F7 /* BalanceWidgetConfigurationIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53870B07D601E12FFA543804 /* BalanceWidgetConfigurationIntent.swift */; };
 		8F72423147DAE28D7498176B /* TokenMonitorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */; };
 		940C6D074CF2715554EC0F78 /* TokenMonitorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */; };
 		AA93FCA9C92A2A16C9CC69EF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB5368CEFF4D02438526B9D /* ContentView.swift */; };
+		ACCD3CC2798480365182CCCC /* QuotaLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98762D8A9099B61E2E4A6A3E /* QuotaLocalization.swift */; };
+		B02328128B80CE569E5910D6 /* QuotaLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98762D8A9099B61E2E4A6A3E /* QuotaLocalization.swift */; };
 		B5B57F84E02C893FE5327E43 /* QuotaAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028D555DADEB7064908046AC /* QuotaAPI.swift */; };
+		B62530BBDD16934D7DEE9C18 /* QuotaBridgeCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3C2E2003CA7DD49D89658E4 /* QuotaBridgeCodec.swift */; };
+		C0293725DE6C6EA14A195256 /* BalanceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */; };
+		C0F2722AB3AD322BF53A1840 /* QuotaBridgeCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3C2E2003CA7DD49D89658E4 /* QuotaBridgeCodec.swift */; };
+		C114697AE9430F2CEC325983 /* QuotaWidgetConfigurationIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD52C49C026D3DA667D8A46 /* QuotaWidgetConfigurationIntent.swift */; };
 		C2E0EDF7F4D5AA73470663D2 /* TokenBalanceMonitorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8247C03F050C9942DB583E6D /* TokenBalanceMonitorApp.swift */; };
 		C386F71EA9162F3FCCF8FBD3 /* BalanceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6418C86586A86B72EA24B245 /* BalanceAPI.swift */; };
+		C864A97ED6D172BC22468F3A /* TokenMonitorConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */; };
 		CBEF25DE88C5F5807DE65463 /* BalanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39594AB06091D2FD9E1DA55A /* BalanceStore.swift */; };
 		D327DD4E0BCEB346CD040211 /* TokenBalanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B78A925B16E935BBAA0E3D /* TokenBalanceWidget.swift */; };
+		D900DE265EF3B52097CCE419 /* QuotaBridgeCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3C2E2003CA7DD49D89658E4 /* QuotaBridgeCodec.swift */; };
 		E23FBF289E4CE3E4B3105DDF /* QuotaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454FA948041435B43638A062 /* QuotaModels.swift */; };
+		EDDC542539DB4F2BCCE0941B /* WatchPhoneQuotaBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2F32097FF4A27082EE44B6 /* WatchPhoneQuotaBridge.swift */; };
+		F8D327357F4AAE886679FF16 /* QuotaBridgeCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3C2E2003CA7DD49D89658E4 /* QuotaBridgeCodec.swift */; };
+		FB3E67C18E1B0B634B4D8D9D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ABD67567EBE52F8E6CE582EE /* Assets.xcassets */; };
+		FB8617107DA704A9B5146103 /* QuotaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066D1755387AE9C9D05B116B /* QuotaWidget.swift */; };
 		FE1C0C3348C35967CBA4A475 /* BalanceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1A6C977A0CCD1F6A4114D489 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 174DF655DA7BC733C199E96F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3AA46C07A07E005AFD30CC80;
+			remoteInfo = TokenBalanceWatchComplication;
+		};
+		2D076B87326E554E319C5934 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 174DF655DA7BC733C199E96F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7BB455986A55F5F4EAC39545;
+			remoteInfo = TokenBalanceWatch;
+		};
 		C896356DEC4A71911474C9A2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 174DF655DA7BC733C199E96F /* Project object */;
@@ -46,6 +87,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		C89780E55D03C0319D5768CA /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				74A7E6EA4A9723B414A59736 /* TokenBalanceWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC4DC5D490B5842FA88B8216 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				456A3D04BD32A4B0FD62FE7E /* TokenBalanceWatchComplication.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EFC003D9310035C3BF636B4F /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -61,14 +124,21 @@
 
 /* Begin PBXFileReference section */
 		028D555DADEB7064908046AC /* QuotaAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaAPI.swift; sourceTree = "<group>"; };
+		03F6E0E24C60A307D25349A5 /* QuotaHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaHomeView.swift; sourceTree = "<group>"; };
+		066D1755387AE9C9D05B116B /* QuotaWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaWidget.swift; sourceTree = "<group>"; };
 		0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenMonitorConfig.swift; sourceTree = "<group>"; };
 		1CB5368CEFF4D02438526B9D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1DD52C49C026D3DA667D8A46 /* QuotaWidgetConfigurationIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaWidgetConfigurationIntent.swift; sourceTree = "<group>"; };
+		1EB7F736E3AEE4C7F2CD0DDE /* TokenBalanceWatchComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenBalanceWatchComplication.swift; sourceTree = "<group>"; };
 		1FB02122DCD4FF4AD3F2997D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2AFFCAD4D9BD95C891829819 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		2B07BD4ECE9FC7E1401BCDB0 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
 		39594AB06091D2FD9E1DA55A /* BalanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceStore.swift; sourceTree = "<group>"; };
+		396118567C7951DBE65770B6 /* PhoneQuotaBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneQuotaBridge.swift; sourceTree = "<group>"; };
 		3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceModels.swift; sourceTree = "<group>"; };
 		454FA948041435B43638A062 /* QuotaModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaModels.swift; sourceTree = "<group>"; };
 		53870B07D601E12FFA543804 /* BalanceWidgetConfigurationIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceWidgetConfigurationIntent.swift; sourceTree = "<group>"; };
+		545C73873E7DB18694659ECD /* TokenBalanceWatchComplication.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TokenBalanceWatchComplication.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		6091C4FBC19E337E372E62A0 /* WatchBalanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBalanceStore.swift; sourceTree = "<group>"; };
 		6418C86586A86B72EA24B245 /* BalanceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceAPI.swift; sourceTree = "<group>"; };
 		65B78A925B16E935BBAA0E3D /* TokenBalanceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenBalanceWidget.swift; sourceTree = "<group>"; };
@@ -77,20 +147,29 @@
 		809D239CF93BE261778E0F06 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8247C03F050C9942DB583E6D /* TokenBalanceMonitorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenBalanceMonitorApp.swift; sourceTree = "<group>"; };
 		939EA578F9243F097315ED7A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		98762D8A9099B61E2E4A6A3E /* QuotaLocalization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaLocalization.swift; sourceTree = "<group>"; };
+		9ECF94730AF9E20D73730F33 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		AAF4677DFFB7550626CEF329 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		ABD67567EBE52F8E6CE582EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BA0C76EC9AB2E86316AAC007 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C908813AA9AB2E4CADE748EE /* QuotaStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaStore.swift; sourceTree = "<group>"; };
 		CA27F7EEA94DBCEA7619FA7A /* TokenBalanceWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenBalanceWatchApp.swift; sourceTree = "<group>"; };
 		E4426FC958D0AC9CDF24FEA7 /* TokenBalanceWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TokenBalanceWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8D8E3D41BA950E3D14DFA84 /* TokenBalanceMonitor.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TokenBalanceMonitor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE2F32097FF4A27082EE44B6 /* WatchPhoneQuotaBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchPhoneQuotaBridge.swift; sourceTree = "<group>"; };
+		F3C2E2003CA7DD49D89658E4 /* QuotaBridgeCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBridgeCodec.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		3382E996C611B64686CFC8AF /* TokenBalanceWatch */ = {
 			isa = PBXGroup;
 			children = (
+				ABD67567EBE52F8E6CE582EE /* Assets.xcassets */,
 				6B1913BD44DD773197ED03D5 /* Info.plist */,
 				CA27F7EEA94DBCEA7619FA7A /* TokenBalanceWatchApp.swift */,
 				6091C4FBC19E337E372E62A0 /* WatchBalanceStore.swift */,
 				2B07BD4ECE9FC7E1401BCDB0 /* WatchContentView.swift */,
+				EE2F32097FF4A27082EE44B6 /* WatchPhoneQuotaBridge.swift */,
 			);
 			path = TokenBalanceWatch;
 			sourceTree = "<group>";
@@ -100,7 +179,10 @@
 			children = (
 				6418C86586A86B72EA24B245 /* BalanceAPI.swift */,
 				3FBC9DCD732B8FAEA4FD9B53 /* BalanceModels.swift */,
+				BA7271EB7EC9A40FA78083CE /* Localizable.strings */,
 				028D555DADEB7064908046AC /* QuotaAPI.swift */,
+				F3C2E2003CA7DD49D89658E4 /* QuotaBridgeCodec.swift */,
+				98762D8A9099B61E2E4A6A3E /* QuotaLocalization.swift */,
 				454FA948041435B43638A062 /* QuotaModels.swift */,
 				0E1176519CB1C06BFE46A795 /* TokenMonitorConfig.swift */,
 			);
@@ -112,6 +194,7 @@
 			children = (
 				E8D8E3D41BA950E3D14DFA84 /* TokenBalanceMonitor.app */,
 				6C851BB04896B71717F0FF6A /* TokenBalanceWatch.app */,
+				545C73873E7DB18694659ECD /* TokenBalanceWatchComplication.appex */,
 				E4426FC958D0AC9CDF24FEA7 /* TokenBalanceWidgetExtension.appex */,
 			);
 			name = Products;
@@ -123,6 +206,8 @@
 				809D239CF93BE261778E0F06 /* Assets.xcassets */,
 				53870B07D601E12FFA543804 /* BalanceWidgetConfigurationIntent.swift */,
 				939EA578F9243F097315ED7A /* Info.plist */,
+				066D1755387AE9C9D05B116B /* QuotaWidget.swift */,
+				1DD52C49C026D3DA667D8A46 /* QuotaWidgetConfigurationIntent.swift */,
 				65B78A925B16E935BBAA0E3D /* TokenBalanceWidget.swift */,
 			);
 			path = TokenBalanceWidget;
@@ -135,9 +220,21 @@
 				39594AB06091D2FD9E1DA55A /* BalanceStore.swift */,
 				1CB5368CEFF4D02438526B9D /* ContentView.swift */,
 				1FB02122DCD4FF4AD3F2997D /* Info.plist */,
+				396118567C7951DBE65770B6 /* PhoneQuotaBridge.swift */,
+				03F6E0E24C60A307D25349A5 /* QuotaHomeView.swift */,
+				C908813AA9AB2E4CADE748EE /* QuotaStore.swift */,
 				8247C03F050C9942DB583E6D /* TokenBalanceMonitorApp.swift */,
 			);
 			path = TokenBalanceMonitor;
+			sourceTree = "<group>";
+		};
+		D25EFE49DA6CEAB926A795E0 /* TokenBalanceWatchComplication */ = {
+			isa = PBXGroup;
+			children = (
+				AAF4677DFFB7550626CEF329 /* Info.plist */,
+				1EB7F736E3AEE4C7F2CD0DDE /* TokenBalanceWatchComplication.swift */,
+			);
+			path = TokenBalanceWatchComplication;
 			sourceTree = "<group>";
 		};
 		DBFB05B3341506D888B7D103 = {
@@ -146,6 +243,7 @@
 				525E28DAD97C3DAB9B690417 /* Shared */,
 				C8AF4A0DDA8E5139D1FE8B5F /* TokenBalanceMonitor */,
 				3382E996C611B64686CFC8AF /* TokenBalanceWatch */,
+				D25EFE49DA6CEAB926A795E0 /* TokenBalanceWatchComplication */,
 				9D6D2D7088A1D7732D27AE9E /* TokenBalanceWidget */,
 				57F694CF41B5F3F77FF8639A /* Products */,
 			);
@@ -154,6 +252,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3AA46C07A07E005AFD30CC80 /* TokenBalanceWatchComplication */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EF23720BD095B9B5A0906CFE /* Build configuration list for PBXNativeTarget "TokenBalanceWatchComplication" */;
+			buildPhases = (
+				B12A4879CADEBECC9656D2CE /* Sources */,
+				9A583B4D74D750704CE0F2EB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TokenBalanceWatchComplication;
+			packageProductDependencies = (
+			);
+			productName = TokenBalanceWatchComplication;
+			productReference = 545C73873E7DB18694659ECD /* TokenBalanceWatchComplication.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		3C8495F1A8053AF37A3CD051 /* TokenBalanceWidgetExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BF7BFE1ECAA5BEA0326C5A7F /* Build configuration list for PBXNativeTarget "TokenBalanceWidgetExtension" */;
@@ -177,10 +293,13 @@
 			buildConfigurationList = E57ACCE49B97B61A71F90E81 /* Build configuration list for PBXNativeTarget "TokenBalanceWatch" */;
 			buildPhases = (
 				CBE810F43C48FCA18420B330 /* Sources */,
+				307480A0F43256E63F2BD9EF /* Resources */,
+				CC4DC5D490B5842FA88B8216 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				FF17B99ACAA3D0A8B15206E0 /* PBXTargetDependency */,
 			);
 			name = TokenBalanceWatch;
 			packageProductDependencies = (
@@ -196,11 +315,13 @@
 				8FC50EB56D8AC42907F2DAC5 /* Sources */,
 				721013FEF27CA87D473098BE /* Resources */,
 				EFC003D9310035C3BF636B4F /* Embed Foundation Extensions */,
+				C89780E55D03C0319D5768CA /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				852F65C6DCEAB462F720C1DB /* PBXTargetDependency */,
+				6DB12E6CC0F3A7CF70FC6296 /* PBXTargetDependency */,
 			);
 			name = TokenBalanceMonitor;
 			packageProductDependencies = (
@@ -227,6 +348,7 @@
 			knownRegions = (
 				Base,
 				en,
+				"zh-Hans",
 			);
 			mainGroup = DBFB05B3341506D888B7D103;
 			minimizedProjectReferenceProxies = 1;
@@ -236,6 +358,7 @@
 			targets = (
 				AC73E874F860490E4FAEBFFA /* TokenBalanceMonitor */,
 				7BB455986A55F5F4EAC39545 /* TokenBalanceWatch */,
+				3AA46C07A07E005AFD30CC80 /* TokenBalanceWatchComplication */,
 				3C8495F1A8053AF37A3CD051 /* TokenBalanceWidgetExtension */,
 			);
 		};
@@ -247,6 +370,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				400629AB22EAA689FC733689 /* Assets.xcassets in Resources */,
+				11339183B2CA8587ABCBB317 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		307480A0F43256E63F2BD9EF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB3E67C18E1B0B634B4D8D9D /* Assets.xcassets in Resources */,
+				0003CD1342A93A22557CF63C /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,6 +388,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D63277739C8AB7079EE0F39 /* Assets.xcassets in Resources */,
+				4CCE677B817E0D330C12C996 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9A583B4D74D750704CE0F2EB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				551FA9782001D3A73BF77569 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,10 +411,30 @@
 				8556F3FDEA5D755A19EF026B /* BalanceModels.swift in Sources */,
 				CBEF25DE88C5F5807DE65463 /* BalanceStore.swift in Sources */,
 				AA93FCA9C92A2A16C9CC69EF /* ContentView.swift in Sources */,
+				088A7C0D487CA9B00859B29D /* PhoneQuotaBridge.swift in Sources */,
 				0E8C5F50141C4368B31EA4F1 /* QuotaAPI.swift in Sources */,
+				C0F2722AB3AD322BF53A1840 /* QuotaBridgeCodec.swift in Sources */,
+				020DCA0EE1A5EF89A0C5F1BA /* QuotaHomeView.swift in Sources */,
+				11959D965D7E44E3523A5041 /* QuotaLocalization.swift in Sources */,
 				E23FBF289E4CE3E4B3105DDF /* QuotaModels.swift in Sources */,
+				03A2F307FFA797F4A566AA4E /* QuotaStore.swift in Sources */,
 				C2E0EDF7F4D5AA73470663D2 /* TokenBalanceMonitorApp.swift in Sources */,
 				8F72423147DAE28D7498176B /* TokenMonitorConfig.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B12A4879CADEBECC9656D2CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A6875B6CA3867F313D43E1A /* BalanceAPI.swift in Sources */,
+				C0293725DE6C6EA14A195256 /* BalanceModels.swift in Sources */,
+				7CCDF4A2D4929A85424D6496 /* QuotaAPI.swift in Sources */,
+				D900DE265EF3B52097CCE419 /* QuotaBridgeCodec.swift in Sources */,
+				310C38E33BB6B70DAA4285EF /* QuotaLocalization.swift in Sources */,
+				7684EF719F192EF8472867F6 /* QuotaModels.swift in Sources */,
+				6395CD9DDC59694AF509819E /* TokenBalanceWatchComplication.swift in Sources */,
+				C864A97ED6D172BC22468F3A /* TokenMonitorConfig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,11 +445,14 @@
 				240BB19804E5013969533E32 /* BalanceAPI.swift in Sources */,
 				22D6313C1DA568E09E3A62E7 /* BalanceModels.swift in Sources */,
 				3610CA0DACDBED6DAAB4E0E8 /* QuotaAPI.swift in Sources */,
+				B62530BBDD16934D7DEE9C18 /* QuotaBridgeCodec.swift in Sources */,
+				B02328128B80CE569E5910D6 /* QuotaLocalization.swift in Sources */,
 				061365D6F15FA101C2F77D69 /* QuotaModels.swift in Sources */,
 				64C9309399305229261DDBF2 /* TokenBalanceWatchApp.swift in Sources */,
 				940C6D074CF2715554EC0F78 /* TokenMonitorConfig.swift in Sources */,
 				5BB627FA2464834BBA4AD2A7 /* WatchBalanceStore.swift in Sources */,
 				53EBE82B8C989EE7A2317369 /* WatchContentView.swift in Sources */,
+				EDDC542539DB4F2BCCE0941B /* WatchPhoneQuotaBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,7 +464,11 @@
 				FE1C0C3348C35967CBA4A475 /* BalanceModels.swift in Sources */,
 				8697FFEE3447B9D2166648F7 /* BalanceWidgetConfigurationIntent.swift in Sources */,
 				B5B57F84E02C893FE5327E43 /* QuotaAPI.swift in Sources */,
+				F8D327357F4AAE886679FF16 /* QuotaBridgeCodec.swift in Sources */,
+				ACCD3CC2798480365182CCCC /* QuotaLocalization.swift in Sources */,
 				747EE04E98C35B980948BCCD /* QuotaModels.swift in Sources */,
+				FB8617107DA704A9B5146103 /* QuotaWidget.swift in Sources */,
+				C114697AE9430F2CEC325983 /* QuotaWidgetConfigurationIntent.swift in Sources */,
 				D327DD4E0BCEB346CD040211 /* TokenBalanceWidget.swift in Sources */,
 				10AB69F5ECB77046C8970F9E /* TokenMonitorConfig.swift in Sources */,
 			);
@@ -308,12 +477,34 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		6DB12E6CC0F3A7CF70FC6296 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7BB455986A55F5F4EAC39545 /* TokenBalanceWatch */;
+			targetProxy = 2D076B87326E554E319C5934 /* PBXContainerItemProxy */;
+		};
 		852F65C6DCEAB462F720C1DB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3C8495F1A8053AF37A3CD051 /* TokenBalanceWidgetExtension */;
 			targetProxy = C896356DEC4A71911474C9A2 /* PBXContainerItemProxy */;
 		};
+		FF17B99ACAA3D0A8B15206E0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3AA46C07A07E005AFD30CC80 /* TokenBalanceWatchComplication */;
+			targetProxy = 1A6C977A0CCD1F6A4114D489 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		BA7271EB7EC9A40FA78083CE /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9ECF94730AF9E20D73730F33 /* en */,
+				2AFFCAD4D9BD95C891829819 /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		14CD931DF29008C5D8CBFF38 /* Release */ = {
@@ -331,6 +522,24 @@
 				PRODUCT_NAME = TokenBalanceMonitor;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		29E196C1DA2FE055D708B0CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				INFOPLIST_FILE = TokenBalanceWatchComplication/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyue.TokenBalanceMonitor.watch.complication;
+				PRODUCT_NAME = TokenBalanceWatchComplication;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Release;
 		};
@@ -449,6 +658,24 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		C5C0559415C80BD4D6697731 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				INFOPLIST_FILE = TokenBalanceWatchComplication/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyue.TokenBalanceMonitor.watch.complication;
+				PRODUCT_NAME = TokenBalanceWatchComplication;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
 		};
 		CDEAF265ABA805B6619283C3 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -574,6 +801,15 @@
 			buildConfigurations = (
 				E3BB6F4DA0CA7C670257AD35 /* Debug */,
 				14CD931DF29008C5D8CBFF38 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EF23720BD095B9B5A0906CFE /* Build configuration list for PBXNativeTarget "TokenBalanceWatchComplication" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C5C0559415C80BD4D6697731 /* Debug */,
+				29E196C1DA2FE055D708B0CB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

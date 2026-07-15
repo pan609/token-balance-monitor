@@ -1,6 +1,6 @@
 import Foundation
 
-struct QuotaSummary: Decodable, Equatable, Sendable {
+struct QuotaSummary: Codable, Equatable, Sendable {
     let ok: Bool
     let refreshedAt: Date
     let staleSeconds: Int
@@ -15,11 +15,12 @@ struct QuotaSummary: Decodable, Equatable, Sendable {
     }
 }
 
-struct QuotaService: Decodable, Equatable, Identifiable, Sendable {
+struct QuotaService: Codable, Equatable, Identifiable, Sendable {
     let serviceId: String
     let serviceName: String
     let accountLabel: String?
     let planLabel: String?
+    let quotaType: String?
     let source: String
     let fetchedAt: Date
     let ageSeconds: Int
@@ -31,7 +32,7 @@ struct QuotaService: Decodable, Equatable, Identifiable, Sendable {
     var id: String { serviceId }
 }
 
-struct QuotaWindow: Decodable, Equatable, Identifiable, Sendable {
+struct QuotaWindow: Codable, Equatable, Identifiable, Sendable {
     let id: String
     let label: String
     let usedPercent: Double?
@@ -42,6 +43,103 @@ struct QuotaWindow: Decodable, Equatable, Identifiable, Sendable {
     let limitText: String?
     let status: String
     let statusLabel: String
+}
+
+extension QuotaSummary {
+    var quotaDisplayServices: [QuotaService] {
+        var result: [QuotaService] = []
+
+        if let codex = canonicalService(id: "codex") {
+            result.append(codex.normalizedQuotaDisplay(serviceId: "codex", serviceName: "Codex"))
+        } else {
+            result.append(.pendingDisplay(
+                serviceId: "codex",
+                serviceName: "Codex",
+                windows: [
+                    .displayPlaceholder(id: "5h", label: "5 小时"),
+                    .displayPlaceholder(id: "weekly", label: "每周")
+                ]
+            ))
+        }
+
+        if let claude = canonicalService(id: "claude") {
+            result.append(claude.normalizedQuotaDisplay(serviceId: "claude", serviceName: "Claude"))
+        } else {
+            result.append(.pendingDisplay(
+                serviceId: "claude",
+                serviceName: "Claude",
+                windows: [
+                    .displayPlaceholder(id: "monthly", label: "本月")
+                ]
+            ))
+        }
+
+        let knownPrefixes = ["codex", "claude"]
+        let extras = services.filter { service in
+            !knownPrefixes.contains { prefix in
+                service.serviceId == prefix || service.serviceId.hasPrefix("\(prefix)_")
+            }
+        }
+        return result + extras
+    }
+
+    private func canonicalService(id: String) -> QuotaService? {
+        services.first { $0.serviceId == id }
+            ?? services.first { $0.serviceId.hasPrefix("\(id)_") }
+    }
+}
+
+extension QuotaService {
+    static func pendingDisplay(serviceId: String, serviceName: String, windows: [QuotaWindow]) -> QuotaService {
+        QuotaService(
+            serviceId: serviceId,
+            serviceName: serviceName,
+            accountLabel: nil,
+            planLabel: "等待同步",
+            quotaType: serviceId == "claude" ? "spend_limit" : "rate_window",
+            source: "pending",
+            fetchedAt: Date(),
+            ageSeconds: 0,
+            isStale: true,
+            status: "stale",
+            statusLabel: "等待同步",
+            windows: windows
+        )
+    }
+
+    func normalizedQuotaDisplay(serviceId: String, serviceName: String) -> QuotaService {
+        QuotaService(
+            serviceId: serviceId,
+            serviceName: serviceName,
+            accountLabel: accountLabel,
+            planLabel: planLabel,
+            quotaType: quotaType,
+            source: source,
+            fetchedAt: fetchedAt,
+            ageSeconds: ageSeconds,
+            isStale: isStale,
+            status: status,
+            statusLabel: statusLabel,
+            windows: windows
+        )
+    }
+}
+
+extension QuotaWindow {
+    static func displayPlaceholder(id: String, label: String) -> QuotaWindow {
+        QuotaWindow(
+            id: id,
+            label: label,
+            usedPercent: nil,
+            remainingPercent: nil,
+            resetsAt: nil,
+            usedText: nil,
+            remainingText: nil,
+            limitText: nil,
+            status: "unknown",
+            statusLabel: "待同步"
+        )
+    }
 }
 
 extension QuotaSummary {
@@ -58,7 +156,8 @@ extension QuotaSummary {
                 serviceId: "codex",
                 serviceName: "Codex",
                 accountLabel: "ChatGPT Pro",
-                planLabel: "GPT-5.1 Codex",
+                planLabel: nil,
+                quotaType: "rate_window",
                 source: "codex-status",
                 fetchedAt: Date(),
                 ageSeconds: 8,
@@ -97,6 +196,7 @@ extension QuotaSummary {
                 serviceName: "Claude",
                 accountLabel: "Max",
                 planLabel: "Claude Code",
+                quotaType: "rate_window",
                 source: "claude-statusline",
                 fetchedAt: Date().addingTimeInterval(-26),
                 ageSeconds: 26,

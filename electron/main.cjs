@@ -335,6 +335,8 @@ async function fetchBalances() {
 }
 
 async function fetchQuotaData({ quotaModule, quotaRefreshModule }) {
+  if (!isPetQuotaEnabled()) return null;
+
   const localQuotaData = await fetchLocalQuotaData({ quotaModule, quotaRefreshModule });
   if (localQuotaData?.services?.length) return localQuotaData;
   return fetchRemoteQuotaData();
@@ -443,9 +445,15 @@ function getPetQuotaRefreshServiceId() {
   const serviceId = String(
     process.env.PET_QUOTA_REFRESH_SERVICE_ID ||
       process.env.MAC_QUOTA_REFRESH_SERVICE_ID ||
-      "claude"
+      ""
   ).trim();
   return serviceId === "all" ? "" : serviceId;
+}
+
+function isPetQuotaEnabled() {
+  return Boolean(
+    String(process.env.PET_QUOTA_REFRESH_SERVICE_ID || process.env.MAC_QUOTA_REFRESH_SERVICE_ID || "").trim()
+  );
 }
 
 function getDashboardUrl({ usage = false } = {}) {

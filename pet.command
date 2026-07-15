@@ -31,5 +31,5 @@ if [[ ! -x "$ROOT_DIR/node_modules/electron/dist/Electron.app/Contents/MacOS/Ele
   PATH="$NODE_DIR:$PATH" "$NODE_BIN" "$ROOT_DIR/node_modules/electron/install.js"
 fi
 
-echo "启动余额监控桌宠..."
+echo "启动 AI Meter 桌宠..."
 PATH="$NODE_DIR:$PATH" "$NODE_BIN" "$ROOT_DIR/.tools/npm/bin/npm-cli.js" run pet

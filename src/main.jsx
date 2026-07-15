@@ -211,8 +211,8 @@ function App() {
             <WalletCards size={22} />
           </div>
           <div>
-            <strong>余额监控</strong>
-            <span>AI Provider</span>
+            <strong>AI Meter</strong>
+            <span>Balance · Usage</span>
           </div>
         </div>
 

@@ -29,6 +29,8 @@ targets:
     dependencies:
       - target: TokenBalanceWidgetExtension
         embed: true
+      - target: TokenBalanceWatch
+        embed: true
   TokenBalanceWidgetExtension:
     type: app-extension
     platform: iOS
@@ -53,8 +55,27 @@ targets:
       - path: Shared
         excludes:
           - TokenMonitorConfig.example
+    dependencies:
+      - target: TokenBalanceWatchComplication
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.panyue.TokenBalanceMonitor.watch
         PRODUCT_NAME: TokenBalanceWatch
         INFOPLIST_FILE: TokenBalanceWatch/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  TokenBalanceWatchComplication:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - path: TokenBalanceWatchComplication
+      - path: Shared
+        excludes:
+          - TokenMonitorConfig.example
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.panyue.TokenBalanceMonitor.watch.complication
+        PRODUCT_NAME: TokenBalanceWatchComplication
+        INFOPLIST_FILE: TokenBalanceWatchComplication/Info.plist
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES

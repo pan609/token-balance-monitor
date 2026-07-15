@@ -1,163 +1,274 @@
-# Token Balance Monitor SEO/GEO Growth Adapter
+# AI Meter SEO/GEO Growth Adapter
 
-Updated: 2026-06-17
+Updated: 2026-06-18
 
 ## Current Positioning
 
-Token Balance Monitor 是一个开源、自托管的模型平台余额、请求级 token 用量和订阅额度窗口监控工具。
+AI Meter 是一个开源、自托管的 AI 用量仪表盘仓库，后续按两个产品线运营：
+
+- **AI Balance**：模型平台余额、credits、近 24h token 消耗和请求级 usage 归因。
+- **AI Quota**：Codex / Claude Code 这类订阅制工具的 5 小时、每周额度窗口。
 
 English definition:
 
-> Token Balance Monitor is a self-hosted open-source monitor for AI provider balances, request-level token usage, and subscription quota windows across Web, macOS, iPhone, Apple Watch, and agent workflows.
+> AI Meter is a self-hosted open-source AI usage dashboard with two separate product lines: AI Balance for provider balances and request-level token usage, and AI Quota for Codex / Claude Code subscription quota windows.
 
 ## Why The SEO Plan Changed
 
-The product has moved from a single "AI provider balance monitor" story into two related but distinct jobs:
+The previous public story treated Codex / Claude quota as a secondary feature of a balance monitor. That is no longer precise. The repository now contains two related but separate products that share infrastructure:
 
-1. **API Key balance and usage visibility**: provider balance, 24h usage, request-level token attribution.
-2. **Subscription quota visibility**: Codex and Claude Code 5-hour / weekly quota windows, surfaced through Apple Watch and local bridge scripts.
+1. **AI Balance** answers "which provider account still has money, and which request consumed tokens?"
+2. **AI Quota** answers "how much of my Codex / Claude Code subscription window is left, and when does it reset?"
 
-These should share the same product brand, but SEO pages and social posts should not mix the concepts too early. A user searching for "Claude Code 额度" has a different intent from a user searching for "DeepSeek 余额监控".
+These two search intents should not be merged under one keyword. Users searching for `DeepSeek 余额监控` and users searching for `Codex 额度` are trying to solve different problems.
 
-## Growth Targets
+## Domain Placement
 
-1. GitHub growth.
-2. Public website SEO under `https://panyue.xyz/projects/token-balance-monitor/`.
-3. Developer long-tail docs.
-4. Xiaohongshu publishing.
+- Hub canonical URL: `https://ai.meter.panyue.xyz/projects/token-balance-monitor/`
+- AI Balance canonical URL: `https://ai.meter.panyue.xyz/projects/ai-balance/`
+- AI Quota canonical URL: `https://ai.meter.panyue.xyz/projects/ai-quota/`
+- Canonical host: `https://ai.meter.panyue.xyz`
+- Project slug: keep `token-balance-monitor` as the hub / legacy entry to avoid losing existing GitHub and search references.
+- Public route model: one AI Meter hub page plus one dedicated landing page per product line.
+- Required public pages:
+  - `/projects/token-balance-monitor/`: AI Meter hub and router.
+  - `/projects/ai-balance/`: model provider balance and request-level token usage.
+  - `/projects/ai-quota/`: Codex / Claude Code subscription quota windows.
+- noindex routes: local dashboards, authenticated dashboards, internal API responses.
+- Sitemap ownership: the `ai.meter.panyue.xyz` hub owns the sitemap.
+- Deployment model: static public landing pages; app/service can remain this repository.
+- Redirects: only redirect old paths after GitHub README, sitemap, canonical tags, analytics, and Search Console resubmission are ready.
 
-ASO remains paused. Apple Watch and iOS App Store metadata should not be treated as store growth work until there is an App Store release plan.
+## Product Lines
 
-## Surface Inventory
+| Product line | Primary job | Public surfaces | SEO role |
+|---|---|---|---|
+| AI Balance | Provider balance, credits, token usage attribution | Web Dashboard, Agent Skill, macOS menu bar, iPhone App, iOS Widget, API docs | Main category page and GitHub value prop |
+| AI Quota | Codex / Claude Code subscription quota windows | iPhone App, Apple Watch App, Watch complication, local bridge scripts, quota API docs | Dedicated secondary product line and long-tail intent |
 
-| Surface | Current state | SEO/GEO action |
+## Audiences
+
+| Audience | Looks for | Best entry |
 |---|---|---|
-| GitHub README | Includes Web, Agent, macOS, iPhone, Apple Watch quota, Claude Code bridge | Keep README as the broad product overview; avoid making the first paragraph too crowded |
-| Public landing page | Canonical page already deployed on `panyue.xyz`; current public copy may lag behind quota features | Add a secondary section for subscription quota monitoring, not a hero replacement |
-| API Reference | Covers balance, usage, and quota APIs | Keep quota vocabulary separate from balance vocabulary |
-| Apple Watch quota doc | New long-tail doc for watchOS quota use case | Treat as a developer doc page and source for posts |
-| Claude Code quota doc | New long-tail doc for status line bridge | Treat as high-intent long-tail content |
-| Provider matrix | Correctly separates API billing/cost from simple balances | Extend with subscription quota category if needed |
-| Xiaohongshu | Not yet researched with logged-in search | Use problem-first posts: "Codex/Claude 额度快耗尽看不到" rather than generic app promo |
+| Multi-provider AI developers | Aliyun, DeepSeek, Kimi, Doubao, OpenRouter balance and usage visibility | AI Balance hero, README quick start |
+| Agent / backend maintainers | Request-level token attribution without storing prompt/response | Agent Skill, usage API, privacy section |
+| Codex / Claude Code heavy users | 5-hour / weekly quota visibility before hitting limits | AI Quota section, Watch docs, Xiaohongshu post |
+| Self-hosted-first users | Provider keys and prompt content stay under their control | README privacy, landing FAQ, API auth docs |
 
 ## Search Intent Map
 
-| Intent cluster | Chinese queries | English queries | Best surface |
-|---|---|---|---|
-| Balance monitor | AI 模型余额监控, DeepSeek 余额监控, 阿里云百炼余额看板 | AI provider balance monitor, DeepSeek balance dashboard | Landing page, README |
-| Token attribution | token 用量统计, 模型请求 token 来源, AI 成本分析 | LLM token usage dashboard, request-level token tracking | Landing page, Agent docs, API Reference |
-| Agent workflow | Agent 查询余额, Codex 上报 token 用量 | agent token usage reporting, self-hosted usage events API | Agent docs, README |
-| Subscription quota | Codex 额度监控, Claude Code 额度, Claude 5 小时额度, Codex 每周额度 | Codex quota monitor, Claude Code rate limit monitor | Watch quota doc, Claude Code quota doc, landing secondary section |
-| Watch surface | Apple Watch 看 Claude 额度, Apple Watch Codex 额度 | Apple Watch quota monitor | Watch quota doc, Xiaohongshu posts |
-| Privacy | 不保存 prompt 的 token 统计, 不上传 Claude 登录态 | self-hosted AI cost monitor privacy, no prompt storage | Landing FAQ, quota docs |
+| Intent cluster | Chinese queries | English queries | Best surface | Vocabulary rule |
+|---|---|---|---|---|
+| AI Balance category | AI 模型余额监控, DeepSeek 余额监控, 阿里云百炼余额看板 | AI provider balance monitor, DeepSeek balance dashboard | Landing hero, README | Use `余额`, `credits`, `provider balance` |
+| Token attribution | token 用量统计, 模型请求 token 来源, AI 成本分析 | LLM token usage dashboard, request-level token tracking | Landing workflow, API Reference | Use `token 用量`, `usage`, `request-level` |
+| Agent workflow | Agent 查询余额, Agent 上报 token 用量 | agent token usage reporting, self-hosted usage events API | Agent docs, README | Keep prompt/response privacy explicit |
+| AI Quota category | Codex 额度监控, Claude Code 额度, Claude 5 小时额度, Codex 每周额度 | Codex quota monitor, Claude Code rate limit monitor | AI Quota landing section, Watch docs | Use `订阅额度窗口`, `quota window`; do not call it balance |
+| Watch surface | Apple Watch 看 Claude 额度, Apple Watch Codex 额度 | Apple Watch quota monitor | Watch docs, Xiaohongshu | Say foreground Watch App; complication is shortcut/recent snapshot |
+| Privacy | 不保存 prompt 的 token 统计, 不上传 Claude 登录态 | self-hosted AI usage monitor privacy, no prompt storage | Landing FAQ, docs | Claims must match code and docs |
 
-## Copy Rules For New Quota Features
+## Copy Rules
 
-- Say "订阅额度窗口" or "quota window", not "余额", when talking about Codex / Claude Code subscription limits.
-- Do not imply the project logs into Claude or OpenAI cloud accounts on the server.
-- Codex quota refresh can be live only when the service runs where Codex app-server credentials are available.
-- Claude Code quota is received from the local status line bridge; it is not scraped from Claude web pages.
-- Apple Watch should be described as a foreground app for checking freshness, not as a guaranteed real-time complication.
-- If quota data is stale, copy must say "可能过期"; do not present stale snapshots as live status.
+- Use `AI Meter` for the repository/product suite.
+- Use `AI Balance` when talking about provider balances, credits, request usage, Web/macOS/iPhone balance surfaces, and usage events.
+- Use `AI Quota` when talking about Codex / Claude Code quota windows, Watch App, Watch complication, and quota bridge scripts.
+- Do not say Codex / Claude quota is a balance.
+- Do not imply OpenAI or Anthropic web account scraping.
+- Codex quota refresh can be live only where the service can access local Codex app-server credentials.
+- Claude Code quota comes from status line data; it is not scraped from Claude web pages.
+- If quota data is stale, copy must say `可能过期`.
+- App Store / ASO is still out of scope unless a release plan is explicitly opened.
 
-## Website Update Recommendation
+## Website Strategy
 
-The existing landing page should keep the current hero focused on:
+The website should no longer force both products into a single H1. Use a hub-and-spoke structure.
 
-> 模型平台余额与 Token 用量监控
+### Hub Page
 
-Add a second product storyline below the first proof section:
-
-### Suggested Section
-
-Title:
-
-```text
-也能看 Codex / Claude Code 的订阅额度窗口
-```
-
-Body:
+H1:
 
 ```text
-API Key 余额回答账户还剩多少钱；订阅额度窗口回答 Codex 或 Claude Code 在 5 小时、每周周期里还剩多少可用空间。Token Balance Monitor 用独立 quota 通道接收本机 bridge 上报，并在 Apple Watch 上显示新鲜度、剩余比例和重置时间。
+AI Meter：开源 AI 用量监控
 ```
 
-Bullets:
+Job:
 
-- Codex 可由本机 bridge 读取 rate limit 后上报。
-- Claude Code 通过 status line 输出 quota 字段，不保存账号密码或登录态。
-- Watch App 前台刷新；数据过期时明确显示可能过期。
+- Explain that this repository contains two products.
+- Route users to the correct landing page.
+- Preserve legacy `token-balance-monitor` URL value.
 
-CTA:
+### AI Balance Page
 
-- `Apple Watch 额度监控文档` -> `docs/subscription-quota-watch.md`
-- `Claude Code 接入` -> `docs/claude-code-quota.md`
+H1:
 
-## Material Gaps
+```text
+模型平台余额与 token 用量监控
+```
 
-| Asset | Can generate automatically? | Needed for better SEO/social |
-|---|---:|---|
-| Watch App screenshot with mock quota data | Yes, from watchOS simulator | Needed before publishing Watch section visually |
-| Claude Code status line terminal screenshot | Semi-automatic | Good for docs/social proof |
-| Landing section concept image | Yes, outer composition can be designed | Useful after real Watch screenshot exists |
-| Xiaohongshu carousel | Semi-automatic | Needs competitor research and final screenshots |
-| API docs update | Yes | Completed for `GET /api/quota/summary`, `POST /api/quota/refresh`, `POST /api/quota/snapshots` |
+Job:
 
-## Measurement Update
+- Rank for model provider balance and token usage queries.
+- Show provider support, workflow, privacy boundary, and API docs.
+- Avoid mentioning Codex / Claude quota except as a separate product link.
 
-Track quota-related impact separately:
+### AI Quota Page
 
-- landing page views;
-- docs page views for `subscription-quota-watch` and `claude-code-quota`;
-- GitHub visits from quota CTAs;
-- searches/referrers containing `Codex`, `Claude`, `额度`, `quota`, `rate limit`;
-- stars after publishing quota-related posts.
+H1:
 
-Do not judge quota SEO success by the original balance keywords alone.
+```text
+Codex / Claude Code 订阅额度监控
+```
 
-## Growth Diff For This Feature Update
+Job:
 
-Added intent:
+- Rank for Codex / Claude Code quota, rate limit, 5-hour window, weekly quota and Watch use cases.
+- Explain that quota windows are not provider balances.
+- Show Apple Watch / iPhone / bridge flow and quota API.
 
-- Codex / Claude Code subscription quota monitoring.
-- Apple Watch foreground app for quota freshness.
-- Claude Code status line bridge and Codex local bridge.
+Recommended hub structure:
 
-Changed claims:
+1. Hero: AI Meter as the suite; two product-line cards for AI Balance and AI Quota.
+2. Product line cards linking to dedicated pages.
+3. Shared product proof and repository CTA.
+4. Short privacy / self-hosted explanation.
+5. GitHub and API docs links.
 
-- The product is no longer only "AI provider balance + token usage"; it also has a separate subscription quota channel.
-- Codex / Claude quota must not be described as provider balance.
-- Live freshness is conditional on local bridge availability and stale snapshot handling.
+## Public Surface Updates
 
-New/updated public surfaces:
+| Surface | Needed update | Status |
+|---|---|---|
+| GitHub README | Keep AI Meter top summary; emphasize two product lines and avoid calling quota a balance | In progress |
+| Hub landing page | Keep AI Meter as suite entry; link to AI Balance and AI Quota product pages | Updated locally |
+| AI Balance landing page | Add dedicated title, description, canonical, product copy, FAQ schema, proof visual | Updated locally |
+| AI Quota landing page | Add dedicated title, description, canonical, product copy, FAQ schema, Watch proof visual | Updated locally |
+| API Reference | Split API groups into AI Balance API and AI Quota API in intro/auth | In progress |
+| Provider matrix | Rename as AI Balance provider matrix; quota section remains separate | In progress |
+| Watch docs | Already uses AI Quota framing; keep it as the long-tail page | Current |
+| Xiaohongshu | Needs new scene-first posts for two product lines, not one generic repo post | Planned |
 
-- README surface table already includes Apple Watch quota and Claude Code bridge.
-- `docs/subscription-quota-watch.md`.
-- `docs/claude-code-quota.md`.
-- `docs/api-reference.md` quota API section.
-- Future landing page secondary section under the existing canonical page.
+## Material Diff
 
-New materials needed:
+Changed surface:
 
-- Watch App screenshot from simulator with mock quota data.
-- Terminal/status line screenshot for Claude Code bridge.
-- One landing page visual composition using real/mock-data quota screens.
+- Landing page hero and product-line section.
+- Watch / iPhone quota surfaces now belong to AI Quota, not a generic balance-monitor feature.
+
+Changed user-facing UI:
+
+- iPhone app has AI Balance and AI Quota sections.
+- Apple Watch / complication are AI Quota surfaces.
+
+Changed copy/terminology:
+
+- Repository suite: AI Meter.
+- Balance line: AI Balance.
+- Subscription quota line: AI Quota.
+
+Changed proof claim:
+
+- Old claim: one monitor covers balance, token usage, and quota.
+- New claim: one self-hosted service powers two separate product lines and keeps their accounting concepts separate.
+
+Old assets still valid:
+
+- Web dashboard screenshots for AI Balance.
+- Agent terminal visual for usage/reporting.
+- Provider matrix.
+- Watch quota screenshot after removing model-specific label.
+
+Old assets that must be recaptured or redesigned:
+
+- Hero / OG image should eventually say AI Meter and show two product lines.
+- Xiaohongshu carousel should be rebuilt around one concrete scene per post.
+
+## Measurement
+
+Baseline date for this strategy: 2026-06-18.
+
+Track separately:
+
+- Hub page visits and product-card click-through.
+- AI Balance page visits and GitHub/API CTA clicks.
+- AI Quota page visits and Watch/Claude docs CTA clicks.
+- Docs visits for `subscription-quota-watch`, `claude-code-quota`, and `api-reference`.
+- Query/referrer clusters containing `AI Meter`, `AI Balance`, `AI Quota`, `DeepSeek 余额`, `Codex 额度`, `Claude Code 额度`, `quota`.
+- GitHub stars and referrers after publishing each product-line post.
+
+Do not claim SEO lift until the page is deployed and at least one measurement window exists:
+
+- 24-72h: crawler discovery and status codes.
+- 7 days: early query discovery.
+- 28 days: first meaningful comparison.
+
+## Next Publishing Brief
+
+Next GitHub update:
+
+- Make AI Meter the visible repo identity.
+- Keep `token-balance-monitor` repo URL stable.
+- Add a short "Two product lines" block near the top.
+
+Next landing update:
+
+- Deploy hub page plus two product pages.
+- Ensure nginx/static routing maps `/projects/ai-balance/` and `/projects/ai-quota/`.
+- Submit updated sitemap with all three canonical URLs.
+
+Next Xiaohongshu posts:
+
+1. AI Quota scene: "写代码前先看 Codex / Claude 额度窗口，别等限速了才发现。"
+2. AI Balance scene: "多个模型平台的余额和 token 消耗别再每天开 6 个控制台。"
+
+Required proof assets:
+
+- Readable Watch App / complication quota screenshot.
+- Readable Web Dashboard usage screenshot.
+- Terminal bridge screenshot with secrets hidden.
 
 Manual inputs required:
 
-- Logged-in Xiaohongshu search examples or browser access for competitor post analysis.
-- Real screenshots only if mock/simulator screenshots are not representative enough.
+- Logged-in Xiaohongshu examples for developer-tool posts, if competitor research is needed.
+- Confirmation before deploying the landing page update.
+
+## Growth Diff For This Change
+
+Added intent:
+
+- AI Meter as a two-product-line suite.
+- AI Balance as the provider balance and usage product.
+- AI Quota as the subscription quota product.
+
+Changed claims:
+
+- Codex / Claude quota is no longer framed as a feature under balance monitoring.
+- Balance, usage, cost, and quota must be explained as different data types.
+
+Updated public surfaces:
+
+- Hub landing page metadata and hero.
+- Dedicated AI Balance landing page.
+- Dedicated AI Quota landing page.
+- README top summary.
+- API Reference introduction and auth table.
+- Provider matrix title and quota separation.
+- Project growth adapter.
+
+New materials needed:
+
+- Future AI Meter OG/GitHub social preview.
+- Separate Xiaohongshu carousel plans for AI Balance and AI Quota.
+
+Manual inputs required:
+
+- Deployment confirmation.
+- Xiaohongshu logged-in research samples if we need competitor-post analysis.
 
 Measurement update:
 
-- Track quota-related queries and docs visits separately from balance-monitor queries.
-- Re-submit the canonical landing URL after the landing page copy changes; do not create a new sitemap URL unless new public docs are hosted on the website.
+- Track AI Balance and AI Quota query clusters separately under the same canonical landing page.
 
 ## Rules To Persist Back To Growth Foundation
 
-- Product feature changes should trigger an SEO/GEO impact review before new features are announced.
-- When a new feature creates a new search intent cluster, add it as a secondary storyline first unless it becomes the product's primary job.
-- Do not overwrite existing ranking intent with a new feature if the old hero still matches the broader category.
-- For features that are adjacent but semantically different, such as balance vs subscription quota, enforce copy vocabulary rules.
-- Every new public feature should update at least one of: README, landing page, API docs, long-tail docs, sitemap/indexing plan, screenshot/material plan, social post plan.
-- If the repo removes or relocates landing assets, the SEO plan must record where the canonical website is now maintained.
+- A feature split into product lines should be treated as a positioning change, not a normal feature launch.
+- Keep the canonical URL stable unless a migration plan includes redirects, sitemap changes, and Search Console resubmission.
+- For same-repo multi-product projects, the landing page can be a suite page, but each line needs its own vocabulary, proof assets, docs links, and measurement cluster.
+- Do not let a new product line dilute an existing high-intent category; route both intents explicitly.

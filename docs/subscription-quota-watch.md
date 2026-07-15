@@ -1,6 +1,6 @@
-# Apple Watch 订阅额度监控
+# AI Quota for Apple Watch
 
-这条线独立于 API Key 余额监控。原来的余额监控回答“账户里还剩多少钱”，这里回答“Codex / Claude 这类订阅制工具的 5 小时、每周额度还剩多少”。
+这条线独立于 AI Balance。AI Balance 回答“账户里还剩多少钱”，AI Quota 回答“Codex / Claude 这类订阅制工具的 5 小时、每周额度还剩多少”。
 
 ## 结论
 
@@ -8,6 +8,8 @@
 - 每次打开 Watch App 或从表盘回到前台时，都优先向自己的服务端 `POST /api/quota/refresh` 请求实时刷新；如果服务端不能实时读取，就回退到 `GET /api/quota/summary` 的最近快照。
 - Watch App 保持前台时默认每 15 秒刷新一次，用于短时间盯额度变化。服务端默认用 `CODEX_QUOTA_REFRESH_MIN_INTERVAL_MS` 做最小间隔保护。
 - Watch 端不保存 OpenAI / Anthropic 登录态，也不读取本机文件。
+- iPhone App 是 AI Quota 的 companion：配置服务端、选择 Watch 默认服务、查看最近快照和数据新鲜度，不作为高频主入口。
+- macOS 上的高频入口是独立 `./quota.command`，它和 AI Balance 的 `./pet.command` 可以同时运行。
 - 本机 Mac 通过 bridge 脚本把 Codex / Claude 的最新额度窗口上报到 `POST /api/quota/snapshots`。
 - 如果上报数据超过 `QUOTA_STALE_SECONDS`，Watch 必须显示“可能过期”，不能伪装实时。
 
@@ -34,6 +36,7 @@ Apple Watch 的表盘复杂功能和 Widget 适合“快速入口”和“低频
   "serviceName": "Claude",
   "accountLabel": "Max",
   "planLabel": "Claude Code",
+  "quotaType": "rate_window",
   "source": "claude-statusline",
   "fetchedAt": "2026-06-16T08:30:00.000Z",
   "windows": [
@@ -54,6 +57,13 @@ Apple Watch 的表盘复杂功能和 Widget 适合“快速入口”和“低频
   ]
 }
 ```
+
+AI Quota 当前支持两类快照：
+
+| `quotaType` | 场景 | 窗口示例 |
+| --- | --- | --- |
+| `rate_window` | Codex / Claude Code 个人订阅窗口 | `5h`、`weekly` |
+| `spend_limit` | Claude Team / claude.ai usage spend | `monthly`，包含 `usedText`、`remainingText`、`limitText` |
 
 `GET /api/quota/summary` 会返回每个服务的最新快照、过期状态和告警等级。`POST /api/quota/refresh` 会先尝试实时刷新，再返回同样结构的 summary。默认规则：
 
@@ -141,6 +151,27 @@ curl -X POST "$QUOTA_REFRESH_URL" \
 ```
 
 注意：云服务器通常没有你的 Codex 登录态，所以云端 refresh 只能返回最近快照。想让真机 Watch 也尽量接近实时，需要让本机 Mac 的 bridge 定时把 Codex 快照上报到你的云服务器，或者把服务端运行在这台 Mac 所在网络中。
+
+## macOS Quota 菜单栏
+
+电脑上建议单独运行 AI Quota，而不是把订阅额度混进 AI Balance 桌宠：
+
+```bash
+./quota.command
+```
+
+常用配置：
+
+```bash
+PRIMARY_QUOTA_SERVICE_ID=claude
+QUOTA_MENU_SERVICES=claude,codex
+QUOTA_MENU_REFRESH_INTERVAL_MS=60000
+```
+
+- `PRIMARY_QUOTA_SERVICE_ID` 控制菜单栏标题默认显示哪个服务。
+- `QUOTA_MENU_SERVICES` 控制下拉菜单展示哪些服务，逗号分隔；设为 `all` 时使用所有快照。
+- 如果你用企业 Codex 代理余额接口，把菜单改成 `QUOTA_MENU_SERVICES=claude,codex_proxy`，并设置 `PRIMARY_QUOTA_SERVICE_ID=codex_proxy`。
+- `./pet.command` 默认只显示 AI Balance。只有显式设置 `PET_QUOTA_REFRESH_SERVICE_ID=claude` 或 `codex` 时，才会把 Quota 作为高级信息混入桌宠。
 
 ## Watch UI
 

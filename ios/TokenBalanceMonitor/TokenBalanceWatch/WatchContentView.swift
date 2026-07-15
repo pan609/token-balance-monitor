@@ -48,20 +48,24 @@ private struct QuotaSummaryView: View {
     @AppStorage("watch.focusServiceId") private var focusedServiceId = "codex"
     @State private var presentedSheet: WatchSheet?
 
+    private var displayServices: [QuotaService] {
+        summary.quotaDisplayServices
+    }
+
     private var focusedService: QuotaService? {
-        summary.services.first { $0.serviceId == focusedServiceId }
-            ?? summary.primary
-            ?? summary.services.first
+        displayServices.first { $0.serviceId == focusedServiceId }
+            ?? displayServices.first { $0.serviceId == summary.primaryServiceId }
+            ?? displayServices.first
     }
 
     var body: some View {
         GeometryReader { proxy in
             let compact = proxy.size.height < 220
 
-            VStack(alignment: .leading, spacing: compact ? 4 : 6) {
+            VStack(alignment: .leading, spacing: compact ? 5 : 7) {
                 QuotaHeader(
                     isRefreshing: isRefreshing,
-                    serviceName: focusedService?.serviceName ?? "额度",
+                    serviceName: focusedService?.serviceName ?? QuotaL10n.text("额度", "Quota"),
                     showSettings: { presentedSheet = .servicePicker },
                     refresh: { refresh(focusedService?.serviceId, true) }
                 )
@@ -89,7 +93,7 @@ private struct QuotaSummaryView: View {
         .sheet(item: $presentedSheet) { sheet in
             switch sheet {
             case .servicePicker:
-                FocusServiceSheet(services: summary.services, selectedServiceId: $focusedServiceId)
+                FocusServiceSheet(services: displayServices, selectedServiceId: $focusedServiceId)
             }
         }
     }
@@ -103,13 +107,9 @@ private struct QuotaHeader: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(headerTitle)
                     .font(.system(size: 19, weight: .bold, design: .rounded))
-                    .lineLimit(1)
-                Text("订阅窗口 · 前台 15s")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
 
@@ -122,7 +122,7 @@ private struct QuotaHeader: View {
                     .background(Color.white.opacity(0.13), in: Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("选择关注服务")
+            .accessibilityLabel(QuotaL10n.text("选择关注服务", "Choose focused service"))
 
             Button(action: refresh) {
                 Image(systemName: "arrow.clockwise")
@@ -132,19 +132,19 @@ private struct QuotaHeader: View {
             }
             .buttonStyle(.plain)
             .disabled(isRefreshing)
-            .accessibilityLabel("刷新额度")
+            .accessibilityLabel(QuotaL10n.text("刷新额度", "Refresh quota"))
         }
         .padding(.horizontal, 2)
     }
 
     private var headerTitle: String {
         if serviceName.localizedCaseInsensitiveContains("claude") {
-            return "Claude 额度"
+            return QuotaL10n.text("Claude 额度", "Claude Quota")
         }
         if serviceName.localizedCaseInsensitiveContains("codex") {
-            return "Codex 额度"
+            return QuotaL10n.text("Codex 额度", "Codex Quota")
         }
-        return "额度监控"
+        return "AI Quota"
     }
 }
 
@@ -154,18 +154,14 @@ private struct QuotaServiceStrip: View {
     var body: some View {
         let tint = QuotaVisuals.tint(for: service)
         HStack(spacing: 8) {
-            Text(QuotaVisuals.badgeText(for: service))
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .foregroundStyle(tint)
-                .frame(width: 30, height: 30)
-                .background(tint.opacity(0.18), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            QuotaBrandMark(service: service)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(service.serviceName)
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.64)
-                Text(service.planLabel ?? service.accountLabel ?? "订阅额度")
+                Text(QuotaL10n.localizedKnownText(service.accountLabel ?? QuotaL10n.text("订阅额度", "Subscription quota")))
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -173,9 +169,16 @@ private struct QuotaServiceStrip: View {
 
             Spacer(minLength: 4)
 
-            Image(systemName: QuotaVisuals.statusIcon(for: service.status))
-                .font(.system(size: 19, weight: .bold))
+            Text(QuotaL10n.status(service.status, fallback: service.statusLabel))
+                .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(QuotaVisuals.statusTint(for: service.status))
+                .lineLimit(1)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+                .background(
+                    QuotaVisuals.statusTint(for: service.status).opacity(0.14),
+                    in: Capsule()
+                )
         }
         .padding(.horizontal, 9)
         .padding(.vertical, 6)
@@ -191,21 +194,61 @@ private struct QuotaServiceStrip: View {
     }
 }
 
+private struct QuotaBrandMark: View {
+    let service: QuotaService
+
+    var body: some View {
+        let tint = QuotaVisuals.tint(for: service)
+
+        ZStack {
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(tint.opacity(0.18))
+            officialLogo
+                .frame(width: 19, height: 19)
+        }
+        .frame(width: 30, height: 30)
+    }
+
+    @ViewBuilder
+    private var officialLogo: some View {
+        if let assetName = QuotaVisuals.officialLogoAssetName(for: service) {
+            Image(assetName)
+                .resizable()
+                .renderingMode(.template)
+                .scaledToFit()
+                .foregroundStyle(.white)
+                .accessibilityHidden(true)
+        } else {
+            Text(QuotaVisuals.badgeText(for: service))
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(QuotaVisuals.tint(for: service))
+        }
+    }
+}
+
 private struct QuotaWindowGrid: View {
     let service: QuotaService
     let compact: Bool
 
     var body: some View {
-        let windows = [
-            service.window(id: "5h") ?? QuotaWindow.placeholder(id: "5h", label: "5 小时"),
-            service.window(id: "weekly") ?? QuotaWindow.placeholder(id: "weekly", label: "每周")
-        ]
+        let windows = visibleWindows
 
         HStack(spacing: 6) {
             ForEach(windows) { window in
                 QuotaWindowTile(window: window, tint: QuotaVisuals.tint(for: service), compact: compact)
             }
         }
+    }
+
+    private var visibleWindows: [QuotaWindow] {
+        let ordered = service.orderedWindows
+        if ordered.isEmpty {
+            return [
+                .placeholder(id: "5h", label: QuotaL10n.windowLabel(id: "5h")),
+                .placeholder(id: "weekly", label: QuotaL10n.windowLabel(id: "weekly"))
+            ]
+        }
+        return Array(ordered.prefix(2))
     }
 }
 
@@ -217,7 +260,7 @@ private struct QuotaWindowTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 3 : 4) {
             HStack(spacing: 4) {
-                Text(window.label)
+                Text(QuotaL10n.windowLabel(id: window.id, fallback: window.label))
                     .font(.system(size: 12, weight: .bold))
                     .lineLimit(1)
                 Spacer(minLength: 2)
@@ -232,7 +275,7 @@ private struct QuotaWindowTile: View {
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.68)
-                Text("剩余")
+                Text(QuotaL10n.text("剩余", "left"))
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -253,9 +296,9 @@ private struct QuotaWindowTile: View {
 
     private var resetText: String {
         if let resetsAt = window.resetsAt {
-            return "\(resetsAt.relativeResetText)重置"
+            return QuotaL10n.resetText(resetsAt: resetsAt)
         }
-        return window.statusLabel
+        return QuotaL10n.status(window.status, fallback: window.statusLabel)
     }
 }
 
@@ -289,7 +332,7 @@ private struct QuotaFreshnessLine: View {
             Circle()
                 .fill((primary?.isStale ?? true) ? Color.orange : Color.green)
                 .frame(width: 7, height: 7)
-            Text(isRefreshing ? "正在获取最新额度" : ((primary?.isStale ?? true) ? "数据可能过期" : "刚刚同步"))
+            Text(isRefreshing ? QuotaL10n.text("正在获取最新额度", "Fetching latest quota") : ((primary?.isStale ?? true) ? QuotaL10n.text("数据可能过期", "Data may be stale") : QuotaL10n.text("刚刚同步", "Just synced")))
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle((primary?.isStale ?? true) ? .orange : .green)
                 .lineLimit(1)
@@ -303,11 +346,11 @@ private struct QuotaFreshnessLine: View {
     }
 
     private func timeText(primary: QuotaService?) -> String {
-        if isRefreshing { return "请求中" }
+        if isRefreshing { return QuotaL10n.text("请求中", "Requesting") }
         if primary?.isStale ?? true {
-            return "查 \(summary.refreshedAt.watchTimeText)"
+            return QuotaL10n.watchUpdatedAt(summary.refreshedAt)
         }
-        return primary?.fetchedAt.watchTimeText ?? summary.refreshedAt.watchTimeText
+        return primary?.fetchedAt.quotaWatchTimeText ?? summary.refreshedAt.quotaWatchTimeText
     }
 }
 
@@ -337,20 +380,13 @@ private struct FocusServiceSheet: View {
                         dismiss()
                     } label: {
                         HStack(spacing: 8) {
-                            Text(QuotaVisuals.badgeText(for: service))
-                                .font(.headline.weight(.heavy))
-                                .foregroundStyle(QuotaVisuals.tint(for: service))
-                                .frame(width: 30, height: 30)
-                                .background(
-                                    QuotaVisuals.tint(for: service).opacity(0.16),
-                                    in: RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                )
+                            QuotaBrandMark(service: service)
 
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(service.serviceName)
                                     .font(.headline.weight(.bold))
                                     .lineLimit(1)
-                                Text(service.statusLabel)
+                                Text(QuotaL10n.status(service.status, fallback: service.statusLabel))
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
@@ -365,7 +401,7 @@ private struct FocusServiceSheet: View {
                     }
                 }
             }
-            .navigationTitle("关注")
+            .navigationTitle(QuotaL10n.text("关注", "Focus"))
         }
     }
 }
@@ -376,9 +412,9 @@ private struct EmptyQuotaCard: View {
             Image(systemName: "timer")
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.orange)
-            Text("等待额度数据")
+            Text(QuotaL10n.text("等待额度数据", "Waiting for quota data"))
                 .font(.headline)
-            Text("请先让本机 bridge 上报 Codex 或 Claude 的最新窗口")
+            Text(QuotaL10n.text("请先让本机 bridge 上报 Codex 或 Claude 的最新窗口", "Let the local bridge report the latest Codex or Claude quota window first."))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -391,16 +427,61 @@ private struct EmptyQuotaCard: View {
 
 private struct QuotaLoadingView: View {
     var body: some View {
-        VStack(spacing: 12) {
-            ProgressView()
-            Text("正在读取额度")
-                .font(.headline)
-            Text("打开即刷新，不依赖表盘后台刷新")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+        GeometryReader { proxy in
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("AI Quota")
+                        .font(.system(size: 19, weight: .bold, design: .rounded))
+                    Spacer()
+                    Circle()
+                        .fill(Color.cyan)
+                        .frame(width: 8, height: 8)
+                }
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(QuotaL10n.text("正在获取最新额度", "Fetching latest quota"))
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                    Text(QuotaL10n.text("打开 App 后会立即请求最新 Codex / Claude 额度", "Opening the app requests the latest Codex / Claude quota immediately."))
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                HStack(spacing: 6) {
+                    QuotaLoadingPill(title: QuotaL10n.windowLabel(id: "5h"))
+                    QuotaLoadingPill(title: QuotaL10n.windowLabel(id: "weekly"))
+                }
+            }
+            .padding(.horizontal, 4)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct QuotaLoadingPill: View {
+    let title: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 11, weight: .bold))
+            Capsule()
+                .fill(Color.white.opacity(0.16))
+                .frame(height: 6)
+            Text("--")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
     }
 }
 
@@ -413,14 +494,14 @@ private struct QuotaErrorView: View {
             Image(systemName: "wifi.exclamationmark")
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.orange)
-            Text("读取失败")
+            Text(QuotaL10n.text("读取失败", "Read failed"))
                 .font(.headline)
             Text(message)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-                .lineLimit(4)
-            Button("重试", action: refresh)
+                .lineLimit(8)
+            Button(QuotaL10n.text("重试", "Retry"), action: refresh)
                 .buttonStyle(.borderedProminent)
         }
         .padding(.horizontal, 4)
@@ -428,26 +509,37 @@ private struct QuotaErrorView: View {
 }
 
 private enum QuotaVisuals {
-    static func tint(for service: QuotaService) -> Color {
-        switch service.serviceId {
-        case "codex":
-            return .mint
-        case "claude":
-            return .orange
-        default:
-            return .cyan
+    static func officialLogoAssetName(for service: QuotaService) -> String? {
+        let key = "\(service.serviceId) \(service.serviceName)".lowercased()
+        if key.contains("codex") || key.contains("openai") {
+            return "BrandOpenAI"
         }
+        if key.contains("claude") || key.contains("anthropic") {
+            return "BrandClaude"
+        }
+        return nil
+    }
+
+    static func tint(for service: QuotaService) -> Color {
+        let key = "\(service.serviceId) \(service.serviceName)".lowercased()
+        if key.contains("codex") || key.contains("openai") {
+            return .mint
+        }
+        if key.contains("claude") || key.contains("anthropic") {
+            return .orange
+        }
+        return .cyan
     }
 
     static func badgeText(for service: QuotaService) -> String {
-        switch service.serviceId {
-        case "codex":
+        let key = "\(service.serviceId) \(service.serviceName)".lowercased()
+        if key.contains("codex") || key.contains("openai") {
             return "Cx"
-        case "claude":
-            return "Cl"
-        default:
-            return String(service.serviceName.prefix(2))
         }
+        if key.contains("claude") || key.contains("anthropic") {
+            return "Cl"
+        }
+        return String(service.serviceName.prefix(2))
     }
 
     static func statusIcon(for status: String) -> String {
@@ -485,12 +577,19 @@ private extension QuotaService {
     func window(id: String) -> QuotaWindow? {
         windows.first { $0.id == id }
     }
+
+    var orderedWindows: [QuotaWindow] {
+        let preferred = ["5h", "weekly"].compactMap { window(id: $0) }
+        let rest = windows.filter { window in
+            !preferred.contains { $0.id == window.id }
+        }
+        return preferred + rest
+    }
 }
 
 private extension QuotaWindow {
     var remainingPercentText: String {
-        guard let remainingPercent else { return "--" }
-        return "\(Int(remainingPercent.rounded()))%"
+        QuotaL10n.quotaValueText(remainingText: remainingText, remainingPercent: remainingPercent)
     }
 
     static func placeholder(id: String, label: String) -> QuotaWindow {
@@ -504,26 +603,18 @@ private extension QuotaWindow {
             remainingText: nil,
             limitText: nil,
             status: "unknown",
-            statusLabel: "待同步"
+            statusLabel: QuotaL10n.text("待同步", "Waiting to sync")
         )
     }
 }
 
 private extension Date {
     var watchTimeText: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss"
-        return formatter.string(from: self)
+        quotaWatchTimeText
     }
 
     var relativeResetText: String {
-        let seconds = timeIntervalSinceNow
-        if seconds <= 0 { return "即将" }
-        let minutes = Int(seconds / 60)
-        if minutes < 60 { return "\(max(1, minutes)) 分钟后" }
-        let hours = minutes / 60
-        if hours < 24 { return "\(hours) 小时后" }
-        return "\(hours / 24) 天后"
+        QuotaL10n.relativeResetText(self)
     }
 }
 
