@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
+import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const DEFAULT_TIMEOUT_MS = 10000;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CACHE_PATH = path.join(__dirname, "..", "data", "codex-quota-cache.json");
 
 if (isMainModule()) {
   await main();
@@ -12,7 +15,22 @@ if (isMainModule()) {
 
 export async function collectCodexQuotaSnapshots({ timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   const response = await readCodexRateLimits({ timeoutMs });
-  return buildSnapshots(response.result);
+  const snapshots = buildSnapshots(response.result);
+  writeCodexQuotaCache(snapshots);
+  return snapshots;
+}
+
+function writeCodexQuotaCache(snapshots) {
+  if (!Array.isArray(snapshots) || snapshots.length === 0) return;
+  try {
+    mkdirSync(path.dirname(CACHE_PATH), { recursive: true });
+    writeFileSync(
+      CACHE_PATH,
+      JSON.stringify({ fetchedAt: new Date().toISOString(), snapshots }, null, 2)
+    );
+  } catch {
+    // Best-effort cache; the statusline just shows nothing if this is missing/stale.
+  }
 }
 
 async function main() {
@@ -34,6 +52,7 @@ async function main() {
   try {
     const response = await readCodexRateLimits({ timeoutMs });
     const snapshots = buildSnapshots(response.result);
+    writeCodexQuotaCache(snapshots);
 
     if (snapshots.length > 0 && ingestURL && !args.has("--no-post")) {
       await postSnapshots(ingestURL, token, snapshots);

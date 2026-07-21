@@ -1,5 +1,11 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CODEX_CACHE_PATH = path.join(__dirname, "..", "data", "codex-quota-cache.json");
 
 const args = new Set(process.argv.slice(2));
 const serviceId = getArgValue("--service") || "claude";
@@ -24,7 +30,53 @@ if (snapshot && summaryURL) {
 if (args.has("--json")) {
   console.log(JSON.stringify(snapshot || { ok: false, message: "quota unavailable" }));
 } else {
-  console.log(formatStatusLine(snapshot));
+  const codexSuffix = serviceId === "claude" ? formatCodexSuffix() : "";
+  console.log(`${formatStatusLine(snapshot)}${codexSuffix}`);
+}
+
+function formatCodexSuffix() {
+  const cache = readCodexCache();
+  const primary = cache?.snapshots?.find((item) => item.serviceId === "codex") || cache?.snapshots?.[0];
+  const window = primary?.windows?.find((item) => item.id === "weekly") || primary?.windows?.[0];
+  if (!window) return "";
+
+  // The cache only updates when a codex plugin call fires (see codex-quota-hook.mjs),
+  // so once resetsAt has passed the window rolled over without us noticing — the
+  // cached percent is stale and would misleadingly look current. Drop it rather
+  // than show a confident-but-wrong number.
+  const deadline = formatDeadline(window.resetsAt);
+  if (!deadline) return "";
+
+  const remaining = Number.isFinite(window.remainingPercent)
+    ? `${Math.round(window.remainingPercent)}%`
+    : "--";
+  return ` | Codex ${window.label || "每周"} ${remaining} · 截至 ${deadline}`;
+}
+
+function formatDeadline(resetsAt) {
+  if (!resetsAt) return null;
+  const target = new Date(resetsAt);
+  const millis = target.getTime();
+  if (!Number.isFinite(millis) || millis <= Date.now()) return null;
+
+  const parts = new Intl.DateTimeFormat("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(target);
+  const get = (type) => parts.find((part) => part.type === type)?.value || "";
+  return `${get("month")}/${get("day")} ${get("hour")}:${get("minute")}`;
+}
+
+function readCodexCache() {
+  try {
+    const parsed = JSON.parse(readFileSync(CODEX_CACHE_PATH, "utf8"));
+    return Array.isArray(parsed?.snapshots) && parsed.snapshots.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 function buildSnapshot(input, requestedServiceId) {
@@ -191,7 +243,31 @@ function formatStatusLine(snapshot) {
     ? `${Math.round(first.remainingPercent)}%`
     : "--";
   const label = snapshot.serviceName || snapshot.serviceId || "Quota";
-  return `${label} ${first?.label || "额度"} ${remaining}`;
+  const countdown = formatCountdown(first?.resetsAt);
+  const suffix = countdown ? ` · ${countdown}后重置` : "";
+  return `${label} ${first?.label || "额度"} ${remaining}${suffix}`;
+}
+
+function formatCountdown(resetsAt) {
+  if (!resetsAt) return null;
+  const target = new Date(resetsAt).getTime();
+  if (!Number.isFinite(target)) return null;
+
+  const diffMs = target - Date.now();
+  if (diffMs <= 0) return null;
+
+  const totalMinutes = Math.round(diffMs / 60000);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (totalHours >= 24) {
+    const days = Math.floor(totalHours / 24);
+    const hours = totalHours % 24;
+    return hours === 0 ? `${days}天` : `${days}天${hours}小时`;
+  }
+  if (totalHours <= 0) return `${minutes}分钟`;
+  if (minutes === 0) return `${totalHours}小时`;
+  return `${totalHours}小时${minutes}分钟`;
 }
 
 async function readStdinJSON() {
