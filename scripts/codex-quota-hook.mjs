@@ -2,17 +2,15 @@
 /**
  * PostToolUse hook (Bash) — refreshes the local Codex quota cache whenever a
  * codex plugin (codex-companion.mjs) invocation completes, so the terminal
- * statusline shows Codex's weekly limit without spawning `codex app-server`
- * on every render. Always exits 0 quickly; the actual quota fetch runs
- * detached so it never delays the tool call that triggered it.
+ * statusline shows Codex's weekly limit without waiting for the next
+ * statusline tick. Always exits 0 quickly; the actual quota fetch runs
+ * detached so it never delays the tool call that triggered it. Shares a
+ * debounce lock with the statusline's own periodic refresh (see
+ * quota-statusline-bridge.mjs) so the two triggers don't double up.
  */
-import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
-import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { triggerCodexQuotaRefresh } from "./lib/codex-quota-refresh-trigger.mjs";
 
 let payload = {};
 try {
@@ -26,10 +24,4 @@ if (payload.tool_name !== "Bash") process.exit(0);
 const command = String(payload.tool_input?.command || "");
 if (!command.includes("codex-companion.mjs")) process.exit(0);
 
-const bridge = path.join(__dirname, "codex-quota-bridge.mjs");
-const child = spawn(process.execPath, [bridge], {
-  detached: true,
-  stdio: "ignore",
-  env: process.env
-});
-child.unref();
+triggerCodexQuotaRefresh();

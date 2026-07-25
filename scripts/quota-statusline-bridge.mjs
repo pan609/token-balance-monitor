@@ -35,13 +35,15 @@ if (args.has("--json")) {
 }
 
 function formatCodexSuffix() {
+  // Pure display: reads whatever is in the cache. Refreshing it is the Stop
+  // hook's job (see codex-quota-stop-hook.mjs), not the statusline's — this
+  // keeps every 15s render cheap regardless of how often Codex quota changes.
   const cache = readCodexCache();
   const primary = cache?.snapshots?.find((item) => item.serviceId === "codex") || cache?.snapshots?.[0];
   const window = primary?.windows?.find((item) => item.id === "weekly") || primary?.windows?.[0];
   if (!window) return "";
 
-  // The cache only updates when a codex plugin call fires (see codex-quota-hook.mjs),
-  // so once resetsAt has passed the window rolled over without us noticing — the
+  // Once resetsAt has passed the window rolled over without us noticing — the
   // cached percent is stale and would misleadingly look current. Drop it rather
   // than show a confident-but-wrong number.
   const deadline = formatDeadline(window.resetsAt);
