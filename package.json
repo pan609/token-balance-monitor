@@ -22,7 +22,8 @@
     "seo:report": "node scripts/seo-log-report.mjs",
     "pet": "electron electron/main.cjs",
     "quota": "electron electron/quota-main.cjs",
-    "preview": "NODE_ENV=production node server/index.mjs"
+    "preview": "NODE_ENV=production node server/index.mjs",
+    "test:usage-read-auth": "node --test server/usage-read-auth.test.mjs server/usage-read-auth.integration.test.mjs"
   },
   "engines": {
     "node": ">=20"
