@@ -35,6 +35,7 @@ import {
   recordQuotaSnapshot
 } from "./quota.mjs";
 import { refreshQuotaSnapshots } from "./quota-refresh.mjs";
+import { createUsageReadGuard } from "./usage-read-auth.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +54,7 @@ const hmrPort = await findAvailablePort(Number(process.env.HMR_PORT || port + 10
 const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(applyUsageCors);
+app.use("/api/usage", createUsageReadGuard());
 
 app.get("/api/health", (_req, res) => {
   res.json({
